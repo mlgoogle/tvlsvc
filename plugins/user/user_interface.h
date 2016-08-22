@@ -8,6 +8,7 @@
 #include "public/basic/basictypes.h"
 #include "public/config/config.h"
 #include "pub/net/proto_buf.h"
+#include "pub/share/data_share_mgr.h"
 
 #include "user/user_mysql.h"
 namespace user {
@@ -28,17 +29,30 @@ class UserInterface {
 
   int32 NearbyGuide(const int32 socket, PacketHead* packet);
 
+  int32 HeartPacket(const int32 socket, PacketHead* packet);
+
+  int32 GuideDetail(const int32 socket, PacketHead* packet);
+
+  int32 RecommendGuide(const int32 socket, PacketHead* packet);
+
   int32 AuthorUser(std::string phone, std::string passwd, int32 type,
                    DicValue* v);
+
+  int32 CheckHeartLoss();
+
+  void AddUser(int32 fd, DicValue* v, int64 type);
 
   //判断用户是否登陆
   bool UserIsLogin(std::string u);
 
   void SendPacket(const int socket, PacketHead* packet);
 
+  void SendError(const int socket, PacketHead* packet, int32 err, int16 opcode);
+
  private:
   static UserInterface* instance_;
   UserMysql* user_mysql_;
+  share::DataShareMgr* data_share_mgr_;
 };
 
 }  // namespace user

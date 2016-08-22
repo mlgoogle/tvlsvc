@@ -23,6 +23,16 @@ class LoginRecv:public PacketHead {
   int64 user_type_;
 };
 
+class Heartbeat:public PacketHead {
+ public:
+  Heartbeat(PacketHead packet);
+  int32 Deserialize();
+
+  inline int64 uid() { return uid_; }
+ private:
+  int64 uid_;
+};
+
 class ObtainGuideRecv:public PacketHead {
  public:
   ObtainGuideRecv(PacketHead packet);
@@ -37,6 +47,7 @@ class ObtainGuideRecv:public PacketHead {
   double distance_;
 };
 
+typedef Heartbeat GuideDetailRecv;
 //send
 
 

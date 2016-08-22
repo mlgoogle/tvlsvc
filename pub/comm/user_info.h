@@ -2,20 +2,24 @@
 // user.h
 // Created on: 2016年8月19日.
 // Author: Paco.
-#ifndef PUB_COMM_USER_H_
-#define PUB_COMM_USER_H_
+#ifndef PUB_COMM_USER_INFO_H_
+#define PUB_COMM_USER_INFO_H_
 
 #include <string>
 #include <list>
 
 #include "public/basic/basictypes.h"
+#include "base/logic/base_values.h"
 
 #include "pub/comm/ref_base.h"
+
+typedef base_logic::DictionaryValue DicValue;
 
 class UserData : public RefBase {
  public:
   UserData():uid_(-1), usual_lon_(0.0), usual_lat_(0.0), credit_lv_(0),
-    praise_lv_(0), cash_lv_(0), user_type_(-1), is_login_(false) {
+    praise_lv_(0), cash_lv_(0), user_type_(-1), socket_fd_(-1), heart_loss_(0),
+    is_login_(false) {
   }
   ~UserData() {}
  public:
@@ -28,11 +32,13 @@ class UserData : public RefBase {
   double usual_lon_;
   double usual_lat_;
   //信用度
-  int32 credit_lv_;
-  int32 praise_lv_;
-  int32 cash_lv_;
+  int64 credit_lv_;
+  int64 praise_lv_;
+  int64 cash_lv_;
 
   int32 user_type_;
+  int32 socket_fd_;
+  int32 heart_loss_;
   bool is_login_;
 };
 
@@ -49,12 +55,14 @@ class GuideData : public UserData {
   std::list<std::string> photo_list_;
 };
 
-class User {
+class UserInfo {
  public:
-  User();
-  ~User();
-  User(const User& user);
-  User& operator=(const User& user);
+  UserInfo();
+  virtual ~UserInfo();
+  UserInfo(const UserInfo& user);
+  UserInfo& operator=(const UserInfo& user);
+
+  void Serialization(DicValue* dic);
   inline int64 uid() const { return data_->uid_; }
   inline std::string phone_num() const { return data_->phone_num_; }
   inline std::string nickname() const { return data_->nickname_; }
@@ -68,6 +76,8 @@ class User {
   inline int32 cash_lv() const { return data_->cash_lv_; }
   inline int32 user_type() const { return data_->user_type_; }
   inline bool is_login() const { return data_->is_login_; }
+  inline int32 socket_fd() const { return data_->socket_fd_; }
+  inline int32 heart_loss() const { return data_->heart_loss_; }
 
   inline void set_uid(int64 id) { data_->uid_ = id; }
   inline void set_phone_num(std::string mob) { data_->phone_num_ = mob; }
@@ -82,7 +92,9 @@ class User {
   inline void set_cash_lv(int32 cash) { data_->cash_lv_ = cash; }
   inline void set_user_type(int32 type) { data_->user_type_ = type; }
   inline void set_is_login(bool login) { data_->is_login_ = login; }
- private:
+  inline void set_socket_fd(int32 fd) { data_->socket_fd_ = fd; }
+  inline void set_heart_loss(int32 loss) { data_->heart_loss_ = loss; }
+ public:
   UserData* data_;
 //  int64 uid_;
 //  std::string phone_num_;
@@ -101,10 +113,9 @@ class User {
 //  bool is_login_;
 };
 
-class Guide : public User {
+class Guide : public UserInfo {
  public:
   Guide();
-  ~Guide();
 
   inline int32 bussiness_lv() {
     return ((GuideData*)data_)->business_lv_;
@@ -136,9 +147,9 @@ class Guide : public User {
 //  std::list<std::string> photo_list_;
 };
 
-class Visitor : public User {
+class Visitor : public UserInfo {
 
 };
 
 
-#endif  // PUB_COMM_USER_H_
+#endif  // PUB_COMM_USER_INFO_H_

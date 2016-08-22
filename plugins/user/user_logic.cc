@@ -15,9 +15,12 @@
 #include "base/logic/base_values.h"
 
 #include "user/user_interface.h"
+#include "user/user_opcode.h"
 #include "pub/comm/comm_head.h"
 
 #define DEFAULT_CONFIG_PATH "./plugins/user/user_config.xml"
+
+#define CONNECT_CKECK 100
 namespace user {
 Userlogic* Userlogic::instance_ = NULL;
 
@@ -128,13 +131,20 @@ bool Userlogic::OnBroadcastClose(struct server *srv, const int socket) {
   return true;
 }
 
-bool Userlogic::OnIniTimer(struct server *srv) {
+bool Userlogic::OnInitTimer(struct server *srv) {
+  srv->add_time_task(srv, "user", CONNECT_CKECK, 10, -1);
   return true;
 }
 
 
 
 bool Userlogic::OnTimeout(struct server *srv, char *id, int opcode, int time) {
+  switch (opcode) {
+    case CONNECT_CKECK: {
+      user_manager_->CheckHeartLoss();
+      break;
+    }
+  }
   return true;
 }
 

@@ -33,7 +33,7 @@ class Userlogic {
   bool OnBroadcastMessage(struct server *srv, const int socket,
                           const void *msg, const int len);
   bool OnBroadcastClose(struct server *srv, const int socket);
-  bool OnIniTimer(struct server *srv);
+  bool OnInitTimer(struct server *srv);
   bool OnTimeout(struct server *srv, char* id, int opcode, int time);
 
  private:

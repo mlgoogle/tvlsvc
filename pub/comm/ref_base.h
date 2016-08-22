@@ -24,43 +24,5 @@ class RefBase {
   int ref_count_;
 };
 
-class RefPtr {
- private:
-  RefBase* ptr_;
-  void Init() {
-    if (ptr_ == NULL)
-      return;
-    ptr_->AddRef();
-  }
- public:
-  RefPtr(RefBase* p) {
-    ptr_ = p;
-    Init();
-  }
-  RefPtr(const RefPtr& rp) {
-    ptr_ = rp.ptr_;
-    Init();
-  }
-  RefPtr& operator=(const RefPtr& rp) {
-    if (ptr_ == rp.ptr_)
-      return *this;
-    RefBase* old = ptr_;
-    ptr_ = rp.ptr_;
-    Init();
-    if (old)
-      old->DelRef();
-    return *this;
-  }
-  ~RefPtr() {
-    if (ptr_)
-      ptr_->DelRef();
-  }
-  RefBase* operator->() const {
-    return ptr_;
-  }
-  RefBase& operator*() const {
-    return *ptr_;
-  }
-};
 
 #endif  // PUB_COMM_REF_BASE_H_

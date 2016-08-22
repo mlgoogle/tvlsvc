@@ -2,6 +2,9 @@
 //  Created on: 2016年5月18日 Author: kerry
 
 #include "storage/storage.h"
+
+#include <list>
+
 #include "public/basic/basictypes.h"
 #include "public/basic/basic_info.h"
 #include "base/thread/base_thread_handler.h"

@@ -27,13 +27,42 @@ UserMysql::~UserMysql() {
   mysql_engine_ = NULL;
 }
 
+int32 UserMysql::GuideDetailSelect(int64 uid, DicValue* dic) {
+  int32 err = 0;
+  bool r = false;
+  do {
+    std::stringstream ss;
+    ss << "call proc_GuideDetailSelect(" << uid << ");";
+    LOG(INFO) << "sql:" << ss.str();
+    r = mysql_engine_->ReadData(ss.str(), dic, CallGuideDetailSelect);
+    if (!r) {
+      err = SQL_EXEC_ERROR;
+      break;
+    }
+    if (dic->empty()) {
+      err = NO_GUIDE;
+      break;
+    }
+    ss.str("");
+    ss.clear();
+    ss << "call proc_GuideServiceSelect(" << uid << ");";
+    LOG(INFO) << "sql:" << ss.str();
+    r = mysql_engine_->ReadData(ss.str(), dic, CallGuideServiceSelect);
+    if (!r) {
+      err = SQL_EXEC_ERROR;
+      break;
+    }
+  } while (0);
+  return err;
+}
+
 int32 UserMysql::NearGuideSelect(double* point, DicValue* dic) {
   int32 err = 0;
   bool r = false;
   do {
     std::stringstream ss;
     ss << "call proc_NearGuideSelect(" << point[0] << "," << point[1] <<
-        "," << point[2] << "," << point[3] << ")";
+        "," << point[2] << "," << point[3] << ");";
     LOG(INFO) << "sql:" << ss.str();
     r = mysql_engine_->ReadData(ss.str(), dic, CallNearGuideSelect);
     LOG(INFO) << "sql exec result:" << r;
@@ -56,7 +85,7 @@ int32 UserMysql::UserLoginSelect(std::string phone, std::string pass,
   do {
     std::stringstream ss;
     ss << "call proc_UserInfoAddrSelect('" << phone << "','" << pass <<
-        "'," << type << ")";
+        "'," << type << ");";
     LOG(INFO) << "sql:" << ss.str();
     r = mysql_engine_->ReadData(ss.str(), dic, CallUserLoginSelect);
     LOG(INFO) << "sql exec result:" << r;
@@ -70,6 +99,60 @@ int32 UserMysql::UserLoginSelect(std::string phone, std::string pass,
     }
   } while (0);
   return err;
+}
+
+void UserMysql::CallGuideServiceSelect(void* param, Value* value) {
+  base_storage::DBStorageEngine* engine =
+      (base_storage::DBStorageEngine*)(param);
+  MYSQL_ROW rows;
+  int32 num = engine->RecordCount();
+  DicValue* info = reinterpret_cast<DicValue*>(value);
+  if (num > 0) {
+    ListValue* list = new ListValue();
+    while (rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)) {
+      DicValue* dict = new DicValue();
+      if (rows[0] != NULL)
+        dict->SetBigInteger(L"service_id_", atoll(rows[0]));
+      if (rows[1] != NULL)
+        dict->SetString(L"service_name_", rows[1]);
+      if (rows[2] != NULL)
+        dict->SetString(L"service_time_", rows[2]);
+      if (rows[3] != NULL)
+        dict->SetBigInteger(L"service_price_", atoll(rows[3]));
+      list->Append(dict);
+    }
+    info->Set(L"service", list);
+  } else {
+    LOG(WARNING) << "CallGuideServiceSelect count < 0";
+  }
+}
+
+void UserMysql::CallGuideDetailSelect(void* param, Value* value) {
+  base_storage::DBStorageEngine* engine =
+      (base_storage::DBStorageEngine*)(param);
+  MYSQL_ROW rows;
+  int32 num = engine->RecordCount();
+  DicValue* dict = reinterpret_cast<DicValue*>(value);
+  if (num > 0) {
+    while (rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)) {
+      if (rows[0] != NULL)
+        dict->SetBigInteger(L"uid_", atoll(rows[0]));
+      if (rows[1] != NULL)
+        dict->SetBigInteger(L"is_certification_", atoi(rows[1]));
+      if (rows[2] != NULL)
+        dict->SetBigInteger(L"business_lv_", atoi(rows[2]));
+      if (rows[3] != NULL)
+        dict->SetString(L"business_tag_", rows[3]);
+      if (rows[4] != NULL)
+        dict->SetString(L"traval_tag_", rows[4]);
+      if (rows[5] != NULL)
+        dict->SetString(L"heag_bg_url_", rows[5]);
+      if (rows[6] != NULL)
+        dict->SetString(L"photo_list_", rows[6]);
+    }
+  } else {
+    LOG(WARNING) << "CallUserLoginSelect count < 0";
+  }
 }
 
 void UserMysql::CallNearGuideSelect(void* param, Value* value) {
@@ -119,17 +202,21 @@ void UserMysql::CallUserLoginSelect(void* param, Value* value) {
       if (rows[1] != NULL)
         dict->SetString(L"phone_num_", rows[1]);
       if (rows[2] != NULL)
-        dict->SetString(L"nick_name_", rows[2]);
+        dict->SetString(L"nickname_", rows[2]);
       if (rows[3] != NULL)
-        dict->SetBigInteger(L"level_", atoll(rows[3]));
+        dict->SetBigInteger(L"credit_lv_", atoll(rows[3]));
       if (rows[4] != NULL)
-        dict->SetString(L"head_url_", rows[4]);
+        dict->SetBigInteger(L"praise_lv_", atoll(rows[4]));
       if (rows[5] != NULL)
-        dict->SetString(L"address_", rows[5]);
+        dict->SetBigInteger(L"cash_lv_", atoll(rows[5]));
       if (rows[6] != NULL)
-        dict->SetReal(L"longitude_", atof(rows[6]));
+        dict->SetString(L"head_url_", rows[6]);
       if (rows[7] != NULL)
-        dict->SetReal(L"latitude_", atof(rows[7]));
+        dict->SetString(L"address_", rows[7]);
+      if (rows[8] != NULL)
+        dict->SetReal(L"longitude_", atof(rows[8]));
+      if (rows[9] != NULL)
+        dict->SetReal(L"latitude_", atof(rows[9]));
     }
   } else {
     LOG(WARNING) << "CallUserLoginSelect count < 0";

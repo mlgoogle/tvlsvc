@@ -9,19 +9,27 @@
 #include <map>
 
 #include "base/thread/base_thread_lock.h"
+#include "public/basic/basictypes.h"
+
+#include "pub/comm/user_info.h"
+#include "pub/net/typedef.h"
 
 namespace share {
 
 class DataShareMgr {
  public:
-  DataShareMgr* GetInstance();
-  void AddGuide(Guide* guide);
-  void AddVisitor(Visitor* visitor);
-  void DelGuide(int64 uid);
-  void DelVisitor(int64 uid);
+  static DataShareMgr* GetInstance();
+  void AddUser(UserInfo* user);
+  void DelUser(int64 uid);
+  void UserHeart(int64 uid);
+
+  void CheckHeartLoss();
  private:
   DataShareMgr();
   ~DataShareMgr();
+
+  void DelGuide(int64 uid);
+  void DelVisitor(int64 uid);
 
  private:
   static DataShareMgr* instance_;

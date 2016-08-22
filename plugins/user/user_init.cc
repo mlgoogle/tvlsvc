@@ -72,8 +72,8 @@ static handler_t OnBroadcastMessage(struct server* srv, int fd, void *data,
   return HANDLER_GO_ON;
 }
 
-static handler_t OnIniTimer(struct server* srv) {
-  user::Userlogic::GetInstance()->OnIniTimer(srv);
+static handler_t OnInitTimer(struct server* srv) {
+  user::Userlogic::GetInstance()->OnInitTimer(srv);
   return HANDLER_GO_ON;
 }
 
@@ -89,7 +89,7 @@ int user_plugin_init(struct plugin *pl) {
   pl->connection_close = OnUserClose;
   pl->connection_close_srv = OnBroadcastClose;
   pl->connection_srv = OnBroadcastConnect;
-  pl->handler_init_time = OnIniTimer;
+  pl->handler_init_time = OnInitTimer;
   pl->handler_read = OnUserMessage;
   pl->handler_read_srv = OnBroadcastMessage;
   pl->handler_read_other = OnUnknow;

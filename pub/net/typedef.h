@@ -6,9 +6,10 @@
 #define PUB_NET_TYPEDEF_H_
 
 #include <map>
+
+#include "pub/comm/user_info.h"
 #include "base/logic/base_values.h"
 
-#include "pub/comm/user.h"
 
 
 typedef base_logic::DictionaryValue DicValue;
@@ -17,7 +18,7 @@ typedef base_logic::Value Value;
 
 typedef std::map<int64, Guide*> GuideMap;
 typedef std::map<int64, Visitor*> VisitorMap;
-typedef std::map<int64, User*> UserMap;
+typedef std::map<int64, UserInfo*> UserMap;
 
 
 

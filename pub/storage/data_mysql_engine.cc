@@ -47,6 +47,7 @@ bool DataMYSQLEngine::ReadData(const std::string& sql, base_logic::Value* value,
       break;
     } else {
       storage_get(reinterpret_cast<void*>(engine), value);
+      engine->Release();
     }
   }while (0);
   db_pool_.DBConnectionPush(engine);

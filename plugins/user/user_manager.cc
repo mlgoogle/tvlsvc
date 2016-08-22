@@ -11,7 +11,7 @@
 #include "user/user_interface.h"
 
 namespace user {
-UserManager* UserManager::instance_;
+UserManager* UserManager::instance_ = NULL;
 
 UserManager* UserManager::GetInstance() {
   if (instance_ == NULL)
@@ -42,13 +42,31 @@ int32 UserManager::AssignPacket(const int32 socket, PacketHead* packet) {
       interface->UserLogin(socket, packet);
       break;
     }
-    case NEARBY_WAITER_REQ: {
+    case NEARBY_GUIDE_REQ: {
       interface->NearbyGuide(socket, packet);
+      break;
+    }
+    case GUIDE_RECOMMEND_REQ: {
+      interface->RecommendGuide(socket, packet);
+      break;
+    }
+    case GUIDE_DETAIL_REQ: {
+      interface->GuideDetail(socket, packet);
+      break;
+    }
+    case PACKET_HEART_REQ: {
+      interface->HeartPacket(socket, packet);
       break;
     }
 
   }
   return err;
+}
+
+int32 UserManager::CheckHeartLoss() {
+  UserInterface* interface = UserInterface::GetInstance();
+  interface->CheckHeartLoss();
+  return 0;
 }
 
 }  // namespace user

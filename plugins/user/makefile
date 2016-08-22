@@ -9,6 +9,8 @@ SO_DIR = ${SRC_DIR}bin/plugins
 SRC_PUB_NET = ${SRC_DIR}pub/net
 SRC_PUB_UTIL = ${SRC_DIR}pub/util
 SRC_PUB_STORAGE = ${SRC_DIR}pub/storage
+SRC_PUB_SHARE = ${SRC_DIR}pub/share
+SRC_PUB_COMM = ${SRC_DIR}pub/comm
 
 LINK_DYNAMIC = -Wl,-Bdynamic -lpthread
 LINK_STATIC = -Wl,-Bstatic -L${LIB_DIR}/third_party/glog/lib/libglog.a
@@ -64,9 +66,15 @@ mysql_pool.o : ${SRC_PUB_STORAGE}/mysql_pool.cc  ${SRC_PUB_STORAGE}/mysql_pool.h
 data_mysql_engine.o : ${SRC_PUB_STORAGE}/data_mysql_engine.cc  ${SRC_PUB_STORAGE}/data_mysql_engine.h 
 	${CXX} ${CXXFLAGS} -c ${SRC_PUB_STORAGE}/data_mysql_engine.cc ${INCLUDE_PATHS}
 
+user_info.o : ${SRC_PUB_COMM}/user_info.cc  ${SRC_PUB_COMM}/user_info.h 
+	${CXX} ${CXXFLAGS} -c ${SRC_PUB_COMM}/user_info.cc ${INCLUDE_PATHS}
+
+data_share_mgr.o : ${SRC_PUB_SHARE}/data_share_mgr.cc  ${SRC_PUB_SHARE}/data_share_mgr.h 
+	${CXX} ${CXXFLAGS} -c ${SRC_PUB_SHARE}/data_share_mgr.cc ${INCLUDE_PATHS}
+
 ${OUT_PUT} : user_init.o user_logic.o proto_buf.o user_manager.o \
 		user_interface.o user_proto.o user_mysql.o util.o data_engine.o \
-		mysql_pool.o data_mysql_engine.o 
+		mysql_pool.o data_mysql_engine.o user_info.o data_share_mgr.o 
 	${CXX} ${CXXFLAGS} $^ -o ${OUT_PUT} ${LINK_PATH} -lpthread -lmysqlclient \
 		${LIB_DIR}/third_party/glog/lib/libglog.a ${LIB_DIR}/base/lib/mybase.a \
 		${LIB_DIR}/third_party/dmg_fp/lib/dmg_fp.a

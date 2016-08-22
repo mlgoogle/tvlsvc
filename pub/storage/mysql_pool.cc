@@ -1,6 +1,8 @@
 #include "pub/storage/mysql_pool.h"
 #include "base/logic/logic_comm.h"
 
+#include "glog/logging.h"
+
 namespace base_logic {
 
 MYSQL_Pool::MYSQL_Pool()
@@ -46,6 +48,7 @@ base_storage::DBStorageEngine* MYSQL_Pool::DBConnectionPop(){
     db_conn_pool_.pop_front();
 	}
 	if (!engine->CheckConnect()) {
+	   LOG(WARNING) << "reconnect ";
 	   int reconnects = 3;
 	   do {
 	     if (engine->Connections(addrlist_))
