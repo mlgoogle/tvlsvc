@@ -20,6 +20,9 @@ namespace user {
 
 #define GUIDE_RECOMMEND_REQ USER_TYPE*1000 + 7
 #define GUIDE_RECOMMEND_RLY USER_TYPE*1000 + 8
+
+#define SERVICE_CITY_REQ USER_TYPE*1000 + 9
+#define SERVICE_CITY_RLY USER_TYPE*1000 + 10
 }  // namespace user
 
 

@@ -141,7 +141,7 @@ bool Userlogic::OnInitTimer(struct server *srv) {
 bool Userlogic::OnTimeout(struct server *srv, char *id, int opcode, int time) {
   switch (opcode) {
     case CONNECT_CKECK: {
-      user_manager_->CheckHeartLoss();
+//      user_manager_->CheckHeartLoss();
       break;
     }
   }

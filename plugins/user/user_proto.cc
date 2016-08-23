@@ -128,6 +128,33 @@ int32 Heartbeat::Deserialize() {
   return err;
 }
 
+RecommendGuideRecv::RecommendGuideRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  city_code_ = 0;
+}
+
+int32 RecommendGuideRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer =
+     base_logic::ValueSerializer::Create(base_logic::IMPL_JSON, &body_str_);
+  std::string err_str;
+  DicValue* dic = (DicValue*)serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetBigInteger(L"city_code_", &city_code_);
+      LOG_IF(ERROR, !r) << "RecommendGuideRecv::city_code_ parse error";
+    } else {
+      LOG(ERROR) << "RecommendGuideRecv Deserialize error";
+      err = RECOMMEND_GUIDE_JSON_ERR;
+    break;
+    }
+  } while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                               serializer);
+  return err;
+}
 
 }  // namespace user
 

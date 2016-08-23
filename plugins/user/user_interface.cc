@@ -40,7 +40,6 @@ UserInterface::~UserInterface() {
 }
 
 void UserInterface::InitConfig(config::FileConfig* config) {
-  LOG(INFO) << "UserInterface::InitConfig:";
   user_mysql_ = new UserMysql(config);
   data_share_mgr_ = share::DataShareMgr::GetInstance();
 }
@@ -56,12 +55,12 @@ int32 UserInterface::CheckHeartLoss() {
 
 int32 UserInterface::HeartPacket(const int32 socket, PacketHead* packet) {
   int32 err = 0;
-  Heartbeat recv(*packet);
+  Heartbeat rev(*packet);
   do {
-    err = recv.Deserialize();
+    err = rev.Deserialize();
     if (err < 0)
       break;
-    data_share_mgr_->UserHeart(recv.uid());
+    data_share_mgr_->UserHeart(rev.uid());
   } while(0);
   return err;
 }
@@ -70,12 +69,12 @@ int32 UserInterface::GuideDetail(const int32 socket, PacketHead* packet) {
   int32 err = 0;
   do {
     //获取导游详
-    GuideDetailRecv recv(*packet);
-    err = recv.Deserialize();
+    GuideDetailRecv rev(*packet);
+    err = rev.Deserialize();
     if (err < 0)
       break;
     DicValue dic;
-    err = user_mysql_->GuideDetailSelect(recv.uid(), &dic);
+    err = user_mysql_->GuideDetailSelect(rev.uid(), &dic);
     if (err < 0)
       break;
     PacketHead send;
@@ -88,32 +87,55 @@ int32 UserInterface::GuideDetail(const int32 socket, PacketHead* packet) {
   return err;
 }
 
+int32 UserInterface::ServiceCity(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    DicValue dic;
+    err = user_mysql_->ServiceCitySelect(&dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, SERVICE_CITY_RLY);
+  } while (0);
+  if (err < 0) {
+    SendError(socket, packet, err, SERVICE_CITY_RLY);
+  }
+  return err;
+}
+
 int32 UserInterface::RecommendGuide(const int32 socket, PacketHead* packet) {
   int32 err = 0;
-
+  RecommendGuideRecv rev(*packet);
+  do {
+    err = rev.Deserialize();
+    if (err < 0)
+      break;
+    DicValue dic;
+    err = user_mysql_->RecommendGuideSelect(rev.city_code(), &dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, GUIDE_RECOMMEND_RLY);
+  } while (0);
+  if (err < 0) {
+    SendError(socket, packet, err, GUIDE_RECOMMEND_RLY);
+  }
   return err;
 }
 
 int32 UserInterface::NearbyGuide(const int32 socket, PacketHead* packet) {
   int32 err = 0;
-  ObtainGuideRecv recv(*packet);
+  ObtainGuideRecv rev(*packet);
   do {
-    err = recv.Deserialize();
+    err = rev.Deserialize();
     if (err < 0)
       break;
     DicValue dic;
     double point[4];
-    util::BonderOfCoordinate(recv.longitude(), recv.latitude(),
-                             recv.distance(), point);
+    util::BonderOfCoordinate(rev.longitude(), rev.latitude(),
+                             rev.distance(), point);
     err = user_mysql_->NearGuideSelect(point, &dic);
     if (err < 0)
       break;
-    PacketHead send;
-    send.set_head(packet->head());
-    send.Serialize(&dic);
-    send.AdapterLen();
-    send.set_operate_code(NEARBY_GUIDE_RLY);
-    SendPacket(socket, &send);
+    SendMsg(socket, packet, &dic, NEARBY_GUIDE_RLY);
   } while (0);
   if (err < 0) {
     SendError(socket, packet, err, NEARBY_GUIDE_RLY);
@@ -123,26 +145,21 @@ int32 UserInterface::NearbyGuide(const int32 socket, PacketHead* packet) {
 
 int32 UserInterface::UserLogin(const int32 socket, PacketHead* packet) {
   int32 err = 0;
-  LoginRecv recv(*packet);
+  LoginRecv rev(*packet);
   do {
-    err = recv.Deserialize();
+    err = rev.Deserialize();
     if (err < 0)
       break;
-    if (UserIsLogin(recv.phone_num())) {
+    if (UserIsLogin(rev.phone_num())) {
       // todo
     }
     DicValue dic;
-    err = AuthorUser(recv.phone_num(), recv.passwd(), recv.user_type(), &dic);
+    err = AuthorUser(rev.phone_num(), rev.passwd(), rev.user_type(), &dic);
     LOG(INFO) << "UserLogin err:" << err;
     if (err < 0)
       break;
-    PacketHead send;
-    send.set_head(packet->head());
-    send.Serialize(&dic);
-    send.AdapterLen();
-    send.set_operate_code(USER_LOGIN_RLY);
-    SendPacket(socket, &send);
-    AddUser(socket, &dic, recv.user_type());
+    SendMsg(socket, packet, &dic, USER_LOGIN_RLY);
+    AddUser(socket, &dic, rev.user_type());
   } while (0);
   if (err < 0) {
     SendError(socket, packet, err, USER_LOGIN_RLY);
@@ -181,6 +198,8 @@ int32 UserInterface::AuthorUser(std::string phone, std::string passwd,
 }
 
 void UserInterface::SendPacket(const int socket, PacketHead* packet) {
+
+
   char* s = new char[packet->packet_length()];
   LOG(INFO) << "packet body:" << packet->body_str();
   memset(s, 0, packet->packet_length());
@@ -201,6 +220,16 @@ void UserInterface::SendError(const int socket, PacketHead* packet, int32 err,
   p_err.AdapterLen();
   p_err.set_operate_code(opcode);
   SendPacket(socket, &p_err);
+}
+
+void UserInterface::SendMsg(const int socket, PacketHead* packet, DicValue* dic,
+             int16 opcode) {
+  PacketHead send;
+  send.set_head(packet->head());
+  send.Serialize(dic);
+  send.AdapterLen();
+  send.set_operate_code(opcode);
+  SendPacket(socket, &send);
 }
 
 }  // namespace user

@@ -47,6 +47,15 @@ class ObtainGuideRecv:public PacketHead {
   double distance_;
 };
 
+class RecommendGuideRecv:public PacketHead {
+ public:
+  RecommendGuideRecv(PacketHead packet);
+  int32 Deserialize();
+  inline int64 city_code() { return city_code_; }
+ private:
+  int64 city_code_;
+};
+
 typedef Heartbeat GuideDetailRecv;
 //send
 

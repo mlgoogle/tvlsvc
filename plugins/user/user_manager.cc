@@ -7,6 +7,8 @@
 
 #include <stdio.h>
 
+#include "glog/logging.h"
+
 #include "user/user_opcode.h"
 #include "user/user_interface.h"
 
@@ -37,6 +39,7 @@ UserManager::~UserManager() {
 int32 UserManager::AssignPacket(const int32 socket, PacketHead* packet) {
   int32 err = 0;
   UserInterface* interface = UserInterface::GetInstance();
+  LOG(INFO) << "AssignPacket opcode" << (int)packet->operate_code();
   switch (packet->operate_code()) {
     case USER_LOGIN_REQ: {
       interface->UserLogin(socket, packet);
@@ -56,6 +59,10 @@ int32 UserManager::AssignPacket(const int32 socket, PacketHead* packet) {
     }
     case PACKET_HEART_REQ: {
       interface->HeartPacket(socket, packet);
+      break;
+    }
+    case SERVICE_CITY_REQ: {
+      interface->ServiceCity(socket, packet);
       break;
     }
 

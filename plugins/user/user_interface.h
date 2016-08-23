@@ -35,6 +35,8 @@ class UserInterface {
 
   int32 RecommendGuide(const int32 socket, PacketHead* packet);
 
+  int32 ServiceCity(const int32 socket, PacketHead* packet);
+
   int32 AuthorUser(std::string phone, std::string passwd, int32 type,
                    DicValue* v);
 
@@ -49,6 +51,8 @@ class UserInterface {
 
   void SendError(const int socket, PacketHead* packet, int32 err, int16 opcode);
 
+  void SendMsg(const int socket, PacketHead* packet, DicValue* dic,
+               int16 opcode);
  private:
   static UserInterface* instance_;
   UserMysql* user_mysql_;

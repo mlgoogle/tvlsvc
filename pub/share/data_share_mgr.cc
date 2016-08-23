@@ -5,6 +5,7 @@
 
 #include "pub/share/data_share_mgr.h"
 
+#include <sys/unistd.h>
 #include "glog/logging.h"
 
 #include "base/logic/logic_comm.h"
@@ -73,9 +74,9 @@ void DataShareMgr::CheckHeartLoss() {
     } else {
       LOG(WARNING) << "user lost connect uid:" << p->uid();
       user_map_.erase(it1++);
-      LOG(INFO) << "uid:" << p->uid();
       DelGuide(p->uid());
       DelVisitor(p->uid());
+      close(p->socket_fd());
       delete p;
       p = NULL;
     }

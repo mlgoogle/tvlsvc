@@ -25,11 +25,15 @@ class UserMysql {
 
   int32 NearGuideSelect(double* point, DicValue* dic);
   int32 GuideDetailSelect(int64 uid, DicValue* dic);
+  int32 ServiceCitySelect(DicValue* dic);
+  int32 RecommendGuideSelect(int64 city, DicValue* dic);
 
   static void CallUserLoginSelect(void* param, Value* value);
   static void CallNearGuideSelect(void* param, Value* value);
   static void CallGuideDetailSelect(void* param, Value* value);
   static void CallGuideServiceSelect(void* param, Value* value);
+  static void CallServiceCitySelect(void* param, Value* value);
+  static void CallRecommendGuideSelect(void* param, Value* value);
  private:
   base_logic::DataEngine* mysql_engine_;
 };
