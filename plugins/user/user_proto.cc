@@ -156,5 +156,43 @@ int32 RecommendGuideRecv::Deserialize() {
   return err;
 }
 
+ChangePasswdRecv::ChangePasswdRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  uid_ = -1;
+}
+
+int32 ChangePasswdRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer =
+     base_logic::ValueSerializer::Create(base_logic::IMPL_JSON, &body_str_);
+  std::string err_str;
+  DicValue* dic = (DicValue*)serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetBigInteger(L"uid_", &uid_);
+      LOG_IF(ERROR, !r) << "ChangePasswdRecv::uid_ parse error";
+      r = dic->GetString(L"old_passwd_", &old_passwd_);
+      LOG_IF(ERROR, !r) << "ChangePasswdRecv::old_passwd_ parse error";
+      if (old_passwd_.length() > 0) {
+        old_passwd_ = old_passwd_.substr(0,old_passwd_.length()-1);
+      }
+      r = dic->GetString(L"new_passwd_", &new_passwd_);
+      LOG_IF(ERROR, !r) << "ChangePasswdRecv::new_passwd_ parse error";
+      if (old_passwd_.length() > 0) {
+        new_passwd_ = new_passwd_.substr(0,new_passwd_.length()-1);
+      }
+    } else {
+      LOG(ERROR) << "ChangePasswdRecv Deserialize error";
+      err = CHANGE_PASSWD_JSON_ERR;
+    break;
+    }
+  } while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                               serializer);
+  return err;
+}
+
 }  // namespace user
 

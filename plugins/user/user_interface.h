@@ -37,12 +37,14 @@ class UserInterface {
 
   int32 ServiceCity(const int32 socket, PacketHead* packet);
 
+  int32 ChangePasswd(const int32 socket, PacketHead* packet);
+
   int32 AuthorUser(std::string phone, std::string passwd, int32 type,
                    DicValue* v);
 
   int32 CheckHeartLoss();
 
-  void AddUser(int32 fd, DicValue* v, int64 type);
+  void AddUser(int32 fd, DicValue* v, int64 type, std::string pwd);
 
   //判断用户是否登陆
   bool UserIsLogin(std::string u);

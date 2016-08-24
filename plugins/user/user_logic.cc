@@ -43,7 +43,7 @@ bool Userlogic::Init() {
   }
   r = config->LoadConfig(path);
   if (!r) {
-    LOG(ERROR) << "news config load error";
+    LOG(ERROR) << "user config load error";
     return false;
   }
   LOG(INFO) << "user plugin init 111";

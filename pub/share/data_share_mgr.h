@@ -22,6 +22,7 @@ class DataShareMgr {
   void AddUser(UserInfo* user);
   void DelUser(int64 uid);
   void UserHeart(int64 uid);
+  UserInfo* GetUser(int64 uid);
 
   void CheckHeartLoss();
  private:

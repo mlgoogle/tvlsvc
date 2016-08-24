@@ -29,6 +29,14 @@ DataShareMgr* DataShareMgr::GetInstance() {
   return instance_;
 }
 
+UserInfo* DataShareMgr::GetUser(int64 uid) {
+  base_logic::RLockGd lk(lock_);
+  UserMap::iterator it1 = user_map_.find(uid);
+  if (it1 != user_map_.end())
+    return it1->second;
+  return NULL;
+}
+
 void DataShareMgr::AddUser(UserInfo* user) {
   base_logic::WLockGd lk(lock_);
   user_map_[user->uid()] = user;

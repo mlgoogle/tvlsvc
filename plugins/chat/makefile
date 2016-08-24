@@ -1,0 +1,77 @@
+
+
+OUT_PUT = ${SO_DIR}/chat/chat.so 
+
+SRC_DIR = ../../
+LIB_DIR = ./../../../baselib
+SRC_PLUGINS = ${SRC_DIR}plugins
+SO_DIR = ${SRC_DIR}bin/plugins
+SRC_PUB_NET = ${SRC_DIR}pub/net
+SRC_PUB_UTIL = ${SRC_DIR}pub/util
+SRC_PUB_STORAGE = ${SRC_DIR}pub/storage
+SRC_PUB_SHARE = ${SRC_DIR}pub/share
+SRC_PUB_COMM = ${SRC_DIR}pub/comm
+
+LINK_DYNAMIC = -Wl,-Bdynamic -lpthread
+LINK_STATIC = -Wl,-Bstatic -L${LIB_DIR}/third_party/glog/lib/libglog.a
+LINK_PATH = -L/usr/lib64/mysql
+
+CXXFLAGS += -g -Wextra -w -shared -fPIC 
+
+INCLUDE_PATHS = -I${LIB_DIR} \
+		-I${SRC_PLUGINS} \
+		-I${SRC_DIR} \
+		-I${LIB_DIR}/public \
+		-I${LIB_DIR}/base \
+		-I${LIB_DIR}/third_party/glog/include
+
+all : ${OUT_PUT} del-temp-files
+
+del-temp-files:
+	rm -rf *.o
+	
+clean :
+	rm -f ${OUT_PUT}  del-temp-files
+	
+chat_init.o : ./chat_init.cc  ./chat_init.h
+	${CXX} ${CXXFLAGS} -c ./chat_init.cc ${INCLUDE_PATHS}
+
+chat_logic.o : ./chat_logic.cc  ./chat_logic.h
+	${CXX} ${CXXFLAGS} -c ./chat_logic.cc ${INCLUDE_PATHS}
+
+chat_manager.o : ./chat_manager.cc  ./chat_manager.h
+	${CXX} ${CXXFLAGS} -c ./chat_manager.cc ${INCLUDE_PATHS}
+	
+chat_interface.o : ./chat_interface.cc  ./chat_interface.h
+	${CXX} ${CXXFLAGS} -c ./chat_interface.cc ${INCLUDE_PATHS}
+	
+chat_proto.o : ./chat_proto.cc  ./chat_proto.h
+	${CXX} ${CXXFLAGS} -c ./chat_proto.cc ${INCLUDE_PATHS}
+
+chat_mysql.o : ./chat_mysql.cc  ./chat_mysql.h
+	${CXX} ${CXXFLAGS} -c ./chat_mysql.cc ${INCLUDE_PATHS}
+
+proto_buf.o : ${SRC_PUB_NET}/proto_buf.cc  ${SRC_PUB_NET}/proto_buf.h 
+	${CXX} ${CXXFLAGS} -c ${SRC_PUB_NET}/proto_buf.cc ${INCLUDE_PATHS}
+
+util.o : ${SRC_PUB_UTIL}/util.cc  ${SRC_PUB_UTIL}/util.h 
+	${CXX} ${CXXFLAGS} -c ${SRC_PUB_UTIL}/util.cc ${INCLUDE_PATHS}
+
+data_engine.o : ${SRC_PUB_STORAGE}/data_engine.cc  ${SRC_PUB_STORAGE}/data_engine.h 
+	${CXX} ${CXXFLAGS} -c ${SRC_PUB_STORAGE}/data_engine.cc ${INCLUDE_PATHS}
+
+mysql_pool.o : ${SRC_PUB_STORAGE}/mysql_pool.cc  ${SRC_PUB_STORAGE}/mysql_pool.h 
+	${CXX} ${CXXFLAGS} -c ${SRC_PUB_STORAGE}/mysql_pool.cc ${INCLUDE_PATHS}
+
+data_mysql_engine.o : ${SRC_PUB_STORAGE}/data_mysql_engine.cc  ${SRC_PUB_STORAGE}/data_mysql_engine.h 
+	${CXX} ${CXXFLAGS} -c ${SRC_PUB_STORAGE}/data_mysql_engine.cc ${INCLUDE_PATHS}
+
+data_share_mgr.o : ${SRC_PUB_SHARE}/data_share_mgr.cc  ${SRC_PUB_SHARE}/data_share_mgr.h 
+	${CXX} ${CXXFLAGS} -c ${SRC_PUB_SHARE}/data_share_mgr.cc ${INCLUDE_PATHS}
+
+${OUT_PUT} : chat_init.o chat_logic.o proto_buf.o chat_manager.o \
+		chat_interface.o chat_proto.o chat_mysql.o util.o data_engine.o \
+		mysql_pool.o data_mysql_engine.o data_share_mgr.o 
+	${CXX} ${CXXFLAGS} $^ -o ${OUT_PUT} ${LINK_PATH} -lpthread -lmysqlclient \
+		${LIB_DIR}/third_party/glog/lib/libglog.a ${LIB_DIR}/base/lib/mybase.a \
+		${LIB_DIR}/third_party/dmg_fp/lib/dmg_fp.a

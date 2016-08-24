@@ -77,13 +77,39 @@ int32 UserInterface::GuideDetail(const int32 socket, PacketHead* packet) {
     err = user_mysql_->GuideDetailSelect(rev.uid(), &dic);
     if (err < 0)
       break;
-    PacketHead send;
-    send.set_head(packet->head());
-    send.Serialize(&dic);
-    send.AdapterLen();
-    send.set_operate_code(GUIDE_DETAIL_RLY);
-    SendPacket(socket, &send);
+    SendMsg(socket, packet, &dic, GUIDE_DETAIL_RLY);
   } while (0);
+  return err;
+}
+
+int32 UserInterface::ChangePasswd(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    ChangePasswdRecv rev(*packet);
+    err = rev.Deserialize();
+    if (err < 0)
+      break;
+    UserInfo* p = data_share_mgr_->GetUser(rev.uid());
+    if (p == NULL || !p->is_login()) {
+      err = USER_NOT_IN_CACHE;
+      break;
+    }
+    LOG(INFO) << "oldpwd:" << rev.old_passwd();
+    LOG(INFO) << "pwd" << p->passwd();
+    if (p->passwd() != rev.old_passwd()) {
+      err = CHANGE_OLD_PWD_ERR;
+      break;
+    } else {
+      err = user_mysql_->ChangePwdUpdate(rev.uid(), rev.new_passwd());
+      if (err < 0)
+        break;
+      p->set_passwd(rev.new_passwd());
+      SendMsg(socket, packet, NULL, CHANGE_PASSWD_RLY);
+    }
+  } while (0);
+  if (err < 0) {
+    SendError(socket, packet, err, CHANGE_PASSWD_RLY);
+  }
   return err;
 }
 
@@ -159,7 +185,7 @@ int32 UserInterface::UserLogin(const int32 socket, PacketHead* packet) {
     if (err < 0)
       break;
     SendMsg(socket, packet, &dic, USER_LOGIN_RLY);
-    AddUser(socket, &dic, rev.user_type());
+    AddUser(socket, &dic, rev.user_type(), rev.passwd());
   } while (0);
   if (err < 0) {
     SendError(socket, packet, err, USER_LOGIN_RLY);
@@ -172,7 +198,8 @@ bool UserInterface::UserIsLogin(std::string u) {
   return false;
 }
 
-void UserInterface::AddUser(int32 fd, DicValue* v, int64 type) {
+void UserInterface::AddUser(int32 fd, DicValue* v, int64 type,
+                            std::string pwd) {
   UserInfo* user;
   //游客
   if (type == 1)
@@ -183,6 +210,7 @@ void UserInterface::AddUser(int32 fd, DicValue* v, int64 type) {
   user->set_user_type(type);
   user->set_is_login(true);
   user->set_socket_fd(fd);
+  user->set_passwd(pwd);
   data_share_mgr_->AddUser(user);
 }
 
@@ -215,6 +243,7 @@ void UserInterface::SendError(const int socket, PacketHead* packet, int32 err,
                               int16 opcode) {
   PacketErr p_err;
   p_err.set_head(packet->head());
+  p_err.set_type(ERROR_TYPE);
   p_err.set_error(err);
   p_err.Serialize();
   p_err.AdapterLen();

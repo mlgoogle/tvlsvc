@@ -23,6 +23,10 @@ namespace user {
 
 #define SERVICE_CITY_REQ USER_TYPE*1000 + 9
 #define SERVICE_CITY_RLY USER_TYPE*1000 + 10
+
+#define CHANGE_PASSWD_REQ USER_TYPE*1000 + 11
+#define CHANGE_PASSWD_RLY USER_TYPE*1000 + 12
+
 }  // namespace user
 
 

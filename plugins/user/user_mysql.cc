@@ -75,6 +75,22 @@ int32 UserMysql::RecommendGuideSelect(int64 city, DicValue* dic) {
   return err;
 }
 
+int32 UserMysql::ChangePwdUpdate(int64 uid, std::string pwd) {
+  int32 err = 0;
+  bool r = false;
+  do {
+    std::stringstream ss;
+    ss << "call proc_ChangePwdUpdate(" << uid << ",'" << pwd << "');";
+    LOG(INFO) << "sql:" << ss.str();
+    r = mysql_engine_->WriteData(ss.str());
+    if (!r) {
+      err = SQL_EXEC_ERROR;
+      break;
+    }
+  } while(0);
+  return err;
+}
+
 int32 UserMysql::ServiceCitySelect(DicValue* dic) {
   int32 err = 0;
   bool r =  false;

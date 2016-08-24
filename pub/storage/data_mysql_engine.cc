@@ -10,7 +10,7 @@ void DataMYSQLEngine::Release() {
 	db_pool_.Dest();
 }
 
-bool DataMYSQLEngine::WriteData(const std::string& sql, base_logic::Value* value) {
+bool DataMYSQLEngine::WriteData(const std::string& sql) {
   bool r = false;
   base_storage::DBStorageEngine* engine = db_pool_.DBConnectionPop();
   if (engine == NULL) {
@@ -21,7 +21,6 @@ bool DataMYSQLEngine::WriteData(const std::string& sql, base_logic::Value* value
   if (!r) {
     return false;
   }
-
   db_pool_.DBConnectionPush(engine);
   return true;
 }

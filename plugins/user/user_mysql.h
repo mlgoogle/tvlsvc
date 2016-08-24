@@ -28,6 +28,8 @@ class UserMysql {
   int32 ServiceCitySelect(DicValue* dic);
   int32 RecommendGuideSelect(int64 city, DicValue* dic);
 
+  int32 ChangePwdUpdate(int64 uid, std::string pwd);
+
   static void CallUserLoginSelect(void* param, Value* value);
   static void CallNearGuideSelect(void* param, Value* value);
   static void CallGuideDetailSelect(void* param, Value* value);

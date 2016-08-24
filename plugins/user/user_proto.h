@@ -56,6 +56,19 @@ class RecommendGuideRecv:public PacketHead {
   int64 city_code_;
 };
 
+class ChangePasswdRecv:public PacketHead {
+ public:
+  ChangePasswdRecv(PacketHead packet);
+  int32 Deserialize();
+  inline int64 uid() { return uid_; }
+  inline std::string old_passwd() { return old_passwd_; }
+  inline std::string new_passwd() { return new_passwd_; }
+ private:
+  int64 uid_;
+  std::string old_passwd_;
+  std::string new_passwd_;
+};
+
 typedef Heartbeat GuideDetailRecv;
 //send
 

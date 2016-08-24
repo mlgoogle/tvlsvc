@@ -44,7 +44,7 @@ class DataEngine {
   virtual bool ReadData(const std::string& sql, base_logic::Value* value,
   void (*storage_get)(void*, base_logic::Value*)) = 0;
 
-  virtual bool WriteData(const std::string& sql, base_logic::Value* value) = 0;
+  virtual bool WriteData(const std::string& sql) = 0;
 };
 
 }  // namespace base_logic

@@ -23,7 +23,7 @@ class DataMYSQLEngine : public DataEngine {
      bool ReadData(const std::string& sql, base_logic::Value* value,
              void (*storage_get)(void*, base_logic::Value*));
 
-     bool WriteData(const std::string& sql, base_logic::Value* value);
+     bool WriteData(const std::string& sql);
 
   private:
      base_logic::MYSQL_Pool        db_pool_;

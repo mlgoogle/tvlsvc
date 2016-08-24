@@ -65,7 +65,10 @@ int32 UserManager::AssignPacket(const int32 socket, PacketHead* packet) {
       interface->ServiceCity(socket, packet);
       break;
     }
-
+    case CHANGE_PASSWD_REQ: {
+      interface->ChangePasswd(socket, packet);
+      break;
+    }
   }
   return err;
 }
