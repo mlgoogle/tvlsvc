@@ -36,6 +36,8 @@ class Userlogic {
   bool OnInitTimer(struct server *srv);
   bool OnTimeout(struct server *srv, char* id, int opcode, int time);
 
+  bool InitShareData();
+
  private:
   bool Init();
   UserManager* user_manager_; //负责user插件消息管理

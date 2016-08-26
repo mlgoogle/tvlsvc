@@ -14,23 +14,30 @@ class Invitation : public PacketHead {
   Invitation(PacketHead packet);
   int32 Deserialize();
 
-  int64 from_uid() { return from_uid_; }
-  int64 to_uid() { return to_uid_; }
-  int64 service_id() { return service_id_; }
+  inline int64 from_uid() { return from_uid_; }
+  inline int64 to_uid() { return to_uid_; }
+  inline int64 service_id() { return service_id_; }
  private:
   int64 from_uid_;
   int64 to_uid_;
   int64 service_id_;
 };
 
-//class InvitationSend : public Invitation {
-// public:
-//  std::string Serialize();
-//
-//  void set_from_uid(int64 uid) { from_uid_ = uid; }
-//  void set_to_uid(int64 uid) { to_uid_ = uid; }
-//  void set_service_id(int64 sid) { service_id_ = sid; }
-//};
+class ChatPacket : public PacketHead {
+ public:
+  ChatPacket(PacketHead packet);
+  int32 Deserialize();
+
+  inline int64 from_uid() { return from_uid_; }
+  inline int64 to_uid() { return to_uid_; }
+  inline int64 msg_time() { return msg_time_; }
+  inline std::string content() { return content_; }
+ private:
+  int64 from_uid_;
+  int64 to_uid_;
+  int64 msg_time_;
+  std::string content_;
+};
 
 }  // namespace chat
 

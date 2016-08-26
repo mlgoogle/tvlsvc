@@ -11,6 +11,7 @@
 #include <sys/socket.h>
 
 #include "glog/logging.h"
+#include "base/logic/logic_comm.h"
 
 #include "chat/chat_proto.h"
 #include "chat/chat_opcode.h"
@@ -35,15 +36,35 @@ void ChatInterface::FreeInstance() {
 ChatInterface::ChatInterface() {
   data_share_mgr_ = NULL;
   chat_mysql_ = NULL;
+  InitThreadrw(&lock_);
 }
 
 ChatInterface::~ChatInterface() {
-
+  DeinitThreadrw(lock_);
 }
 
 void ChatInterface::InitConfig(config::FileConfig* config) {
   chat_mysql_ = new ChatMysql(config);
-  data_share_mgr_ = share::DataShareMgr::GetInstance();
+//  data_share_mgr_ = share::DataShareMgr::GetInstance();
+}
+
+void ChatInterface::InitShareDataMgr(share::DataShareMgr* data) {
+  data_share_mgr_ = data;
+}
+
+int32 ChatInterface::RecordChatSave() {
+  int32 err = 0;
+  std::list<std::string> t;
+  if (!msg_list_.empty()) {
+    base_logic::RLockGd lk(lock_);
+    t.splice(t.begin(), msg_list_);
+  }
+  err = chat_mysql_->ChatRecordInsert(t);
+  if (err < 0) {
+    base_logic::RLockGd lk(lock_);
+    msg_list_.splice(msg_list_.begin(), t);
+  }
+  return err;
 }
 
 int32 ChatInterface::AskInvitation(const int32 socket, PacketHead* packet) {
@@ -56,14 +77,65 @@ int32 ChatInterface::AskInvitation(const int32 socket, PacketHead* packet) {
     UserInfo* u = data_share_mgr_->GetUser(rev.to_uid());
     if (u == NULL || !u->is_login()) {
       //todo 不在线处理
-      LOG(INFO) << "to user is not login";
+      LOG(INFO) << "invitate to user is not login";
       break;
     } else {
-      SendPacket(u->socket_fd(), packet);
+      rev.set_operate_code(ASK_INVITATION_RLY);
+      SendPacket(u->socket_fd(), &rev);
     }
 
   } while (0);
   return err;
+}
+
+int32 ChatInterface::ChatMessage(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    ChatPacket rev(*packet);
+    err = rev.Deserialize();
+    if (err < 0)
+      break;
+    UserInfo* u = data_share_mgr_->GetUser(rev.to_uid());
+    if (u != NULL) {
+       LOG(INFO) << "chat to user is not null uid:" << u->uid() << "is login:" <<
+           u->is_login() ;
+    }
+    if (u == NULL || !u->is_login()) {
+      //todo 不在线处理
+      LOG(INFO) << "chat to user is not login";
+      break;
+    } else {
+      rev.set_operate_code(CHAT_MESSAGE_RLY);
+      SendPacket(u->socket_fd(), &rev);
+      std::stringstream ss;
+      ss << "call proc_ChatRecordInsert(" << rev.from_uid() << ","
+          << rev.to_uid() << ",'"
+          << rev.content() << "',"
+          << rev.msg_time() << ")";
+      msg_list_.push_back(ss.str());
+      if (msg_list_.size() > 10) {
+        LOG(INFO) << "msg_list > 10";
+        std::list<std::string> new_list_;
+        {
+          base_logic::RLockGd lk(lock_);
+          new_list_.splice(new_list_.begin(), msg_list_);
+        }
+        LOG(INFO) << "new_list size:" << new_list_.size();
+        err = chat_mysql_->ChatRecordInsert(new_list_);
+        if (err < 0) {
+          {
+            LOG(INFO) << "new_list insert mysql err:";
+            base_logic::RLockGd lk(lock_);
+            msg_list_.splice(msg_list_.begin(), new_list_);
+          }
+        }
+
+      }
+
+    }
+  } while (0);
+  return err;
+
 }
 
 void ChatInterface::SendPacket(const int socket, PacketHead* packet) {

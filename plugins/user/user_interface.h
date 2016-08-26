@@ -33,6 +33,8 @@ class UserInterface {
 
   int32 GuideDetail(const int32 socket, PacketHead* packet);
 
+  int32 ObtainUserInfo(const int32 socket, PacketHead* packet);
+
   int32 RecommendGuide(const int32 socket, PacketHead* packet);
 
   int32 ServiceCity(const int32 socket, PacketHead* packet);
@@ -55,6 +57,8 @@ class UserInterface {
 
   void SendMsg(const int socket, PacketHead* packet, DicValue* dic,
                int16 opcode);
+
+  void InitShareDataMgr(share::DataShareMgr* data);
  private:
   static UserInterface* instance_;
   UserMysql* user_mysql_;

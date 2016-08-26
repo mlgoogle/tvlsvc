@@ -25,6 +25,7 @@ class UserMysql {
 
   int32 NearGuideSelect(double* point, DicValue* dic);
   int32 GuideDetailSelect(int64 uid, DicValue* dic);
+  int32 UserDetailSelect(int64 uid, DicValue* dic);
   int32 ServiceCitySelect(DicValue* dic);
   int32 RecommendGuideSelect(int64 city, DicValue* dic);
 

@@ -41,7 +41,11 @@ UserInterface::~UserInterface() {
 
 void UserInterface::InitConfig(config::FileConfig* config) {
   user_mysql_ = new UserMysql(config);
-  data_share_mgr_ = share::DataShareMgr::GetInstance();
+//  data_share_mgr_ = share::DataShareMgr::GetInstance();
+}
+
+void UserInterface::InitShareDataMgr(share::DataShareMgr* data) {
+  data_share_mgr_ = data;
 }
 
 int32 UserInterface::CheckHeartLoss() {
@@ -65,6 +69,41 @@ int32 UserInterface::HeartPacket(const int32 socket, PacketHead* packet) {
   return err;
 }
 
+int32 UserInterface::ObtainUserInfo(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    UserDetailRecv rev(*packet);
+    err = rev.Deserialize();
+    if (err < 0)
+      break;
+    DicValue dict;
+    UserInfo* u = data_share_mgr_->GetUser(rev.uid());
+    if (u != NULL) {
+      dict.SetBigInteger(L"uid_", u->uid());
+      dict.SetString(L"phone_num_", u->phone_num());
+      dict.SetString(L"nickname_", u->nickname());
+      dict.SetBigInteger(L"credit_lv_", u->credit_lv());
+      dict.SetBigInteger(L"praise_lv_", u->praise_lv());
+      dict.SetBigInteger(L"cash_lv_", u->cash_lv());
+      dict.SetString(L"head_url_", u->head_url());
+      dict.SetString(L"address_", u->usual_addr());
+      dict.SetReal(L"longitude_", u->usual_lon());
+      dict.SetReal(L"latitude_", u->usual_lat());
+      SendMsg(socket, packet, &dict, USER_INFO_RLY);
+      break;
+    }
+    err = user_mysql_->UserDetailSelect(rev.uid(), &dict);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dict, USER_INFO_RLY);
+  } while (0);
+  if (err < 0) {
+    SendError(socket, packet, err, USER_INFO_RLY);
+  }
+  return err;
+}
+
+
 int32 UserInterface::GuideDetail(const int32 socket, PacketHead* packet) {
   int32 err = 0;
   do {
@@ -79,6 +118,9 @@ int32 UserInterface::GuideDetail(const int32 socket, PacketHead* packet) {
       break;
     SendMsg(socket, packet, &dic, GUIDE_DETAIL_RLY);
   } while (0);
+  if (err < 0) {
+    SendError(socket, packet, err, GUIDE_DETAIL_RLY);
+  }
   return err;
 }
 
@@ -200,7 +242,7 @@ bool UserInterface::UserIsLogin(std::string u) {
 
 void UserInterface::AddUser(int32 fd, DicValue* v, int64 type,
                             std::string pwd) {
-  UserInfo* user;
+  UserInfo* user = NULL;
   //游客
   if (type == 1)
     user = new Visitor();
@@ -211,6 +253,7 @@ void UserInterface::AddUser(int32 fd, DicValue* v, int64 type,
   user->set_is_login(true);
   user->set_socket_fd(fd);
   user->set_passwd(pwd);
+  LOG(INFO) << "adduser login :" << user->uid();
   data_share_mgr_->AddUser(user);
 }
 

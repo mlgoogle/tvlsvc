@@ -44,8 +44,16 @@ int32 ChatManager::AssignPacket(const int32 socket, PacketHead* packet) {
       interface->AskInvitation(socket, packet);
       break;
     }
+    case CHAT_MESSAGE_REQ: {
+      interface->ChatMessage(socket, packet);
+      break;
+    }
   }
   return err;
+}
+
+int32 ChatManager::RecordChatSave() {
+  return ChatInterface::GetInterface()->RecordChatSave();
 }
 
 }  // namespace chat

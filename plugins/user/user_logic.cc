@@ -12,6 +12,7 @@
 #include "core/common.h"
 #include "public/basic/basictypes.h"
 #include "public/config/config.h"
+#include "public/basic/native_library.h"
 #include "base/logic/base_values.h"
 
 #include "user/user_interface.h"
@@ -49,35 +50,26 @@ bool Userlogic::Init() {
   LOG(INFO) << "user plugin init 111";
   UserInterface::GetInstance()->InitConfig(config);
   LOG(INFO) << "user plugin init over";
-//  std::string str = "[{\"passwd_\":\"a12345\"}]";
-//  base_logic::ValueSerializer* serializer_ =
-//      base_logic::ValueSerializer::Create(0, &str);
-//  std::string s;
-//  int32 err = 0;
-//  Value* v = serializer_->Deserialize(&err, &s);
-//  if (typeid(*v) == typeid(ListValue)) {
-//      LOG(INFO) << "listvalue:" ;
-//  }
-//  if (typeid(*v) == typeid(DicValue)) {
-//      LOG(INFO) << "dicvalue:" ;
-//  }
-//  if (v != NULL) {
-//      std::string out;
-//     v->GetString(L"passwd_", &out);
-//     LOG(INFO) << "json_str:" << out;
-//  }
-//  DicValue* body_dic_ = new DicValue();
-//  body_dic_->SetBigInteger(L"uid_", 1);
-//  body_dic_->SetBigInteger(L"level_", 2);
-//  body_dic_->SetReal(L"balance_", 2.5);
-//  body_dic_->SetString(L"user_name_", "abc");
-//  std::string str;
-//  base_logic::ValueSerializer* serializer_ =
-//        base_logic::ValueSerializer::Create(0);
-//  std::string out;
-//  serializer_->Serialize(*body_dic_, &out);
-//  LOG(INFO) << "json_str:" << out;
+  InitShareData();
   return true;
+}
+
+bool Userlogic::InitShareData() {
+  basic::libhandle  handle = NULL;
+  handle = basic::load_native_library("./data.so");
+  if (handle==NULL){
+    LOG(ERROR) << "Can't load path data.so\n";
+  }
+  LOG(INFO) << "load data.so success";
+  share::DataShareMgr* (*pengine) (void);
+  pengine = (share::DataShareMgr *(*)(void))basic::get_function_pointer(handle, "GetDataShareMgr");
+  if(pengine==NULL){
+    LOG(ERROR) << "Can't find GetDataShareMgr\n";
+    return false;
+  }
+  share::DataShareMgr* data_engine_ = (*pengine)();
+  UserInterface::GetInstance()->InitShareDataMgr(data_engine_);
+  return false;
 }
 
 Userlogic* Userlogic::GetInstance() {

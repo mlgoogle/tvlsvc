@@ -41,9 +41,6 @@ int32 LoginRecv::Deserialize() {
         break;
       }
       r = dic->GetString(L"passwd_", &passwd_);
-      if (passwd_.length() > 0) {
-        passwd_ = passwd_.substr(0,passwd_.length()-1);
-      }
       LOG_IF(ERROR, !r) << "LoginRecv::passwd parse error";
       r = dic->GetString(L"phone_num_", &phone_num_);
       LOG_IF(ERROR, !r) << "LoginRecv::phone_num_ parse error";
@@ -51,8 +48,6 @@ int32 LoginRecv::Deserialize() {
         LOG(ERROR) << "phone_num_ is wrong";
         err = PHONE_NUM_ERR;
         break;
-      } else {
-        phone_num_ = phone_num_.substr(0,phone_num_.length()-1);
       }
       r = dic->GetBigInteger(L"user_type_", &user_type_);
       LOG_IF(ERROR, !r) << "LoginRecv::user_type_ parse error";
@@ -175,14 +170,8 @@ int32 ChangePasswdRecv::Deserialize() {
       LOG_IF(ERROR, !r) << "ChangePasswdRecv::uid_ parse error";
       r = dic->GetString(L"old_passwd_", &old_passwd_);
       LOG_IF(ERROR, !r) << "ChangePasswdRecv::old_passwd_ parse error";
-      if (old_passwd_.length() > 0) {
-        old_passwd_ = old_passwd_.substr(0,old_passwd_.length()-1);
-      }
       r = dic->GetString(L"new_passwd_", &new_passwd_);
       LOG_IF(ERROR, !r) << "ChangePasswdRecv::new_passwd_ parse error";
-      if (old_passwd_.length() > 0) {
-        new_passwd_ = new_passwd_.substr(0,new_passwd_.length()-1);
-      }
     } else {
       LOG(ERROR) << "ChangePasswdRecv Deserialize error";
       err = CHANGE_PASSWD_JSON_ERR;

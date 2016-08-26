@@ -37,7 +37,7 @@ class Chatlogic {
   bool OnBroadcastClose(struct server *srv, const int socket);
   bool OnInitTimer(struct server *srv);
   bool OnTimeout(struct server *srv, char* id, int opcode, int time);
-
+  bool InitShareData();
  private:
   bool Init();
 

@@ -24,4 +24,35 @@ ChatMysql::~ChatMysql() {
   mysql_engine_ = NULL;
 }
 
+int32 ChatMysql::ChatRecordInsert(int64 from, int64 to, std::string msg,
+                                  int64 time) {
+  int32 err = 0;
+  bool r = false;
+  do {
+    std::stringstream ss;
+    ss << "call proc_ChatRecordInsert(" << from << "," << to << ",'" << msg <<
+        "'," << time << ");";
+    LOG(INFO) << "sql:" << ss.str();
+    r = mysql_engine_->WriteData(ss.str());
+    if (!r) {
+      err = SQL_EXEC_ERROR;
+      break;
+    }
+  } while(0);
+  return err;
+}
+
+int32 ChatMysql::ChatRecordInsert(std::list<std::string> sqls) {
+  int32 err = 0;
+  bool r = false;
+  do {
+    r = mysql_engine_->WriteDatas(sqls);
+    if (!r) {
+      err = SQL_EXEC_ERROR;
+      break;
+    }
+  } while(0);
+  return err;
+}
+
 }  // namespace chat

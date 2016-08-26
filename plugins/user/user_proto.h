@@ -70,6 +70,7 @@ class ChangePasswdRecv:public PacketHead {
 };
 
 typedef Heartbeat GuideDetailRecv;
+typedef Heartbeat UserDetailRecv;
 //send
 
 

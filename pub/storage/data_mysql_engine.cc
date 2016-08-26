@@ -25,6 +25,21 @@ bool DataMYSQLEngine::WriteData(const std::string& sql) {
   return true;
 }
 
+bool DataMYSQLEngine::WriteDatas(std::list<std::string>& sqls) {
+  bool r = false;
+  base_storage::DBStorageEngine* engine = db_pool_.DBConnectionPop();
+  if (engine == NULL) {
+    return false;
+  }
+  engine->Release();
+  r = engine->SQLExecs(sqls);
+  if (!r) {
+    return false;
+  }
+  db_pool_.DBConnectionPush(engine);
+  return true;
+}
+
 
 bool DataMYSQLEngine::ReadData(const std::string& sql, base_logic::Value* value,
         void (*storage_get)(void*, base_logic::Value*)) {

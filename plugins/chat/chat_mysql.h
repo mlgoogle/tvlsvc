@@ -18,6 +18,9 @@ class ChatMysql {
  public:
   ChatMysql(config::FileConfig* config);
   ~ChatMysql();
+
+  int32 ChatRecordInsert(int64 from, int64 to, std::string msg, int64 time);
+  int32 ChatRecordInsert(std::list<std::string> sqls);
  private:
   base_logic::DataEngine* mysql_engine_;
 };

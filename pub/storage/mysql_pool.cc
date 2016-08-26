@@ -47,6 +47,11 @@ base_storage::DBStorageEngine* MYSQL_Pool::DBConnectionPop(){
     engine = db_conn_pool_.front();
     db_conn_pool_.pop_front();
 	}
+	if (engine == NULL) {
+	  LOG(ERROR) << "DBConnectionPop engine NULL";
+	  engine = base_storage::DBStorageEngine::Create(base_storage::IMPL_MYSQL);
+	  engine->Connections(addrlist_);
+	}
 	if (!engine->CheckConnect()) {
 	   LOG(WARNING) << "reconnect ";
 	   int reconnects = 3;

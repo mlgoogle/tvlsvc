@@ -22,6 +22,8 @@ class ChatManager {
   static void FreeInstance();
 
   int32 AssignPacket(const int32 socket, PacketHead* packet);
+
+  int32 RecordChatSave();
 };
 
 }  // namespace chat

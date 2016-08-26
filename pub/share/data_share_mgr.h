@@ -15,7 +15,7 @@
 #include "pub/net/typedef.h"
 
 namespace share {
-
+__attribute__((visibility("default")))
 class DataShareMgr {
  public:
   static DataShareMgr* GetInstance();
@@ -40,8 +40,9 @@ class DataShareMgr {
   GuideMap guide_map_;
   VisitorMap visitor_map_;
 };
-
 }  // namespace share
+
+extern "C" share::DataShareMgr *GetDataShareMgr(void);
 
 
 

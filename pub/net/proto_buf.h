@@ -43,6 +43,7 @@ class PacketHead {
   void set_head(BufHead head);
   void set_body_str(char* packet);
   std::string body_str() { return body_str_; }
+
   BufHead head() { return head_; }
 
   inline int16 packet_length() { return head_.packet_length; }

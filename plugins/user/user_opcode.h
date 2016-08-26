@@ -27,6 +27,9 @@ namespace user {
 #define CHANGE_PASSWD_REQ USER_TYPE*1000 + 11
 #define CHANGE_PASSWD_RLY USER_TYPE*1000 + 12
 
+#define USER_INFO_REQ USER_TYPE*1000 + 13
+#define USER_INFO_RLY USER_TYPE*1000 + 14
+
 }  // namespace user
 
 

@@ -10,6 +10,9 @@
 
 #include "base/logic/logic_comm.h"
 
+share::DataShareMgr *GetDataShareMgr(void) {
+  return share::DataShareMgr::GetInstance();
+}
 
 namespace share {
 DataShareMgr* DataShareMgr::instance_ = NULL;
@@ -22,6 +25,7 @@ DataShareMgr::~DataShareMgr() {
   DeinitThreadrw(lock_);
 }
 
+__attribute__((visibility("default")))
 DataShareMgr* DataShareMgr::GetInstance() {
   if (instance_ == NULL) {
     instance_ = new DataShareMgr();
@@ -30,6 +34,7 @@ DataShareMgr* DataShareMgr::GetInstance() {
 }
 
 UserInfo* DataShareMgr::GetUser(int64 uid) {
+  LOG(INFO) << "GetUser user map size:" << user_map_.size();
   base_logic::RLockGd lk(lock_);
   UserMap::iterator it1 = user_map_.find(uid);
   if (it1 != user_map_.end())
@@ -44,6 +49,7 @@ void DataShareMgr::AddUser(UserInfo* user) {
     visitor_map_[user->uid()] = reinterpret_cast<Visitor*>(user);
   else
     guide_map_[user->uid()] = reinterpret_cast<Guide*>(user);
+  LOG(INFO) << "AddUser user map size:" << user_map_.size();
 }
 
 void DataShareMgr::DelUser(int64 uid) {

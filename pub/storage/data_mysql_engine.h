@@ -14,19 +14,21 @@ namespace base_logic {
 
 class DataMYSQLEngine : public DataEngine {
  public:
-	DataMYSQLEngine() {}
-	virtual ~DataMYSQLEngine() {}
+  DataMYSQLEngine() {}
+  virtual ~DataMYSQLEngine() {}
  public:
-     void InitParam(std::list<base::ConnAddr>& addrlist);
-     void Release();
-  public:
-     bool ReadData(const std::string& sql, base_logic::Value* value,
-             void (*storage_get)(void*, base_logic::Value*));
+  void InitParam(std::list<base::ConnAddr>& addrlist);
+  void Release();
+ public:
+  bool ReadData(const std::string& sql, base_logic::Value* value,
+           void (*storage_get)(void*, base_logic::Value*));
 
-     bool WriteData(const std::string& sql);
+  bool WriteDatas(std::list<std::string>& sqls);
 
-  private:
-     base_logic::MYSQL_Pool        db_pool_;
+  bool WriteData(const std::string& sql);
+
+ private:
+  base_logic::MYSQL_Pool        db_pool_;
 };
 }
 #endif

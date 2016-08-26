@@ -23,7 +23,8 @@ INCLUDE_PATHS = -I${LIB_DIR} \
 		-I${SRC_DIR} \
 		-I${LIB_DIR}/public \
 		-I${LIB_DIR}/base \
-		-I${LIB_DIR}/third_party/glog/include
+		-I${LIB_DIR}/third_party/glog/include \
+		-I${LIB_DIR}/third_party
 
 all : ${OUT_PUT} del-temp-files
 

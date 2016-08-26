@@ -26,6 +26,26 @@ UserMysql::~UserMysql() {
   mysql_engine_ = NULL;
 }
 
+int32 UserMysql::UserDetailSelect(int64 uid, DicValue* dic) {
+  int32 err = 0;
+  bool r = false;
+  do {
+    std::stringstream ss;
+    ss << "call proc_UserDetailSelect(" << uid << ");";
+    LOG(INFO) << "sql:" << ss.str();
+    r = mysql_engine_->ReadData(ss.str(), dic, CallUserLoginSelect);
+    if (!r) {
+      err = SQL_EXEC_ERROR;
+      break;
+    }
+    if (dic->empty()) {
+      err = NO_GUIDE;
+      break;
+    }
+  } while (0);
+  return err;
+}
+
 int32 UserMysql::GuideDetailSelect(int64 uid, DicValue* dic) {
   int32 err = 0;
   bool r = false;
