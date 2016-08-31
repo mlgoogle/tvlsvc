@@ -21,6 +21,16 @@ class ChatMysql {
 
   int32 ChatRecordInsert(int64 from, int64 to, std::string msg, int64 time);
   int32 ChatRecordInsert(std::list<std::string> sqls);
+
+  int32 ChatRecordQuery(int64 from, int64 to, int64 count, int64 id,
+                        DicValue* dic);
+  //生成订单信息同时返回
+  int32 NewOrderInsertAndSelect(int64 from, int64 to, int64 sid,
+                                   DicValue* dic);
+
+  static void CallNewOrderInsertAndSelect(void* param, Value* value);
+  static void CallChatRecordQuery(void* param, Value* value);
+
  private:
   base_logic::DataEngine* mysql_engine_;
 };

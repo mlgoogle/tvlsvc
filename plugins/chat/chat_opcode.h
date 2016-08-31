@@ -15,6 +15,9 @@ namespace chat {
 #define CHAT_MESSAGE_REQ CHAT_TYPE*1000 + 3
 #define CHAT_MESSAGE_RLY CHAT_TYPE*1000 + 4
 
+#define CHAT_RECORD_REQ CHAT_TYPE*1000 + 5
+#define CHAT_RECORD_RLY CHAT_TYPE*1000 + 6
+
 
 #define RECORD_CHAT_MSG 200
 }  // namespace chat

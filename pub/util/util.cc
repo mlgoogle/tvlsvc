@@ -4,11 +4,17 @@
 // Author: Paco.
 #include "pub/util/util.h"
 
-#include <sys/types.h>
+#include <string.h>
 #include <sys/socket.h>
 #include <cmath>
 
 namespace util {
+std::string GetStrftime(char* format, time_t t) {
+  char buf[100];
+  memset(buf, 0, sizeof(t));
+  strftime(buf, sizeof(buf), format, localtime(&t));
+  return buf;
+}
 
 int SendFull(int socket, const char *buffer,
             size_t nbytes) {

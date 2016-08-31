@@ -48,6 +48,10 @@ int32 ChatManager::AssignPacket(const int32 socket, PacketHead* packet) {
       interface->ChatMessage(socket, packet);
       break;
     }
+    case CHAT_RECORD_REQ: {
+      interface->ChatRecord(socket, packet);
+      break;
+    }
   }
   return err;
 }

@@ -6,11 +6,15 @@
 #define PUB_UTIL_UTIL_H_
 
 #include <stddef.h>
+#include <string>
+#include <sys/types.h>
 
 const double PI = 3.1415926535898;
 const double EARTH_R = 6371.393000; //km
 
 namespace util {
+
+std::string GetStrftime(char* format, time_t t);
 
 int SendFull(int socket, const char *buffer, size_t nbytes);
 

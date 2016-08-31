@@ -33,6 +33,8 @@ class ChatInterface {
 
   int32 ChatMessage(const int32 socket, PacketHead* packet);
 
+  int32 ChatRecord(const int32 socket, PacketHead* packet);
+
   void SendPacket(const int socket, PacketHead* packet);
 
   void SendError(const int socket, PacketHead* packet, int32 err, int16 opcode);

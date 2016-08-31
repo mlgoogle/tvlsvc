@@ -75,16 +75,27 @@ int32 ChatInterface::AskInvitation(const int32 socket, PacketHead* packet) {
     if (err < 0)
       break;
     UserInfo* u = data_share_mgr_->GetUser(rev.to_uid());
+    //发起邀请，记录订单信息
+    DicValue dic;
+    err = chat_mysql_->NewOrderInsertAndSelect(rev.from_uid(), rev.to_uid(),
+                                            rev.service_id(), &dic);
+    if (err < 0)
+      break;
+    // 回复发起者
+    SendMsg(socket, packet, &dic, ASK_INVITATION_RLY);
     if (u == NULL || !u->is_login()) {
       //todo 不在线处理
       LOG(INFO) << "invitate to user is not login";
       break;
     } else {
-      rev.set_operate_code(ASK_INVITATION_RLY);
-      SendPacket(u->socket_fd(), &rev);
+ //     rev.set_operate_code(ASK_INVITATION_RLY);
+      // 回复被邀请者
+      SendMsg(u->socket_fd(), packet, &dic, ASK_INVITATION_RLY);
     }
 
   } while (0);
+  if (err < 0)
+    SendError(socket, packet, err, ASK_INVITATION_RLY);
   return err;
 }
 
@@ -134,6 +145,25 @@ int32 ChatInterface::ChatMessage(const int32 socket, PacketHead* packet) {
 
     }
   } while (0);
+  return err;
+}
+
+int32 ChatInterface::ChatRecord(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    ChatRecordRecv rev(*packet);
+    err = rev.Deserialize();
+    if (err < 0)
+      break;
+    DicValue dic;
+    err = chat_mysql_->ChatRecordQuery(rev.from_uid(), rev.to_uid(),
+                                       rev.count(), rev.last_chat_id(), &dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, CHAT_RECORD_RLY);
+  } while (0);
+  if (err < 0)
+    SendError(socket, packet, err, CHAT_RECORD_RLY);
   return err;
 
 }

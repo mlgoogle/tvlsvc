@@ -39,6 +39,22 @@ class ChatPacket : public PacketHead {
   std::string content_;
 };
 
+class ChatRecordRecv : public PacketHead {
+ public:
+  ChatRecordRecv(PacketHead packet);
+  int32 Deserialize();
+
+  inline int64 from_uid() { return from_uid_; }
+  inline int64 to_uid() { return to_uid_; }
+  inline int64 count() { return count_; }
+  inline int64 last_chat_id() { return last_chat_id_; }
+ private:
+  int64 from_uid_;
+  int64 to_uid_;
+  int64 count_;
+  int64 last_chat_id_;
+};
+
 }  // namespace chat
 
 
