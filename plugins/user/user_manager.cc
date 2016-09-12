@@ -73,6 +73,26 @@ int32 UserManager::AssignPacket(const int32 socket, PacketHead* packet) {
       interface->ObtainUserInfo(socket, packet);
       break;
     }
+    case ALIPAY_SEVER_REQ: {
+      interface->AlipayServer(socket, packet);
+      break;
+    }
+    case ALIPAY_CLIENT_REQ: {
+      interface->AlipayClient(socket, packet);
+      break;
+    }
+    case QUERY_VERIFY_CODE_REQ: {
+      interface->ObtainVerifyCode(socket, packet);
+      break;
+    }
+    case REGISTER_ACCOUNT_REQ: {
+      interface->RegisterAccount(socket, packet);
+      break;
+    }
+    case IMPROVE_DATA_REQ: {
+      interface->ImproveUserData(socket, packet);
+      break;
+    }
   }
   return err;
 }

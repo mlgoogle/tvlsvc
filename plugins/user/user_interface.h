@@ -41,8 +41,19 @@ class UserInterface {
 
   int32 ChangePasswd(const int32 socket, PacketHead* packet);
 
+  int32 AlipayServer(const int32 socket, PacketHead* packet);
+
+  int32 AlipayClient(const int32 socket, PacketHead* packet);
+
+  int32 ObtainVerifyCode(const int32 socket, PacketHead* packet);
+
+  int32 RegisterAccount(const int32 socket, PacketHead* packet);
+
+  int32 ImproveUserData(const int32 socket, PacketHead* packet);
+
   int32 AuthorUser(std::string phone, std::string passwd, int32 type,
                    DicValue* v);
+
 
   int32 CheckHeartLoss();
 

@@ -76,5 +76,5 @@ ${OUT_PUT} : user_init.o user_logic.o proto_buf.o user_manager.o \
 		user_interface.o user_proto.o user_mysql.o util.o data_engine.o \
 		mysql_pool.o data_mysql_engine.o user_info.o data_share_mgr.o 
 	${CXX} ${CXXFLAGS} $^ -o ${OUT_PUT} ${LINK_PATH} -lpthread -lmysqlclient \
-		${LIB_DIR}/third_party/glog/lib/libglog.a ${LIB_DIR}/base/lib/mybase.a \
+		-lcurl ${LIB_DIR}/third_party/glog/lib/libglog.a ${LIB_DIR}/base/lib/mybase.a \
 		${LIB_DIR}/third_party/dmg_fp/lib/dmg_fp.a

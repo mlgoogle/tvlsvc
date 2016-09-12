@@ -113,7 +113,13 @@ int32 ChatInterface::ChatMessage(const int32 socket, PacketHead* packet) {
     }
     if (u == NULL || !u->is_login()) {
       //todo 不在线处理
-      LOG(INFO) << "chat to user is not login";
+
+      // to_id 为-1 表示意见反馈
+      if (rev.to_uid() == -1) {
+        LOG(INFO) << "chat to user -1";
+        err = chat_mysql_->ChatRecordInsert(rev.from_uid(), rev.to_uid(),
+                                            rev.content(), rev.msg_time());
+      }
       break;
     } else {
       rev.set_operate_code(CHAT_MESSAGE_RLY);

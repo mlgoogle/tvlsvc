@@ -6,6 +6,7 @@
 
 #include <string.h>
 #include <sys/socket.h>
+#include <stdlib.h>
 #include <cmath>
 
 namespace util {
@@ -75,6 +76,10 @@ void BonderOfCoordinate(double lon, double lat, double dis, double* out) {
   out[1] = lon_max *180 / PI;
   out[2] = lat_min * 180 / PI;
   out[3] = lat_max * 180 / PI;
+}
+
+int Random(int min, int max) {
+  return min+rand()%(max-min+1);
 }
 
 }  // namespace util

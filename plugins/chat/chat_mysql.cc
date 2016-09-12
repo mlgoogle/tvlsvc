@@ -132,7 +132,7 @@ void ChatMysql::CallNewOrderInsertAndSelect(void* param, Value* value) {
         dict->SetString(L"to_url_", rows[10]);
     }
   } else {
-    LOG(WARNING) << "CallUserLoginSelect count < 0";
+    LOG(WARNING) << "CallNewOrderInsertAndSelect count < 0";
   }
 }
 

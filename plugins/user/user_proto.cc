@@ -183,5 +183,117 @@ int32 ChangePasswdRecv::Deserialize() {
   return err;
 }
 
+ObtainVerifyCodeRecv::ObtainVerifyCodeRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  verify_type_ = 0;
+}
+
+int32 ObtainVerifyCodeRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer =
+     base_logic::ValueSerializer::Create(base_logic::IMPL_JSON, &body_str_);
+  std::string err_str;
+  DicValue* dic = (DicValue*)serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetBigInteger(L"verify_type_", &verify_type_);
+      LOG_IF(ERROR, !r) << "ObtainVerifyCodeRecv::verify_type_ parse error";
+      r = dic->GetString(L"phone_num_", &phone_num_);
+      LOG_IF(ERROR, !r) << "ObtainVerifyCodeRecv::phone_num_ parse error";
+    } else {
+      LOG(ERROR) << "ObtainVerifyCodeRecv Deserialize error";
+      err = OBTAIN_VERIFYCODE_JSON_ERR;
+    break;
+    }
+  } while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                               serializer);
+  return err;
+}
+
+RegisterAccountRecv::RegisterAccountRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  timestamp_ = 0;
+  verify_code_ = 0;
+  user_type_ = 0;
+}
+
+int32 RegisterAccountRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer =
+     base_logic::ValueSerializer::Create(base_logic::IMPL_JSON, &body_str_);
+  std::string err_str;
+  DicValue* dic = (DicValue*)serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetBigInteger(L"timestamp_", &timestamp_);
+      LOG_IF(ERROR, !r) << "RegisterAccountRecv::timestamp_ parse error";
+      r = dic->GetBigInteger(L"verify_code_", &verify_code_);
+      LOG_IF(ERROR, !r) << "RegisterAccountRecv::verify_code_ parse error";
+      r = dic->GetBigInteger(L"user_type_", &user_type_);
+      LOG_IF(ERROR, !r) << "RegisterAccountRecv::user_type_ parse error";
+      r = dic->GetString(L"phone_num_", &phone_num_);
+      LOG_IF(ERROR, !r) << "RegisterAccountRecv::phone_num_ parse error";
+      r = dic->GetString(L"passwd_", &passwd_);
+      LOG_IF(ERROR, !r) << "RegisterAccountRecv::passwd_ parse error";
+      r = dic->GetString(L"token_", &token_);
+      LOG_IF(ERROR, !r) << "RegisterAccount::token_ parse error";
+    } else {
+      LOG(ERROR) << "RegisterAccountRecv Deserialize error";
+      err = REGISTER_ACCOUNT_JSON_ERR;
+    break;
+    }
+  } while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                               serializer);
+  return err;
+}
+
+ImproveDataRecv::ImproveDataRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  uid_ = 0;
+  longitude_ = 0;
+  latitude_ = 0;
+}
+
+int32 ImproveDataRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer =
+     base_logic::ValueSerializer::Create(base_logic::IMPL_JSON, &body_str_);
+  std::string err_str;
+  DicValue* dic = (DicValue*)serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetBigInteger(L"uid_", &uid_);
+      LOG_IF(ERROR, !r) << "ImproveDataRecv::uid_ parse error";
+      r = dic->GetBigInteger(L"gender_", &gender_);
+      LOG_IF(ERROR, !r) << "ImproveDataRecv::gender_ parse error";
+      r = dic->GetString(L"nickname_", &nickname_);
+      LOG_IF(ERROR, !r) << "ImproveDataRecv::nickname_ parse error";
+      r = dic->GetString(L"head_url_", &head_url_);
+      LOG_IF(ERROR, !r) << "ImproveDataRecv::head_url_ parse error";
+      r = dic->GetString(L"address_", &address_);
+      LOG_IF(ERROR, !r) << "ImproveDataRecv::address_ parse error";
+      r = dic->GetReal(L"longitude_", &longitude_);
+      LOG_IF(ERROR, !r) << "ImproveDataRecv::longitude_ parse error";
+      r = dic->GetReal(L"latitude_", &latitude_);
+      LOG_IF(ERROR, !r) << "ImproveDataRecv::latitude_ parse error";
+    } else {
+      LOG(ERROR) << "ImproveDataRecv Deserialize error";
+      err = IMPROVE_DATA_JSON_ERR;
+    break;
+    }
+  } while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                               serializer);
+  return err;
+}
+
 }  // namespace user
 

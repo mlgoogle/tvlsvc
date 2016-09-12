@@ -95,6 +95,46 @@ int32 UserMysql::RecommendGuideSelect(int64 city, DicValue* dic) {
   return err;
 }
 
+int32 UserMysql::RegisterInsertAndSelect(std::string phone, std::string pass,
+                              int64 type, DicValue* dic) {
+  int32 err = 0;
+  bool r = false;
+  do {
+    std::stringstream ss;
+    ss << "call proc_RegisterInsertAndSelect('" << phone << "','" << pass
+        << "'," << type << ")";
+    LOG(INFO) << "sql:" << ss.str();
+    r = mysql_engine_->ReadData(ss.str(), dic, CallRegisterInsertAndSelect);
+    //注册一定有结果返回
+    if (!r || dic->empty()) {
+      err = SQL_EXEC_ERROR;
+      break;
+    }
+//    dic->GetBigInteger(L"result")
+  } while (0);
+  return err;
+}
+
+int32 UserMysql::ImproveUserUpdate(int64 uid, int64 sex, std::string nickname,
+                                   std::string headurl, std::string addr,
+                                   double lon, double lat) {
+  int32 err = 0;
+  bool r = false;
+  do {
+    std::stringstream ss;
+    ss << "call proc_ImproveUserDataUpdate(" << uid << "," << sex  << ",'"
+        << nickname << "','" << headurl << "','" << addr << "'," << lon
+        << "," << lat << ")";
+    LOG(INFO) << "sql:" << ss.str();
+    r = mysql_engine_->WriteData(ss.str());
+    if (!r) {
+      err = SQL_EXEC_ERROR;
+      break;
+    }
+  } while (0);
+  return err;
+}
+
 int32 UserMysql::ChangePwdUpdate(int64 uid, std::string pwd) {
   int32 err = 0;
   bool r = false;
@@ -362,12 +402,37 @@ void UserMysql::CallUserLoginSelect(void* param, Value* value) {
         dict->SetReal(L"longitude_", atof(rows[8]));
       if (rows[9] != NULL)
         dict->SetReal(L"latitude_", atof(rows[9]));
+      if (rows[10] != NULL)
+        dict->SetBigInteger(L"register_status_", atoll(rows[10]));
+      if (rows[11] != NULL)
+        dict->SetBigInteger(L"gender_", atoll(rows[11]));
     }
   } else {
     LOG(WARNING) << "CallUserLoginSelect count < 0";
   }
 }
 
+void UserMysql::CallRegisterInsertAndSelect(void* param, Value* value) {
+  base_storage::DBStorageEngine* engine =
+      (base_storage::DBStorageEngine*)(param);
+  MYSQL_ROW rows;
+  int32 num = engine->RecordCount();
+  DicValue* dict = reinterpret_cast<DicValue*>(value);
+  if (num > 0) {
+    while (rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)) {
+      if (rows[0] != NULL) {
+        dict->SetBigInteger(L"result", atoll(rows[0]));
+          //用户已注册过
+        if(atoi(rows[0]) == 0)
+           break;
+      }
+      if (rows[1] != NULL)
+        dict->SetBigInteger(L"uid_", atoll(rows[1]));
+    }
+  } else {
+    LOG(WARNING) << "CallRegisterInsertAndSelect count < 0";
+  }
+}
 
 
 }  // namespace user

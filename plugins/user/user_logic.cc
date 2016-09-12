@@ -7,6 +7,7 @@
 
 #include <assert.h>
 #include <typeinfo>
+#include <stdio.h>
 
 #include "glog/logging.h"
 #include "core/common.h"
@@ -18,6 +19,7 @@
 #include "user/user_interface.h"
 #include "user/user_opcode.h"
 #include "pub/comm/comm_head.h"
+
 
 #define DEFAULT_CONFIG_PATH "./plugins/user/user_config.xml"
 

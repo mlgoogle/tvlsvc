@@ -69,6 +69,59 @@ class ChangePasswdRecv:public PacketHead {
   std::string new_passwd_;
 };
 
+class ObtainVerifyCodeRecv : public PacketHead {
+ public:
+  ObtainVerifyCodeRecv(PacketHead packet);
+  int32 Deserialize();
+  inline int64 verify_type() { return verify_type_; }
+  inline std::string phone_num() { return phone_num_; }
+ private:
+  int64 verify_type_;
+  std::string phone_num_;
+};
+
+class RegisterAccountRecv : public PacketHead {
+ public:
+  RegisterAccountRecv(PacketHead packet);
+  int32 Deserialize();
+  inline int64 timestamp() { return timestamp_; }
+  inline int64 verify_code() { return verify_code_; }
+  inline std::string phone_num() { return phone_num_; }
+  inline std::string passwd() { return passwd_; }
+  inline std::string token() { return token_; }
+  inline int64 user_type() { return user_type_; }
+ private:
+  int64 timestamp_;
+  int64 verify_code_;
+  int64 user_type_;
+  std::string phone_num_;
+  std::string passwd_;
+  std::string token_;
+};
+
+class ImproveDataRecv : public PacketHead {
+ public:
+  ImproveDataRecv(PacketHead packet);
+  int32 Deserialize();
+
+  inline int64 uid() { return uid_; }
+  inline int64 gender() { return gender_; }
+  inline std::string nickname() { return nickname_; }
+  inline std::string head_url() { return head_url_; }
+  inline std::string address() { return address_; }
+  inline double longitude() { return longitude_; }
+  inline double latitude() { return latitude_; }
+
+ private:
+  int64 uid_;
+  int64 gender_;
+  std::string nickname_;
+  std::string head_url_;
+  std::string address_;
+  double longitude_;
+  double latitude_;
+};
+
 typedef Heartbeat GuideDetailRecv;
 typedef Heartbeat UserDetailRecv;
 //send

@@ -5,15 +5,19 @@
 #include "user/user_interface.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
 #include <sys/socket.h>
 
+#include "public/basic/md5sum.h"
 #include "glog/logging.h"
 
 #include "user/user_proto.h"
 #include "user/user_opcode.h"
 #include "pub/util/util.h"
 
+#define SHELL_SMS "./verify_code_sms.sh"
+#define SMS_KEY "yd1742653sd"
 namespace user {
 UserInterface* UserInterface::instance_;
 
@@ -68,6 +72,105 @@ int32 UserInterface::HeartPacket(const int32 socket, PacketHead* packet) {
   } while(0);
   return err;
 }
+
+int32 UserInterface::AlipayServer(const int32 socket, PacketHead* packet) {
+  LOG(INFO) << "alipay server req";
+  return 0;
+}
+
+int32 UserInterface::AlipayClient(const int32 socket, PacketHead* packet) {
+  LOG(INFO) << "alipay client req";
+  return 0;
+}
+
+int32 UserInterface::ImproveUserData(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    ImproveDataRecv rev(*packet);
+    err = rev.Deserialize();
+    if (err < 0)
+      break;
+    err = user_mysql_->ImproveUserUpdate(rev.uid(), rev.gender(),
+                                         rev.nickname(), rev.head_url(),
+                                         rev.address(), rev.longitude(),
+                                         rev.latitude());
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, NULL, IMPROVE_DATA_RLY);
+  } while (0);
+  if (err < 0) {
+    SendError(socket, packet, err, IMPROVE_DATA_RLY);
+  }
+  return err;
+}
+
+int32 UserInterface::RegisterAccount(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    RegisterAccountRecv rev(*packet);
+    err = rev.Deserialize();
+    if (err < 0)
+      break;
+    if (time(NULL) - rev.timestamp() > 15*60) {
+      err = VERIFY_CODE_OVERDUE;
+      break;
+    }
+    std::stringstream ss;
+    ss << SMS_KEY << rev.timestamp() << rev.verify_code();
+    base::MD5Sum md5(ss.str());
+    if (md5.GetHash() != rev.token()) {
+      err = VERIFY_CODE_ERR;
+      break;
+    }
+    DicValue dic;
+    err = user_mysql_->RegisterInsertAndSelect(rev.phone_num(), rev.passwd(),
+                                               rev.user_type(), &dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, REGISTER_ACCOUNT_RLY);
+  } while (0);
+  if (err < 0) {
+    SendError(socket, packet, err, REGISTER_ACCOUNT_RLY);
+  }
+  return err;
+}
+
+
+int32 UserInterface::ObtainVerifyCode(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    ObtainVerifyCodeRecv rev(*packet);
+    err = rev.Deserialize();
+    if (err < 0)
+      break;
+    std::stringstream ss;
+    int64 timestamp_ = time(NULL);
+    int64 rand_code_ = util::Random(100000, 999999);
+
+    DicValue dic;
+    dic.SetBigInteger(L"timestamp_", timestamp_);
+
+    ss << SMS_KEY << timestamp_ << rand_code_;
+    base::MD5Sum md5(ss.str());
+    dic.SetString(L"token_", md5.GetHash().c_str());
+    LOG(INFO) << "token:" << ss.str();
+    LOG(INFO) << "md5 token:" << md5.GetHash();
+    SendMsg(socket, packet, &dic, QUERY_VERIFY_CODE_RLY);
+
+    ss.str("");
+    ss.clear();
+    ss << SHELL_SMS << " " << rev.phone_num() << " "
+        << rand_code_ << " " << rev.verify_type();
+    LOG(INFO) << ss.str();
+    system(ss.str().c_str());
+  } while (0);
+  if (err < 0) {
+    SendError(socket, packet, err, QUERY_VERIFY_CODE_RLY);
+  }
+  return err;
+}
+
+
 
 int32 UserInterface::ObtainUserInfo(const int32 socket, PacketHead* packet) {
   int32 err = 0;

@@ -26,6 +26,7 @@ double CalcDistance(double lon1, double lat1, double lon2, double lat2);
 //根据坐标以及距离获取经纬度范围 km
 void BonderOfCoordinate(double lon, double lat, double dis, double* out);
 
+int Random(int min, int max);
 }  // namespace util
 
 
