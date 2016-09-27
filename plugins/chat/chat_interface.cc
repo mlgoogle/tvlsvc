@@ -16,6 +16,7 @@
 #include "chat/chat_proto.h"
 #include "chat/chat_opcode.h"
 #include "pub/util/util.h"
+#include "pub/comm/comm_head.h"
 
 namespace chat {
 ChatInterface* ChatInterface::instance_ = NULL;
@@ -50,6 +51,9 @@ void ChatInterface::InitConfig(config::FileConfig* config) {
 
 void ChatInterface::InitShareDataMgr(share::DataShareMgr* data) {
   data_share_mgr_ = data;
+//  util::PushApnChatMsg("26e19d9dea4ad267c32ab06d0a0a9c65b9131607f54cc97d09216b092db24ef6",
+//                                  4,
+//                                  "QQ:哈哈", "多手持");
 }
 
 int32 ChatInterface::RecordChatSave() {
@@ -119,8 +123,10 @@ int32 ChatInterface::ChatMessage(const int32 socket, PacketHead* packet) {
         LOG(INFO) << "chat to user -1";
         err = chat_mysql_->ChatRecordInsert(rev.from_uid(), rev.to_uid(),
                                             rev.content(), rev.msg_time());
+        break;
       }
-      break;
+      PushChatMsg(rev);
+
     } else {
       rev.set_operate_code(CHAT_MESSAGE_RLY);
       SendPacket(u->socket_fd(), &rev);
@@ -171,7 +177,85 @@ int32 ChatInterface::ChatRecord(const int32 socket, PacketHead* packet) {
   if (err < 0)
     SendError(socket, packet, err, CHAT_RECORD_RLY);
   return err;
+}
 
+int32 ChatInterface::PushMsgRead(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    PushMsgReadRecv rev(*packet);
+    err = rev.Deserialize();
+    if (err < 0)
+      break;
+    data_share_mgr_->DelUnReadCount(rev.uid(), rev.count());
+    SendMsg(socket, packet, NULL, CHAT_READ_RLY);
+  } while (0);
+  if (err < 0)
+    SendError(socket, packet, err, CHAT_READ_RLY);
+  return err;
+}
+
+int32 ChatInterface::EvaluateTrip(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    EvaluateTripRecv rev(*packet);
+    err = rev.Deserialize();
+    if (err < 0)
+      break;
+    err = chat_mysql_->EvaluateTripInsert(rev.order_id(), rev.service_score(),
+                                          rev.user_score(), rev.remarks(),
+                                          rev.from_uid(), rev.to_uid());
+    if (err < 0)
+      break;
+    //通知评价者
+    SendMsg(socket, packet, NULL, EVALUATE_TRIP_RLY);
+    //通知被评价者
+    {
+
+    }
+  } while (0);
+  if (err < 0)
+    SendError(socket, packet, err, EVALUATE_TRIP_RLY);
+  return err;
+}
+
+int32 ChatInterface::PushChatMsg(ChatPacket rev) {
+  int32 err = 0;
+  LOG(INFO) << "ChatInterface::PushChatMsg";
+  std::string token = data_share_mgr_->GetDeviceToken(rev.to_uid());
+  do {
+    if (token == "") {
+      err = chat_mysql_->DeviceTokenSelect(rev.to_uid(), &token);
+      if (err < 0)
+        break;
+    }
+    if (token.length() < 5) {
+      err = DEVICE_TOKEN_ERR;
+      break;
+    }
+    std::string lockey;
+    std::string nick = data_share_mgr_->GetNick(rev.from_uid());
+    if (nick == "") {
+       DicValue dic;
+       err = chat_mysql_->UserNickSelect(rev.from_uid(), &dic);
+       if (err < 0)
+         break;
+       nick = dic.GetString(L"nickname", &nick);
+       data_share_mgr_->AddNick(rev.from_uid(), nick);
+    }
+    lockey = nick + ":" +rev.content();
+    LOG(INFO) << "lockey::" << lockey;
+    LOG(INFO) << "token::" << token;
+    LOG(INFO) << "content::" << rev.body_str();
+    util::PushApnChatMsg((char*)token.c_str(),
+                         data_share_mgr_->AddUnReadCount(rev.to_uid()),
+                         (char*)lockey.c_str(), (char*)rev.body_str().c_str());
+  } while (0);
+  return err;
+}
+
+int32 ChatInterface::CloseSocket(const int fd) {
+  data_share_mgr_->UserOffline(fd);
+  return 0;
 }
 
 void ChatInterface::SendPacket(const int socket, PacketHead* packet) {

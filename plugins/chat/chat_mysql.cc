@@ -78,6 +78,67 @@ int32 ChatMysql::ChatRecordQuery(int64 from, int64 to, int64 count, int64 id,
   return err;
 }
 
+int32 ChatMysql::UserNickSelect(int64 uid, DicValue* dic) {
+  int32 err = 0;
+  bool r = false;
+  do {
+    std::stringstream ss;
+    ss << "call proc_UserNickSelect(" << uid << ")";
+    LOG(INFO) << "sql:" << ss.str();
+    r = mysql_engine_->ReadData(ss.str(), dic, CallUserNickSelect);
+    if (!r) {
+      err = SQL_EXEC_ERROR;
+      break;
+    }
+    if (dic->empty()) {
+      err = NO_USER;
+      break;
+    }
+  } while (0);
+  return err;
+}
+
+int32 ChatMysql::DeviceTokenSelect(int64 uid, std::string* token) {
+  int32 err = 0;
+  bool r = false;
+  do {
+    std::stringstream ss;
+    ss << "call proc_DeviceTokenSelect(" << uid << ")";
+    DicValue dic;
+    LOG(INFO) << "sql:" << ss.str();
+    r = mysql_engine_->ReadData(ss.str(), &dic, CallDeviceTokenSelect);
+    if (!r) {
+      err = SQL_EXEC_ERROR;
+      break;
+    }
+    if (dic.empty()) {
+      err = NO_USER_DEVICE_TOKEN;
+      break;
+    }
+    dic.GetString(L"device_token", token);
+  } while (0);
+  return err;
+}
+
+int32 ChatMysql::EvaluateTripInsert(int64 oid, int64 s_score, int64 u_score,
+                         std::string remarks, int64 from, int64 to) {
+  int32 err = 0;
+  bool r = false;
+  do {
+    std::stringstream ss;
+    ss << "call proc_EvaluateTripInsert(" << oid << "," << s_score << ","
+        << u_score << ",'" << remarks << "'," << from << "," << to << ")";
+    LOG(INFO) << "sql:" << ss.str();
+    r = mysql_engine_->WriteData(ss.str());
+    if (!r) {
+      err = SQL_EXEC_ERROR;
+      break;
+    }
+  } while (0);
+  return err;
+}
+
+
 int32 ChatMysql::NewOrderInsertAndSelect(int64 from, int64 to, int64 sid,
                                  DicValue* dic) {
   int32 err = 0;
@@ -87,6 +148,7 @@ int32 ChatMysql::NewOrderInsertAndSelect(int64 from, int64 to, int64 sid,
     std::stringstream ss;
     ss << "call proc_NewOrderInsertAndSelect(" << from << "," << to
         << "," << sid << "," << time(NULL) << ")";
+    LOG(INFO) << "sql:" << ss.str();
     r = mysql_engine_->ReadData(ss.str(), dic, CallNewOrderInsertAndSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -113,11 +175,11 @@ void ChatMysql::CallNewOrderInsertAndSelect(void* param, Value* value) {
       if (rows[1] != NULL)
         dict->SetBigInteger(L"order_status_", atoi(rows[1]));
       if (rows[2] != NULL)
-        dict->SetString(L"service_name_", rows[1]);
+        dict->SetString(L"service_name_", rows[2]);
       if (rows[3] != NULL)
-        dict->SetString(L"service_time_", rows[2]);
+        dict->SetString(L"service_time_", rows[3]);
       if (rows[4] != NULL)
-        dict->SetBigInteger(L"service_price_", atoll(rows[3]));
+        dict->SetBigInteger(L"service_price_", atoll(rows[4]));
       if (rows[5] != NULL)
         dict->SetBigInteger(L"from_uid_", atoll(rows[5]));
       if (rows[6] != NULL)
@@ -130,6 +192,8 @@ void ChatMysql::CallNewOrderInsertAndSelect(void* param, Value* value) {
         dict->SetString(L"to_name_", rows[9]);
       if (rows[10] != NULL)
         dict->SetString(L"to_url_", rows[10]);
+      if (rows[11] != NULL)
+        dict->SetBigInteger(L"server_id_", atoll(rows[11]));
     }
   } else {
     LOG(WARNING) << "CallNewOrderInsertAndSelect count < 0";
@@ -161,6 +225,38 @@ void ChatMysql::CallChatRecordQuery(void* param, Value* value) {
     info->Set(L"chat_list", list);
   } else {
     LOG(WARNING) << "CallChatRecordQuery count < 0";
+  }
+}
+
+void ChatMysql::CallDeviceTokenSelect(void* param, Value* value) {
+  base_storage::DBStorageEngine* engine =
+      (base_storage::DBStorageEngine*)(param);
+  MYSQL_ROW rows;
+  int32 num = engine->RecordCount();
+  DicValue* dict = reinterpret_cast<DicValue*>(value);
+  if (num > 0) {
+    while (rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)) {
+      if (rows[0] != NULL)
+        dict->SetString(L"device_token", rows[0]);
+    }
+  } else {
+    LOG(WARNING) << "CallDeviceTokenSelect count < 0";
+  }
+}
+
+void ChatMysql::CallUserNickSelect(void* param, Value* value) {
+  base_storage::DBStorageEngine* engine =
+      (base_storage::DBStorageEngine*)(param);
+  MYSQL_ROW rows;
+  int32 num = engine->RecordCount();
+  DicValue* dict = reinterpret_cast<DicValue*>(value);
+  if (num > 0) {
+    while (rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)) {
+      if (rows[0] != NULL)
+        dict->SetString(L"nickname", rows[0]);
+    }
+  } else {
+    LOG(WARNING) << "CallUserNickSelect count < 0";
   }
 }
 

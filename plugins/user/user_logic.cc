@@ -8,8 +8,10 @@
 #include <assert.h>
 #include <typeinfo>
 #include <stdio.h>
+#include <string.h>
 
 #include "glog/logging.h"
+#include "gtpush/IGtPush.h"
 #include "core/common.h"
 #include "public/basic/basictypes.h"
 #include "public/config/config.h"
@@ -22,6 +24,9 @@
 
 
 #define DEFAULT_CONFIG_PATH "./plugins/user/user_config.xml"
+static char *host ="http://sdk.open.api.getui.net/apiex.htm";
+static char *appKey = "yEIPB4YFxw64Ag9yJpaXT9";
+static char *masterSecret = "bMsRgf7RrA6jBG4sNbv0F6";
 
 #define CONNECT_CKECK 100
 namespace user {
@@ -37,6 +42,10 @@ Userlogic::~Userlogic() {
 
 bool Userlogic::Init() {
   bool r = false;
+  Result res = pushInit(host, appKey, masterSecret, "编码");
+   if(res!=SUCCESS){
+     LOG(ERROR) << "DataShareMgr pushInit err";
+   }
   user_manager_ = UserManager::GetInstance();
   config::FileConfig* config = config::FileConfig::GetFileConfig();
   std::string path = DEFAULT_CONFIG_PATH;
@@ -94,8 +103,13 @@ bool Userlogic::OnUserMessage(struct server *srv, const int socket,
                               const void *msg, const int len) {
   bool r = false;
   int32 err = 0;
+  char* msg_c = new char[len + 1];
+  memset(msg_c, 0, len+1);
+  memcpy(msg_c, msg, len);
   LOG(INFO) << "OnUserMessage:len-" << len;
-  PacketHead packet_head(reinterpret_cast<char*>((void*)msg));
+  PacketHead packet_head(msg_c);
+  delete[] msg_c;
+  msg_c = NULL;
   if (packet_head.type() == USER_TYPE) {
     err = user_manager_->AssignPacket(socket, &packet_head);
     return true;
@@ -105,6 +119,8 @@ bool Userlogic::OnUserMessage(struct server *srv, const int socket,
 
 bool Userlogic::OnUserClose(struct server *srv, const int socket) {
   LOG(INFO) << "socket has be closed:" << socket;
+  user_manager_->OnSockClose(socket);
+  LOG(INFO) << "OnSockClose:" << socket;
   return true;
 }
 

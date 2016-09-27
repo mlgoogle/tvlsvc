@@ -24,7 +24,17 @@ class DataShareMgr {
   void UserHeart(int64 uid);
   UserInfo* GetUser(int64 uid);
 
+  int32 AddDeviceToken(int64 uid, std::string token); //0-新增 1-更新 -1-未修改
+  int32 AddUnReadCount(int64 uid); //返回未读条数
+  void DelUnReadCount(int64 uid, int32 count); //count -1 全读
+  std::string GetDeviceToken(int64 uid);
+
+  void AddNick(int64 uid, std::string nick);
+  std::string GetNick(int64 uid);
+
   void CheckHeartLoss();
+  void UserOffline(int fd);
+
  private:
   DataShareMgr();
   ~DataShareMgr();
@@ -39,6 +49,9 @@ class DataShareMgr {
   UserMap user_map_;
   GuideMap guide_map_;
   VisitorMap visitor_map_;
+  DeviceTokenMap dt_map_;
+  UnReadMap unread_map_;
+  NickMap nick_map_;
 };
 }  // namespace share
 

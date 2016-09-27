@@ -51,11 +51,19 @@ class UserInterface {
 
   int32 ImproveUserData(const int32 socket, PacketHead* packet);
 
+  int32 ObtainTripRecord(const int32 socket, PacketHead* packet);
+
+  int32 ObtainServiceInfo(const int32 socket, PacketHead* packet);
+
+  int32 DrawBillTrip(const int32 socket, PacketHead* packet);
+
+  int32 DeviceToken(const int32 socket, PacketHead* packet);
+
   int32 AuthorUser(std::string phone, std::string passwd, int32 type,
                    DicValue* v);
 
-
   int32 CheckHeartLoss();
+  int32 CloseSocket(const int fd);
 
   void AddUser(int32 fd, DicValue* v, int64 type, std::string pwd);
 

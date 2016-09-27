@@ -18,6 +18,12 @@ namespace chat {
 #define CHAT_RECORD_REQ CHAT_TYPE*1000 + 5
 #define CHAT_RECORD_RLY CHAT_TYPE*1000 + 6
 
+#define CHAT_READ_REQ CHAT_TYPE*1000 + 7
+#define CHAT_READ_RLY CHAT_TYPE*1000 + 8
+
+#define EVALUATE_TRIP_REQ CHAT_TYPE*1000 + 9
+#define EVALUATE_TRIP_RLY CHAT_TYPE*1000 + 10
+
 
 #define RECORD_CHAT_MSG 200
 }  // namespace chat

@@ -28,8 +28,17 @@ class ChatMysql {
   int32 NewOrderInsertAndSelect(int64 from, int64 to, int64 sid,
                                    DicValue* dic);
 
+  int32 EvaluateTripInsert(int64 oid, int64 s_score, int64 u_score,
+                           std::string remarks, int64 from, int64 to);
+
+  int32 DeviceTokenSelect(int64 uid, std::string* token);
+
+  int32 UserNickSelect(int64 uid, DicValue* dic);
+
   static void CallNewOrderInsertAndSelect(void* param, Value* value);
   static void CallChatRecordQuery(void* param, Value* value);
+  static void CallDeviceTokenSelect(void* param, Value* value);
+  static void CallUserNickSelect(void* param, Value* value);
 
  private:
   base_logic::DataEngine* mysql_engine_;

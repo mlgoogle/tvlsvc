@@ -9,9 +9,6 @@
 #include <string>
 #include <sys/types.h>
 
-const double PI = 3.1415926535898;
-const double EARTH_R = 6371.393000; //km
-
 namespace util {
 
 std::string GetStrftime(char* format, time_t t);
@@ -27,6 +24,8 @@ double CalcDistance(double lon1, double lat1, double lon2, double lat2);
 void BonderOfCoordinate(double lon, double lat, double dis, double* out);
 
 int Random(int min, int max);
+
+int PushApnChatMsg(char* dt, int unreadcount, char* locKey, char* body);
 }  // namespace util
 
 

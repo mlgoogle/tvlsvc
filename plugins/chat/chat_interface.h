@@ -13,6 +13,7 @@
 #include "pub/share/data_share_mgr.h"
 
 #include "chat/chat_mysql.h"
+#include "chat/chat_proto.h"
 
 namespace chat {
 
@@ -35,6 +36,12 @@ class ChatInterface {
 
   int32 ChatRecord(const int32 socket, PacketHead* packet);
 
+  int32 PushMsgRead(const int32 socket, PacketHead* packet);
+
+  int32 EvaluateTrip(const int32 socket, PacketHead* packet);
+
+  int32 PushChatMsg(ChatPacket rev);
+
   void SendPacket(const int socket, PacketHead* packet);
 
   void SendError(const int socket, PacketHead* packet, int32 err, int16 opcode);
@@ -43,6 +50,8 @@ class ChatInterface {
                int16 opcode);
 
   void InitShareDataMgr(share::DataShareMgr* data);
+
+  int32 CloseSocket(const int fd);
 
  private:
   static ChatInterface* instance_;

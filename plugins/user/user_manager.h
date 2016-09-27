@@ -25,6 +25,7 @@ class UserManager {
 
   int32 AssignPacket(const int32 socket, PacketHead* packet);
   int32 CheckHeartLoss();
+  int32 OnSockClose(const int fd);
 };
 
 }  // namespace user

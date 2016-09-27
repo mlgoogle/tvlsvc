@@ -9,6 +9,7 @@
 
 #include "core/common.h"
 #include "glog/logging.h"
+#include "gtpush/IGtPush.h"
 #include "public/config/config.h"
 #include "public/basic/native_library.h"
 
@@ -19,6 +20,9 @@
 #include "chat/chat_opcode.h"
 
 #define DEFAULT_CONFIG_PATH "./plugins/chat/chat_config.xml"
+static char *host ="http://sdk.open.api.getui.net/apiex.htm";
+static char *appKey = "yEIPB4YFxw64Ag9yJpaXT9";
+static char *masterSecret = "bMsRgf7RrA6jBG4sNbv0F6";
 namespace chat {
 Chatlogic* Chatlogic::instance_ = NULL;
 
@@ -33,6 +37,10 @@ Chatlogic::~Chatlogic() {
 
 bool Chatlogic::Init() {
   bool r = false;
+  Result res = pushInit(host, appKey, masterSecret, "编码");
+   if(res!=SUCCESS){
+     LOG(ERROR) << "DataShareMgr pushInit err";
+   }
   chat_manager_ = ChatManager::GetInstance();
   config::FileConfig* config = config::FileConfig::GetFileConfig();
   std::string path = DEFAULT_CONFIG_PATH;
@@ -90,7 +98,14 @@ bool Chatlogic::OnChatMessage(struct server *srv, const int socket,
                               const void *msg, const int len) {
   int32 err = 0;
   LOG(INFO) << "OnChatMessage:len-" << len;
-  PacketHead packet_head(reinterpret_cast<char*>((void*)msg));
+
+  char* msg_c = new char[len + 1];
+  memset(msg_c, 0, len+1);
+  memcpy(msg_c, msg, len);
+  PacketHead packet_head(msg_c);
+  delete[] msg_c;
+  msg_c = NULL;
+
   if (packet_head.type() == CHAT_TYPE) {
     err = chat_manager_->AssignPacket(socket, &packet_head);
     return true;
@@ -99,6 +114,9 @@ bool Chatlogic::OnChatMessage(struct server *srv, const int socket,
 }
 
 bool Chatlogic::OnChatClose(struct server *srv, const int socket) {
+  LOG(INFO) << "OnChatClose:socket-" << socket;
+  chat_manager_->OnSockClose(socket);
+  LOG(INFO) << "OnSockClose:socket-" << socket;
   return true;
 }
 

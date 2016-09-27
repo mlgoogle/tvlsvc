@@ -93,6 +93,22 @@ int32 UserManager::AssignPacket(const int32 socket, PacketHead* packet) {
       interface->ImproveUserData(socket, packet);
       break;
     }
+    case OBTAIN_TRIP_REQ: {
+      interface->ObtainTripRecord(socket, packet);
+      break;
+    }
+    case SERVICE_INFO_REQ: {
+      interface->ObtainServiceInfo(socket, packet);
+      break;
+    }
+    case DRAW_BILL_REQ: {
+      interface->DrawBillTrip(socket, packet);
+      break;
+    }
+    case DEVICE_TOKEN_REQ: {
+      interface->DeviceToken(socket, packet);
+      break;
+    }
   }
   return err;
 }
@@ -100,6 +116,12 @@ int32 UserManager::AssignPacket(const int32 socket, PacketHead* packet) {
 int32 UserManager::CheckHeartLoss() {
   UserInterface* interface = UserInterface::GetInstance();
   interface->CheckHeartLoss();
+  return 0;
+}
+
+int32 UserManager::OnSockClose(const int fd) {
+  UserInterface* interface = UserInterface::GetInstance();
+  interface->CloseSocket(fd);
   return 0;
 }
 

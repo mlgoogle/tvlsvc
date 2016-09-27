@@ -61,6 +61,11 @@ int32 UserInterface::CheckHeartLoss() {
   return err;
 }
 
+int32 UserInterface::CloseSocket(const int fd) {
+ data_share_mgr_->UserOffline(fd);
+ return 0;
+}
+
 int32 UserInterface::HeartPacket(const int32 socket, PacketHead* packet) {
   int32 err = 0;
   Heartbeat rev(*packet);
@@ -103,6 +108,95 @@ int32 UserInterface::ImproveUserData(const int32 socket, PacketHead* packet) {
   }
   return err;
 }
+
+int32 UserInterface::ObtainTripRecord(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    ObtainTripRecv rev(*packet);
+    err = rev.Deserialize();
+    if (err < 0)
+      break;
+    DicValue dic;
+    err = user_mysql_->TripRecordSelect(rev.uid(), rev.order_id(), rev.count(),
+                                  &dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, IMPROVE_DATA_RLY);
+  } while (0);
+  if (err < 0) {
+    SendError(socket, packet, err, OBTAIN_TRIP_RLY);
+  }
+  return err;
+}
+
+int32 UserInterface::ObtainServiceInfo(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    ServiceDetailsRecv rev(*packet);
+    err = rev.Deserialize();
+    if (err < 0)
+      break;
+    DicValue dic;
+    err = user_mysql_->ServiceInfoSelect(rev.sid_str(), &dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, SERVICE_INFO_RLY);
+  } while (0);
+  if (err < 0) {
+    SendError(socket, packet, err, SERVICE_INFO_RLY);
+  }
+  return err;
+}
+
+int32 UserInterface::DrawBillTrip(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    DrawBillRecv rev(*packet);
+    err = rev.Deserialize();
+    if (err < 0)
+      break;
+    DicValue dic;
+    err = user_mysql_->InvoiceInfoInsert(rev.order_id(), rev.title(),
+                                         rev.taxpayer_num(), rev.company_addr(),
+                                         rev.invoice_type(), rev.user_name(),
+                                         rev.user_mobile(), rev.area(),
+                                         rev.addr_detail(), rev.remarks(),
+                                         &dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, DRAW_BILL_RLY);
+  } while (0);
+  if (err < 0) {
+    SendError(socket, packet, err, DRAW_BILL_RLY);
+  }
+  return err;
+}
+
+int32 UserInterface::DeviceToken(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  LOG(INFO) << "DeviceToken";
+  do {
+    DeviceTokenRecv rev(*packet);
+    err = rev.Deserialize();
+    LOG(INFO) << "DeviceToken Deserialize err:" << err;
+    if (err < 0)
+      break;
+    int result = data_share_mgr_->AddDeviceToken(rev.uid(), rev.device_token());
+    LOG(INFO) << "AddDeviceToken result:" << result;
+    if (result >= 0)
+      err = user_mysql_->DeviceTokenUpdate(rev.uid(), rev.device_token());
+    if (err < 0)
+      break;
+    LOG(INFO) << "DeviceToken SendMsg err:" << err;
+    SendMsg(socket, packet, NULL, DEVICE_TOKEN_RLY);
+  } while (0);
+  if (err < 0) {
+    LOG(INFO) << "DeviceToken SendError err:" << err;
+    SendError(socket, packet, err, DEVICE_TOKEN_RLY);
+  }
+  return err;
+}
+
 
 int32 UserInterface::RegisterAccount(const int32 socket, PacketHead* packet) {
   int32 err = 0;
@@ -180,22 +274,22 @@ int32 UserInterface::ObtainUserInfo(const int32 socket, PacketHead* packet) {
     if (err < 0)
       break;
     DicValue dict;
-    UserInfo* u = data_share_mgr_->GetUser(rev.uid());
-    if (u != NULL) {
-      dict.SetBigInteger(L"uid_", u->uid());
-      dict.SetString(L"phone_num_", u->phone_num());
-      dict.SetString(L"nickname_", u->nickname());
-      dict.SetBigInteger(L"credit_lv_", u->credit_lv());
-      dict.SetBigInteger(L"praise_lv_", u->praise_lv());
-      dict.SetBigInteger(L"cash_lv_", u->cash_lv());
-      dict.SetString(L"head_url_", u->head_url());
-      dict.SetString(L"address_", u->usual_addr());
-      dict.SetReal(L"longitude_", u->usual_lon());
-      dict.SetReal(L"latitude_", u->usual_lat());
-      SendMsg(socket, packet, &dict, USER_INFO_RLY);
-      break;
-    }
-    err = user_mysql_->UserDetailSelect(rev.uid(), &dict);
+//    UserInfo* u = data_share_mgr_->GetUser(rev.uid());
+//    if (u != NULL) {
+//      dict.SetBigInteger(L"uid_", u->uid());
+//      dict.SetString(L"phone_num_", u->phone_num());
+//      dict.SetString(L"nickname_", u->nickname());
+//      dict.SetBigInteger(L"credit_lv_", u->credit_lv());
+//      dict.SetBigInteger(L"praise_lv_", u->praise_lv());
+//      dict.SetBigInteger(L"cash_lv_", u->cash_lv());
+//      dict.SetString(L"head_url_", u->head_url());
+//      dict.SetString(L"address_", u->usual_addr());
+//      dict.SetReal(L"longitude_", u->usual_lon());
+//      dict.SetReal(L"latitude_", u->usual_lat());
+//      SendMsg(socket, packet, &dict, USER_INFO_RLY);
+//      break;
+//    }
+    err = user_mysql_->UserDetailSelect(rev.uid_str(), &dict);
     if (err < 0)
       break;
     SendMsg(socket, packet, &dict, USER_INFO_RLY);

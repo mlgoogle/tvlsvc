@@ -9,6 +9,14 @@
 #include <stdlib.h>
 #include <cmath>
 
+#include "gtpush/IGtPush.h"
+#include "glog/logging.h"
+
+const double PI = 3.1415926535898;
+const double EARTH_R = 6371.393000; //km
+const char *APPID = "d2YVUlrbRU6yF0PFQJfPkA";
+const char *APPKEY = "yEIPB4YFxw64Ag9yJpaXT9";
+const char *MASTERSECRET = "bMsRgf7RrA6jBG4sNbv0F6";
 namespace util {
 std::string GetStrftime(char* format, time_t t) {
   char buf[100];
@@ -80,6 +88,66 @@ void BonderOfCoordinate(double lon, double lat, double dis, double* out) {
 
 int Random(int min, int max) {
   return min+rand()%(max-min+1);
+}
+
+int PushApnChatMsg(char* dt, int unreadcount, char* locKey, char* body) {
+
+  //准备数据
+  Message msg = {0};
+  msg.isOffline = 1;//是否离线下发
+  msg.offlineExpireTime = 1000*3600*2;//离线下发有效期 毫秒
+  SingleMessage singleMsg = {0};
+  singleMsg.msg = msg;
+
+  //IOS自定义消息
+  Entry cmsg = {0};
+  strcpy(cmsg.key,"cmsg");
+  strcpy(cmsg.value,"cmsg");
+
+  //title-loc-args赋值
+  ListItem titlelocargs[2]={"titlelocargs1","titlelocargs2"};
+
+  //locargs赋值
+  ListItem locargs[2]={"locargs1","locargs2"};
+
+  //APN模板，只包含了父类模板
+  APNTemplate templ = {0};
+  templ.t.appId = (char*)APPID;
+  templ.t.appKey = (char*)APPKEY;
+
+  templ.t.pushInfo.badge=unreadcount;
+  //templ.t.pushInfo.sound="test1.wav";
+  //templ.t.pushInfo.contentAvailable=1;
+  templ.t.pushInfo.category="";
+  //templ.t.pushInfo.cmsg.size=1;
+  //templ.t.pushInfo.cmsg.map = &cmsg;
+
+  templ.t.pushInfo.body=body;
+  templ.t.pushInfo.actionLocKey="";
+
+  templ.t.pushInfo.locKey=locKey; //nick+content
+  //templ.t.pushInfo.locArgs.size=2;
+  //templ.t.pushInfo.locArgs.item=locargs;
+
+  templ.t.pushInfo.launchImage="";
+  //IOS8.2以上版本支持
+  templ.t.pushInfo.title="";
+  templ.t.pushInfo.titleLocKey="V领队";
+
+  //templ.t.pushInfo.titleLocArgs.size=2;
+  //templ.t.pushInfo.titleLocArgs.item=titlelocargs;
+
+  IPushResult result = {0};
+
+  result = pushAPNMessageToSingle((char*)APPKEY, &templ, APPID, dt);
+  LOG(INFO) << "print result:-------------";
+  for (int i = 0; i < result.size; i++) {
+      LOG(INFO) << result.entry[i].key << ": " << result.entry[i].value;
+  }
+  LOG(INFO) << "print end:----------------";
+  //打印结果
+//  printResult(result);
+  return 0;
 }
 
 }  // namespace util
