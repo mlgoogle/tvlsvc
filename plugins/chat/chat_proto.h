@@ -9,9 +9,9 @@
 
 namespace chat {
 
-class Invitation : public PacketHead {
+class AskInvitationRecv : public PacketHead {
  public:
-  Invitation(PacketHead packet);
+  AskInvitationRecv(PacketHead packet);
   int32 Deserialize();
 
   inline int64 from_uid() { return from_uid_; }
@@ -21,6 +21,22 @@ class Invitation : public PacketHead {
   int64 from_uid_;
   int64 to_uid_;
   int64 service_id_;
+};
+
+class AnswerInvitationRecv : public PacketHead {
+ public:
+  AnswerInvitationRecv(PacketHead packet);
+  int32 Deserialize();
+
+  inline int64 from_uid() { return from_uid_; }
+  inline int64 to_uid() { return to_uid_; }
+  inline int64 order_id() { return order_id_; }
+  inline int64 order_status() { return order_status_; }
+ private:
+  int64 from_uid_;
+  int64 to_uid_;
+  int64 order_id_;
+  int64 order_status_;   // 0-发起邀请1-被导游拒绝.2-接收邀请。3-等待支付。4-支付完成，5-取消支付
 };
 
 class ChatPacket : public PacketHead {

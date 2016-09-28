@@ -12,15 +12,15 @@
 
 namespace chat {
 
-Invitation::Invitation(PacketHead packet) {
+AskInvitationRecv::AskInvitationRecv(PacketHead packet) {
   head_ = packet.head();
   body_str_ = packet.body_str();
-  from_uid_ = -1;
-  to_uid_ = -1;
-  service_id_ = -1;
+  from_uid_ = 0;
+  to_uid_ = 0;
+  service_id_ = 0;
 }
 
-int32 Invitation::Deserialize() {
+int32 AskInvitationRecv::Deserialize() {
   int32 err = 0;
   bool r = false;
   base_logic::ValueSerializer* serializer =
@@ -30,14 +30,51 @@ int32 Invitation::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"from_uid_", &from_uid_);
-      LOG_IF(ERROR, !r) << "Invitation::from_uid_ parse error";
+      LOG_IF(ERROR, !r) << "AskInvitationRecv::from_uid_ parse error";
       r = dic->GetBigInteger(L"to_uid_", &to_uid_);
-      LOG_IF(ERROR, !r) << "Invitation::to_uid_ parse error";
+      LOG_IF(ERROR, !r) << "AskInvitationRecv::to_uid_ parse error";
       r = dic->GetBigInteger(L"service_id_", &service_id_);
-      LOG_IF(ERROR, !r) << "Invitation::service_id_ parse error";
+      LOG_IF(ERROR, !r) << "AskInvitationRecv::service_id_ parse error";
     } else {
-      LOG(ERROR) << "Invitation Deserialize error";
-      err = Invitation_PACKET_JSON_ERR;
+      LOG(ERROR) << "AskInvitationRecv Deserialize error";
+      err = ASK_INVITATION_JSON_ERR;
+    break;
+    }
+  } while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                               serializer);
+  return err;
+}
+
+AnswerInvitationRecv::AnswerInvitationRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  from_uid_ = 0;
+  to_uid_ = 0;
+  order_id_ = 0;
+  order_status_ = 0;
+}
+
+int32 AnswerInvitationRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer =
+     base_logic::ValueSerializer::Create(base_logic::IMPL_JSON, &body_str_);
+  std::string err_str;
+  DicValue* dic = (DicValue*)serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetBigInteger(L"from_uid_", &from_uid_);
+      LOG_IF(ERROR, !r) << "AnswerInvitationRecv::from_uid_ parse error";
+      r = dic->GetBigInteger(L"to_uid_", &to_uid_);
+      LOG_IF(ERROR, !r) << "AnswerInvitationRecv::to_uid_ parse error";
+      r = dic->GetBigInteger(L"order_id_", &order_id_);
+      LOG_IF(ERROR, !r) << "AnswerInvitationRecv::order_id_ parse error";
+      r = dic->GetBigInteger(L"order_status_", &order_status_);
+      LOG_IF(ERROR, !r) << "AnswerInvitationRecv::order_status_ parse error";
+    } else {
+      LOG(ERROR) << "AnswerInvitationRecv Deserialize error";
+      err = ANSWER_INVITATION_JSON_ERR;
     break;
     }
   } while (0);

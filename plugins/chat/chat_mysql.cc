@@ -138,6 +138,21 @@ int32 ChatMysql::EvaluateTripInsert(int64 oid, int64 s_score, int64 u_score,
   return err;
 }
 
+int32 ChatMysql::OrderStatusUpdate(int64 oid, int64 o_status) {
+  int32 err = 0;
+  bool r = false;
+  do {
+    std::stringstream ss;
+    ss << "call proc_OrderStatusUpdate(" << oid << "," << o_status << ")";
+    LOG(INFO) << "sql:" << ss.str();
+    r = mysql_engine_->WriteData(ss.str());
+    if (!r) {
+      err = SQL_EXEC_ERROR;
+      break;
+    }
+  } while (0);
+  return err;
+}
 
 int32 ChatMysql::NewOrderInsertAndSelect(int64 from, int64 to, int64 sid,
                                  DicValue* dic) {
@@ -171,9 +186,9 @@ void ChatMysql::CallNewOrderInsertAndSelect(void* param, Value* value) {
   if (num > 0) {
     while (rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)) {
       if (rows[0] != NULL)
-        dict->SetBigInteger(L"oid_", atoll(rows[0]));
+        dict->SetBigInteger(L"order_id_", atoll(rows[0]));
       if (rows[1] != NULL)
-        dict->SetBigInteger(L"order_status_", atoi(rows[1]));
+        dict->SetBigInteger(L"status_", atoi(rows[1]));
       if (rows[2] != NULL)
         dict->SetString(L"service_name_", rows[2]);
       if (rows[3] != NULL)
@@ -185,18 +200,24 @@ void ChatMysql::CallNewOrderInsertAndSelect(void* param, Value* value) {
       if (rows[6] != NULL)
         dict->SetString(L"from_name_", rows[6]);
       if (rows[7] != NULL)
-        dict->SetString(L"from_url_", rows[7]);
+        dict->SetString(L"from_head_", rows[7]);
       if (rows[8] != NULL)
         dict->SetBigInteger(L"to_uid_", atoll(rows[8]));
       if (rows[9] != NULL)
         dict->SetString(L"to_name_", rows[9]);
       if (rows[10] != NULL)
-        dict->SetString(L"to_url_", rows[10]);
+        dict->SetString(L"to_head_", rows[10]);
       if (rows[11] != NULL)
-        dict->SetBigInteger(L"server_id_", atoll(rows[11]));
+        dict->SetBigInteger(L"service_id_", atoll(rows[11]));
+      if (rows[12] != NULL)
+        dict->SetBigInteger(L"start_", atoll(rows[12]));
+      if (rows[13] != NULL)
+        dict->SetBigInteger(L"end_", atoll(rows[13]));
+      if (rows[14] != NULL)
+        dict->SetBigInteger(L"service_type_", atoll(rows[14]));
     }
   } else {
-    LOG(WARNING) << "CallNewOrderInsertAndSelect count < 0";
+    LOG(WARNING) << "Call NewOrderInsertAndSelect count < 0";
   }
 }
 
@@ -224,7 +245,7 @@ void ChatMysql::CallChatRecordQuery(void* param, Value* value) {
     }
     info->Set(L"chat_list", list);
   } else {
-    LOG(WARNING) << "CallChatRecordQuery count < 0";
+    LOG(WARNING) << "Call ChatRecordQuery count < 0";
   }
 }
 
@@ -240,7 +261,7 @@ void ChatMysql::CallDeviceTokenSelect(void* param, Value* value) {
         dict->SetString(L"device_token", rows[0]);
     }
   } else {
-    LOG(WARNING) << "CallDeviceTokenSelect count < 0";
+    LOG(WARNING) << "Call DeviceTokenSelect count < 0";
   }
 }
 
@@ -256,7 +277,7 @@ void ChatMysql::CallUserNickSelect(void* param, Value* value) {
         dict->SetString(L"nickname", rows[0]);
     }
   } else {
-    LOG(WARNING) << "CallUserNickSelect count < 0";
+    LOG(WARNING) << "Call UserNickSelect count < 0";
   }
 }
 

@@ -71,10 +71,49 @@ int32 ChatInterface::RecordChatSave() {
   return err;
 }
 
+int32 ChatInterface::AnswerInvitation(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    AnswerInvitationRecv  rev(*packet);
+    err = rev.Deserialize();
+    if (err < 0)
+      break;
+    if (rev.order_status() != 2 && rev.order_status() != 1) {
+      // 订单状态有误
+      err = ORDER_STATUS_ERR;
+      break;
+    }
+    //更新订单状态
+    err = chat_mysql_->OrderStatusUpdate(rev.order_id(), rev.order_status());
+    if (err < 0)
+      break;
+    rev.set_operate_code(ANSWER_INVITATION_RLY);
+    //回复导游（受邀人）
+    SendPacket(socket, &rev);
+    //回复游客（发起人）
+    UserInfo* u = data_share_mgr_->GetUser(rev.from_uid());
+    if (u == NULL || !u->is_login()) {
+      //todo 不在线
+      std::string content;
+      if (rev.order_status() == 2)
+        content = " 愿与你同游";
+      else
+        content = " 残忍拒绝";
+      PushGtMsg(rev.to_uid(), rev.from_uid(), rev.body_str(), content, 3);
+      break;
+    } else {
+      SendPacket(u->socket_fd(), &rev);
+    }
+  } while (0);
+  if (err < 0)
+    SendError(socket, packet, err, ANSWER_INVITATION_RLY);
+  return err;
+}
+
 int32 ChatInterface::AskInvitation(const int32 socket, PacketHead* packet) {
   int32 err = 0;
   do {
-    Invitation  rev(*packet);
+    AskInvitationRecv  rev(*packet);
     err = rev.Deserialize();
     if (err < 0)
       break;
@@ -90,6 +129,9 @@ int32 ChatInterface::AskInvitation(const int32 socket, PacketHead* packet) {
     if (u == NULL || !u->is_login()) {
       //todo 不在线处理
       LOG(INFO) << "invitate to user is not login";
+      // 回复被邀请者
+      PushGtMsg(rev.from_uid(), rev.to_uid(), rev.body_str(), " 邀你同游", 2);
+      LOG(INFO) << "PushGtMsg";
       break;
     } else {
  //     rev.set_operate_code(ASK_INVITATION_RLY);
@@ -105,8 +147,8 @@ int32 ChatInterface::AskInvitation(const int32 socket, PacketHead* packet) {
 
 int32 ChatInterface::ChatMessage(const int32 socket, PacketHead* packet) {
   int32 err = 0;
+  ChatPacket rev(*packet);
   do {
-    ChatPacket rev(*packet);
     err = rev.Deserialize();
     if (err < 0)
       break;
@@ -116,8 +158,6 @@ int32 ChatInterface::ChatMessage(const int32 socket, PacketHead* packet) {
            u->is_login() ;
     }
     if (u == NULL || !u->is_login()) {
-      //todo 不在线处理
-
       // to_id 为-1 表示意见反馈
       if (rev.to_uid() == -1) {
         LOG(INFO) << "chat to user -1";
@@ -125,38 +165,38 @@ int32 ChatInterface::ChatMessage(const int32 socket, PacketHead* packet) {
                                             rev.content(), rev.msg_time());
         break;
       }
-      PushChatMsg(rev);
-
+ //     PushChatMsg(rev);
+      PushGtMsg(rev.from_uid(), rev.to_uid(), rev.body_str(), rev.content(), 1);
     } else {
       rev.set_operate_code(CHAT_MESSAGE_RLY);
       SendPacket(u->socket_fd(), &rev);
-      std::stringstream ss;
-      ss << "call proc_ChatRecordInsert(" << rev.from_uid() << ","
-          << rev.to_uid() << ",'"
-          << rev.content() << "',"
-          << rev.msg_time() << ")";
-      msg_list_.push_back(ss.str());
-      if (msg_list_.size() > 10) {
-        LOG(INFO) << "msg_list > 10";
-        std::list<std::string> new_list_;
-        {
-          base_logic::RLockGd lk(lock_);
-          new_list_.splice(new_list_.begin(), msg_list_);
-        }
-        LOG(INFO) << "new_list size:" << new_list_.size();
-        err = chat_mysql_->ChatRecordInsert(new_list_);
-        if (err < 0) {
-          {
-            LOG(INFO) << "new_list insert mysql err:";
-            base_logic::RLockGd lk(lock_);
-            msg_list_.splice(msg_list_.begin(), new_list_);
-          }
-        }
-
-      }
-
     }
   } while (0);
+  //保存消息
+  std::stringstream ss;
+  ss << "call proc_ChatRecordInsert(" << rev.from_uid() << ","
+      << rev.to_uid() << ",'"
+      << rev.content() << "',"
+      << rev.msg_time() << ")";
+  msg_list_.push_back(ss.str());
+  if (msg_list_.size() > 10) {
+    LOG(INFO) << "msg_list > 10";
+    std::list<std::string> new_list_;
+    {
+      base_logic::RLockGd lk(lock_);
+      new_list_.splice(new_list_.begin(), msg_list_);
+    }
+    LOG(INFO) << "new_list size:" << new_list_.size();
+    err = chat_mysql_->ChatRecordInsert(new_list_);
+    if (err < 0) {
+      {
+        LOG(INFO) << "new_list insert mysql err:";
+        base_logic::RLockGd lk(lock_);
+        msg_list_.splice(msg_list_.begin(), new_list_);
+      }
+    }
+
+  }
   return err;
 }
 
@@ -218,6 +258,82 @@ int32 ChatInterface::EvaluateTrip(const int32 socket, PacketHead* packet) {
   return err;
 }
 
+int32 ChatInterface::PushGtMsg(int64 from, int64 to, std::string body,
+                               std::string content, int64 type) {
+  int32 err = 0;
+  LOG(INFO) << "ChatInterface::PushAskMsg";
+  do {
+    std::string token = data_share_mgr_->GetDeviceToken(to);
+    if (token == "") {
+      err = chat_mysql_->DeviceTokenSelect(to, &token);
+      if (err < 0)
+        break;
+    }
+    if (token.length() < 5) {
+      err = DEVICE_TOKEN_ERR;
+      break;
+    }
+    std::string lockey;
+    std::string nick = data_share_mgr_->GetNick(from);
+    if (nick == "") {
+       DicValue dic;
+       err = chat_mysql_->UserNickSelect(from, &dic);
+       if (err < 0)
+         break;
+       nick = dic.GetString(L"nickname", &nick);
+       data_share_mgr_->AddNick(from, nick);
+    }
+    if (type == 1)
+      lockey = nick + ":" + content;
+    else
+      lockey = nick + content;
+    LOG(INFO) << "lockey::" << lockey;
+    LOG(INFO) << "token::" << token;
+    LOG(INFO) << "content::" << body;
+    util::PushApnChatMsg((char*)token.c_str(),
+                         data_share_mgr_->AddUnReadCount(to),
+                         (char*)lockey.c_str(),
+                         (char*)SpliceGtPushBody(body, type).c_str());
+  } while (0);
+  return err;
+}
+
+int32 ChatInterface::PushAskMsg(AskInvitationRecv rev) {
+  int32 err = 0;
+  LOG(INFO) << "ChatInterface::PushAskMsg";
+  do {
+    std::string token = data_share_mgr_->GetDeviceToken(rev.to_uid());
+    if (token == "") {
+      err = chat_mysql_->DeviceTokenSelect(rev.to_uid(), &token);
+      if (err < 0)
+        break;
+    }
+    if (token.length() < 5) {
+      err = DEVICE_TOKEN_ERR;
+      break;
+    }
+    std::string lockey;
+    std::string nick = data_share_mgr_->GetNick(rev.from_uid());
+    if (nick == "") {
+       DicValue dic;
+       err = chat_mysql_->UserNickSelect(rev.from_uid(), &dic);
+       if (err < 0)
+         break;
+       nick = dic.GetString(L"nickname", &nick);
+       data_share_mgr_->AddNick(rev.from_uid(), nick);
+    }
+    lockey = nick + " 邀你同游！";
+    LOG(INFO) << "lockey::" << lockey;
+    LOG(INFO) << "token::" << token;
+    LOG(INFO) << "content::" << rev.body_str();
+    util::PushApnChatMsg((char*)token.c_str(),
+                         data_share_mgr_->AddUnReadCount(rev.to_uid()),
+                         (char*)lockey.c_str(),
+                         (char*)SpliceGtPushBody(rev.body_str(), 2).c_str());
+  } while (0);
+  return err;
+}
+
 int32 ChatInterface::PushChatMsg(ChatPacket rev) {
   int32 err = 0;
   LOG(INFO) << "ChatInterface::PushChatMsg";
@@ -248,9 +364,29 @@ int32 ChatInterface::PushChatMsg(ChatPacket rev) {
     LOG(INFO) << "content::" << rev.body_str();
     util::PushApnChatMsg((char*)token.c_str(),
                          data_share_mgr_->AddUnReadCount(rev.to_uid()),
-                         (char*)lockey.c_str(), (char*)rev.body_str().c_str());
+                         (char*)lockey.c_str(),
+                         (char*)SpliceGtPushBody(rev.body_str(), 1).c_str());
   } while (0);
   return err;
+}
+
+std::string ChatInterface::SpliceGtPushBody(std::string json, int64 type) {
+  int32 err = 0;
+  std::string str;
+  base_logic::ValueSerializer* serializer =
+     base_logic::ValueSerializer::Create(base_logic::IMPL_JSON, &json);
+  std::string err_str;
+  DicValue* dic = (DicValue*)serializer->Deserialize(&err, &err_str);
+  if (dic != NULL) {
+    dic->SetBigInteger(L"push_msg_type", type);
+    serializer->Serialize(*dic, &str);
+  } else {
+    str = "{\"push_msg_type:\",-1}";
+    LOG(ERROR) << "SpliceGtPushBody json error";
+  }
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                               serializer);
+  return str;
 }
 
 int32 ChatInterface::CloseSocket(const int fd) {

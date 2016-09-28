@@ -44,6 +44,10 @@ int32 ChatManager::AssignPacket(const int32 socket, PacketHead* packet) {
       interface->AskInvitation(socket, packet);
       break;
     }
+    case ANSWER_INVITATION_REQ: {
+      interface->AnswerInvitation(socket, packet);
+      break;
+    }
     case CHAT_MESSAGE_REQ: {
       interface->ChatMessage(socket, packet);
       break;

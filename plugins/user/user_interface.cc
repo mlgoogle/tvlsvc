@@ -121,7 +121,7 @@ int32 UserInterface::ObtainTripRecord(const int32 socket, PacketHead* packet) {
                                   &dic);
     if (err < 0)
       break;
-    SendMsg(socket, packet, &dic, IMPROVE_DATA_RLY);
+    SendMsg(socket, packet, &dic, OBTAIN_TRIP_RLY);
   } while (0);
   if (err < 0) {
     SendError(socket, packet, err, OBTAIN_TRIP_RLY);

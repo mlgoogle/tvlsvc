@@ -569,11 +569,27 @@ void UserMysql::CallTripRecordSelect(void* param, Value* value) {
       if (rows[3] != NULL)
         dict->SetBigInteger(L"status_", atoll(rows[3]));
       if (rows[4] != NULL)
-        dict->SetBigInteger(L"from_id_", atoll(rows[4]));
+        dict->SetBigInteger(L"from_uid_", atoll(rows[4]));
       if (rows[5] != NULL)
-        dict->SetBigInteger(L"to_id_", atoll(rows[5]));
+        dict->SetBigInteger(L"to_uid_", atoll(rows[5]));
       if (rows[6] != NULL)
         dict->SetBigInteger(L"service_id_", atoll(rows[6]));
+      if (rows[7] != NULL)
+        dict->SetString(L"from_head_", rows[7]);
+      if (rows[8] != NULL)
+        dict->SetString(L"from_name_", rows[8]);
+      if (rows[9] != NULL)
+        dict->SetString(L"to_head_", rows[9]);
+      if (rows[10] != NULL)
+        dict->SetString(L"to_name_", rows[10]);
+      if (rows[11] != NULL)
+        dict->SetString(L"service_name_", rows[11]);
+      if (rows[12] != NULL)
+        dict->SetBigInteger(L"service_price_", atoll(rows[12]));
+      if (rows[13] != NULL)
+        dict->SetString(L"service_time_", rows[13]);
+      if (rows[14] != NULL)
+        dict->SetBigInteger(L"service_type_", atoll(rows[14]));
       list->Append(dict);
     }
     info->Set(L"trip_list", list);
