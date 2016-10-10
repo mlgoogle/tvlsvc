@@ -164,6 +164,7 @@ int32 UserInterface::DrawBillTrip(const int32 socket, PacketHead* packet) {
                                          &dic);
     if (err < 0)
       break;
+    dic.SetBigInteger(L"order_id_", rev.order_id());
     SendMsg(socket, packet, &dic, DRAW_BILL_RLY);
   } while (0);
   if (err < 0) {
@@ -375,9 +376,11 @@ int32 UserInterface::RecommendGuide(const int32 socket, PacketHead* packet) {
     if (err < 0)
       break;
     DicValue dic;
-    err = user_mysql_->RecommendGuideSelect(rev.city_code(), &dic);
+    err = user_mysql_->RecommendGuideSelect(rev.city_code(),
+                                            rev.recommend_type(), &dic);
     if (err < 0)
       break;
+    dic.SetBigInteger(L"recommend_type", rev.recommend_type());
     SendMsg(socket, packet, &dic, GUIDE_RECOMMEND_RLY);
   } while (0);
   if (err < 0) {
@@ -458,7 +461,7 @@ int32 UserInterface::AuthorUser(std::string phone, std::string passwd,
                                 int32 type, DicValue* v) {
   int32 err = 0;
   do {
-    err = user_mysql_->UserLoginSelect(phone, passwd, type, v);
+    err = user_mysql_->UserLoginSelect(phone, passwd, type, time(NULL), v);
     if (err < 0)
       break;
   } while (0);

@@ -52,8 +52,10 @@ class RecommendGuideRecv:public PacketHead {
   RecommendGuideRecv(PacketHead packet);
   int32 Deserialize();
   inline int64 city_code() { return city_code_; }
+  inline int64 recommend_type() { return recommend_type_; }
  private:
   int64 city_code_;
+  int64 recommend_type_; //1-推荐 2-预约
 };
 
 class ChangePasswdRecv:public PacketHead {

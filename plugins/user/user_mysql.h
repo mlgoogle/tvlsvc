@@ -21,13 +21,13 @@ class UserMysql {
 
  public:
   int32 UserLoginSelect(std::string phone, std::string pass, int32 type,
-                      DicValue* dic);
+                      int64 time, DicValue* dic);
 
   int32 NearGuideSelect(double* point, DicValue* dic);
   int32 GuideDetailSelect(int64 uid, DicValue* dic);
   int32 UserDetailSelect(std::string uids, DicValue* dic);
   int32 ServiceCitySelect(DicValue* dic);
-  int32 RecommendGuideSelect(int64 city, DicValue* dic);
+  int32 RecommendGuideSelect(int64 city, int64 type, DicValue* dic);
   int32 RegisterInsertAndSelect(std::string phone, std::string pass,
                                 int64 type, DicValue* dic);
   int32 ChangePwdUpdate(int64 uid, std::string pwd);

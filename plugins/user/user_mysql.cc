@@ -32,7 +32,7 @@ int32 UserMysql::UserDetailSelect(std::string uids, DicValue* dic) {
   do {
     std::stringstream ss;
     ss << "call proc_UserDetailSelect('" << uids << "')";
-    LOG(INFO) << "sql:" << ss.str();
+    LOG(INFO)<< "sql:" << ss.str();
     r = mysql_engine_->ReadData(ss.str(), dic, CallUserDetailSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -67,7 +67,7 @@ int32 UserMysql::GuideDetailSelect(int64 uid, DicValue* dic) {
   do {
     std::stringstream ss;
     ss << "call proc_GuideDetailSelect(" << uid << ");";
-    LOG(INFO) << "sql:" << ss.str();
+    LOG(INFO)<< "sql:" << ss.str();
     r = mysql_engine_->ReadData(ss.str(), dic, CallGuideDetailSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -80,7 +80,7 @@ int32 UserMysql::GuideDetailSelect(int64 uid, DicValue* dic) {
     ss.str("");
     ss.clear();
     ss << "call proc_GuideServiceSelect(" << uid << ");";
-    LOG(INFO) << "sql:" << ss.str();
+    LOG(INFO)<< "sql:" << ss.str();
     r = mysql_engine_->ReadData(ss.str(), dic, CallGuideServiceSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -90,13 +90,13 @@ int32 UserMysql::GuideDetailSelect(int64 uid, DicValue* dic) {
   return err;
 }
 
-int32 UserMysql::RecommendGuideSelect(int64 city, DicValue* dic) {
+int32 UserMysql::RecommendGuideSelect(int64 city, int64 type, DicValue* dic) {
   int32 err = 0;
-  bool r =  false;
+  bool r = false;
   do {
     std::stringstream ss;
-    ss << "call proc_RecommendGuideSelect(" << city << ");";
-    LOG(INFO) << "sql:" << ss.str();
+    ss << "call proc_RecommendGuideSelect(" << city << "," << type << ");";
+    LOG(INFO)<< "sql:" << ss.str();
     r = mysql_engine_->ReadData(ss.str(), dic, CallRecommendGuideSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -111,14 +111,14 @@ int32 UserMysql::RecommendGuideSelect(int64 city, DicValue* dic) {
 }
 
 int32 UserMysql::RegisterInsertAndSelect(std::string phone, std::string pass,
-                              int64 type, DicValue* dic) {
+                                         int64 type, DicValue* dic) {
   int32 err = 0;
   bool r = false;
   do {
     std::stringstream ss;
     ss << "call proc_RegisterInsertAndSelect('" << phone << "','" << pass
-        << "'," << type << ")";
-    LOG(INFO) << "sql:" << ss.str();
+       << "'," << type << ")";
+    LOG(INFO)<< "sql:" << ss.str();
     r = mysql_engine_->ReadData(ss.str(), dic, CallRegisterInsertAndSelect);
     //注册一定有结果返回
     if (!r || dic->empty()) {
@@ -140,11 +140,11 @@ int32 UserMysql::InvoiceInfoInsert(int64 oid, std::string title,
   bool r = false;
   do {
     std::stringstream ss;
-    ss << "call proc_InvoiceInfoInsert(" << oid << ",'" << title << "','"
-        << num << "','" << comp << "'," << type << ",'" << name << "','"
-        << phone << "','" << area << "','" << addr << "','" << remarks << "')";
-    LOG(INFO) << "sql:" << ss.str();
-    r = mysql_engine_->ReadData(ss.str(),dic, CallInvoiceInfoInsert);
+    ss << "call proc_InvoiceInfoInsert(" << oid << ",'" << title << "','" << num
+       << "','" << comp << "'," << type << ",'" << name << "','" << phone
+       << "','" << area << "','" << addr << "','" << remarks << "')";
+    LOG(INFO)<< "sql:" << ss.str();
+    r = mysql_engine_->ReadData(ss.str(), dic, CallInvoiceInfoInsert);
     if (!r) {
       err = SQL_EXEC_ERROR;
       break;
@@ -159,7 +159,7 @@ int32 UserMysql::DeviceTokenUpdate(int64 uid, std::string dt) {
   do {
     std::stringstream ss;
     ss << "call proc_DeviceTokenUpdate(" << uid << ",'" << dt << "')";
-    LOG(INFO) << "sql:" << ss.str();
+    LOG(INFO)<< "sql:" << ss.str();
     r = mysql_engine_->WriteData(ss.str());
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -169,7 +169,6 @@ int32 UserMysql::DeviceTokenUpdate(int64 uid, std::string dt) {
   return err;
 }
 
-
 int32 UserMysql::ImproveUserUpdate(int64 uid, int64 sex, std::string nickname,
                                    std::string headurl, std::string addr,
                                    double lon, double lat) {
@@ -177,10 +176,10 @@ int32 UserMysql::ImproveUserUpdate(int64 uid, int64 sex, std::string nickname,
   bool r = false;
   do {
     std::stringstream ss;
-    ss << "call proc_ImproveUserDataUpdate(" << uid << "," << sex  << ",'"
-        << nickname << "','" << headurl << "','" << addr << "'," << lon
-        << "," << lat << ")";
-    LOG(INFO) << "sql:" << ss.str();
+    ss << "call proc_ImproveUserDataUpdate(" << uid << "," << sex << ",'"
+       << nickname << "','" << headurl << "','" << addr << "'," << lon << ","
+       << lat << ")";
+    LOG(INFO)<< "sql:" << ss.str();
     r = mysql_engine_->WriteData(ss.str());
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -195,19 +194,18 @@ int32 UserMysql::TripRecordSelect(int64 uid, int64 oid, int64 count,
   int32 err = 0;
   bool r = false;
   do {
-   std::stringstream ss;
-   ss << "call proc_TripRecordSelect(" << uid << "," << oid << "," << count
+    std::stringstream ss;
+    ss << "call proc_TripRecordSelect(" << uid << "," << oid << "," << count
        << ")";
-   LOG(INFO) << "sql:" << ss.str();
-   r = mysql_engine_->ReadData(ss.str(), dic, CallTripRecordSelect);
-   if (!r) {
-     err = SQL_EXEC_ERROR;
-     break;
-   }
+    LOG(INFO)<< "sql:" << ss.str();
+    r = mysql_engine_->ReadData(ss.str(), dic, CallTripRecordSelect);
+    if (!r) {
+      err = SQL_EXEC_ERROR;
+      break;
+    }
   } while (0);
   return err;
 }
-
 
 int32 UserMysql::ChangePwdUpdate(int64 uid, std::string pwd) {
   int32 err = 0;
@@ -215,23 +213,23 @@ int32 UserMysql::ChangePwdUpdate(int64 uid, std::string pwd) {
   do {
     std::stringstream ss;
     ss << "call proc_ChangePwdUpdate(" << uid << ",'" << pwd << "');";
-    LOG(INFO) << "sql:" << ss.str();
+    LOG(INFO)<< "sql:" << ss.str();
     r = mysql_engine_->WriteData(ss.str());
     if (!r) {
       err = SQL_EXEC_ERROR;
       break;
     }
-  } while(0);
+  } while (0);
   return err;
 }
 
 int32 UserMysql::ServiceCitySelect(DicValue* dic) {
   int32 err = 0;
-  bool r =  false;
+  bool r = false;
   do {
     std::stringstream ss;
     ss << "call proc_ServiceCitySelect();";
-    LOG(INFO) << "sql:" << ss.str();
+    LOG(INFO)<< "sql:" << ss.str();
     r = mysql_engine_->ReadData(ss.str(), dic, CallServiceCitySelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -250,9 +248,9 @@ int32 UserMysql::NearGuideSelect(double* point, DicValue* dic) {
   bool r = false;
   do {
     std::stringstream ss;
-    ss << "call proc_NearGuideSelect(" << point[0] << "," << point[1] <<
-        "," << point[2] << "," << point[3] << ");";
-    LOG(INFO) << "sql:" << ss.str();
+    ss << "call proc_NearGuideSelect(" << point[0] << "," << point[1] << ","
+       << point[2] << "," << point[3] << ");";
+    LOG(INFO)<< "sql:" << ss.str();
     r = mysql_engine_->ReadData(ss.str(), dic, CallNearGuideSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -267,14 +265,14 @@ int32 UserMysql::NearGuideSelect(double* point, DicValue* dic) {
 }
 
 int32 UserMysql::UserLoginSelect(std::string phone, std::string pass,
-                                 int32 type, DicValue* dic) {
+                                 int32 type, int64 time, DicValue* dic) {
   int32 err = 0;
   bool r = false;
   do {
     std::stringstream ss;
-    ss << "call proc_UserLoginSelect('" << phone << "','" << pass <<
-        "'," << type << ");";
-    LOG(INFO) << "sql:" << ss.str();
+    ss << "call proc_UserLoginSelect('" << phone << "','" << pass << "',"
+       << type << "," << time << ");";
+    LOG(INFO)<< "sql:" << ss.str();
     r = mysql_engine_->ReadData(ss.str(), dic, CallUserLoginSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -290,13 +288,13 @@ int32 UserMysql::UserLoginSelect(std::string phone, std::string pass,
 
 void UserMysql::CallServiceCitySelect(void* param, Value* value) {
   base_storage::DBStorageEngine* engine =
-      (base_storage::DBStorageEngine*)(param);
+      (base_storage::DBStorageEngine*) (param);
   MYSQL_ROW rows;
   int32 num = engine->RecordCount();
   DicValue* info = reinterpret_cast<DicValue*>(value);
   if (num > 0) {
     ListValue* list = new ListValue();
-    while (rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)) {
+    while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
       DicValue* dict = new DicValue();
       if (rows[0] != NULL)
         dict->SetBigInteger(L"province_code_", atoi(rows[0]));
@@ -310,19 +308,19 @@ void UserMysql::CallServiceCitySelect(void* param, Value* value) {
     }
     info->Set(L"service_city_", list);
   } else {
-    LOG(WARNING) << "CallGuideServiceSelect count < 0";
+    LOG(WARNING)<< "CallGuideServiceSelect count < 0";
   }
 }
 
 void UserMysql::CallGuideServiceSelect(void* param, Value* value) {
   base_storage::DBStorageEngine* engine =
-      (base_storage::DBStorageEngine*)(param);
+      (base_storage::DBStorageEngine*) (param);
   MYSQL_ROW rows;
   int32 num = engine->RecordCount();
   DicValue* info = reinterpret_cast<DicValue*>(value);
   if (num > 0) {
     ListValue* list = new ListValue();
-    while (rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)) {
+    while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
       DicValue* dict = new DicValue();
       if (rows[0] != NULL)
         dict->SetBigInteger(L"service_id_", atoll(rows[0]));
@@ -336,18 +334,18 @@ void UserMysql::CallGuideServiceSelect(void* param, Value* value) {
     }
     info->Set(L"service", list);
   } else {
-    LOG(WARNING) << "CallGuideServiceSelect count < 0";
+    LOG(WARNING)<< "CallGuideServiceSelect count < 0";
   }
 }
 
 void UserMysql::CallGuideDetailSelect(void* param, Value* value) {
   base_storage::DBStorageEngine* engine =
-      (base_storage::DBStorageEngine*)(param);
+      (base_storage::DBStorageEngine*) (param);
   MYSQL_ROW rows;
   int32 num = engine->RecordCount();
   DicValue* dict = reinterpret_cast<DicValue*>(value);
   if (num > 0) {
-    while (rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)) {
+    while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
       if (rows[0] != NULL)
         dict->SetBigInteger(L"uid_", atoll(rows[0]));
       if (rows[1] != NULL)
@@ -364,19 +362,19 @@ void UserMysql::CallGuideDetailSelect(void* param, Value* value) {
         dict->SetString(L"photo_list_", rows[6]);
     }
   } else {
-    LOG(WARNING) << "CallUserLoginSelect count < 0";
+    LOG(WARNING)<< "CallUserLoginSelect count < 0";
   }
 }
 
 void UserMysql::CallNearGuideSelect(void* param, Value* value) {
   base_storage::DBStorageEngine* engine =
-      (base_storage::DBStorageEngine*)(param);
+      (base_storage::DBStorageEngine*) (param);
   MYSQL_ROW rows;
   int32 num = engine->RecordCount();
   DicValue* info = reinterpret_cast<DicValue*>(value);
   if (num > 0) {
     ListValue* list = new ListValue();
-    while (rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)) {
+    while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
       DicValue* dict = new DicValue();
       if (rows[0] != NULL)
         dict->SetBigInteger(L"uid_", atoll(rows[0]));
@@ -398,19 +396,19 @@ void UserMysql::CallNearGuideSelect(void* param, Value* value) {
     }
     info->Set(L"result", list);
   } else {
-    LOG(WARNING) << "CallUserLoginSelect count < 0";
+    LOG(WARNING)<< "CallUserLoginSelect count < 0";
   }
 }
 
 void UserMysql::CallRecommendGuideSelect(void* param, Value* value) {
   base_storage::DBStorageEngine* engine =
-      (base_storage::DBStorageEngine*)(param);
+      (base_storage::DBStorageEngine*) (param);
   MYSQL_ROW rows;
   int32 num = engine->RecordCount();
   DicValue* info = reinterpret_cast<DicValue*>(value);
   if (num > 0) {
     ListValue* list = new ListValue();
-    while (rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)) {
+    while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
       DicValue* dict = new DicValue();
       if (rows[0] != NULL)
         dict->SetBigInteger(L"uid_", atoll(rows[0]));
@@ -444,18 +442,18 @@ void UserMysql::CallRecommendGuideSelect(void* param, Value* value) {
     }
     info->Set(L"recommend_guide", list);
   } else {
-    LOG(WARNING) << "CallUserLoginSelect count < 0";
+    LOG(WARNING)<< "CallUserLoginSelect count < 0";
   }
 }
 
 void UserMysql::CallUserLoginSelect(void* param, Value* value) {
   base_storage::DBStorageEngine* engine =
-      (base_storage::DBStorageEngine*)(param);
+      (base_storage::DBStorageEngine*) (param);
   MYSQL_ROW rows;
   int32 num = engine->RecordCount();
   DicValue* dict = reinterpret_cast<DicValue*>(value);
   if (num > 0) {
-    while (rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)) {
+    while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
       if (rows[0] != NULL)
         dict->SetBigInteger(L"uid_", atoll(rows[0]));
       if (rows[1] != NULL)
@@ -482,19 +480,19 @@ void UserMysql::CallUserLoginSelect(void* param, Value* value) {
         dict->SetBigInteger(L"gender_", atoll(rows[11]));
     }
   } else {
-    LOG(WARNING) << "CallUserLoginSelect count < 0";
+    LOG(WARNING)<< "CallUserLoginSelect count < 0";
   }
 }
 
 void UserMysql::CallUserDetailSelect(void* param, Value* value) {
   base_storage::DBStorageEngine* engine =
-      (base_storage::DBStorageEngine*)(param);
+      (base_storage::DBStorageEngine*) (param);
   MYSQL_ROW rows;
   int32 num = engine->RecordCount();
   DicValue* info = reinterpret_cast<DicValue*>(value);
   if (num > 0) {
     ListValue* list = new ListValue();
-    while (rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)) {
+    while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
       DicValue* dict = new DicValue();
       if (rows[0] != NULL)
         dict->SetBigInteger(L"uid_", atoll(rows[0]));
@@ -524,41 +522,41 @@ void UserMysql::CallUserDetailSelect(void* param, Value* value) {
     }
     info->Set(L"userinfo_list", list);
   } else {
-    LOG(WARNING) << "CallUserDetailSelect count < 0";
+    LOG(WARNING)<< "CallUserDetailSelect count < 0";
   }
 }
 
 void UserMysql::CallRegisterInsertAndSelect(void* param, Value* value) {
   base_storage::DBStorageEngine* engine =
-      (base_storage::DBStorageEngine*)(param);
+      (base_storage::DBStorageEngine*) (param);
   MYSQL_ROW rows;
   int32 num = engine->RecordCount();
   DicValue* dict = reinterpret_cast<DicValue*>(value);
   if (num > 0) {
-    while (rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)) {
+    while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
       if (rows[0] != NULL) {
         dict->SetBigInteger(L"result", atoll(rows[0]));
-          //用户已注册过
-        if(atoi(rows[0]) == 0)
-           break;
+        //用户已注册过
+        if (atoi(rows[0]) == 0)
+          break;
       }
       if (rows[1] != NULL)
         dict->SetBigInteger(L"uid_", atoll(rows[1]));
     }
   } else {
-    LOG(WARNING) << "CallRegisterInsertAndSelect count < 0";
+    LOG(WARNING)<< "CallRegisterInsertAndSelect count < 0";
   }
 }
 
 void UserMysql::CallTripRecordSelect(void* param, Value* value) {
   base_storage::DBStorageEngine* engine =
-      (base_storage::DBStorageEngine*)(param);
+      (base_storage::DBStorageEngine*) (param);
   MYSQL_ROW rows;
   int32 num = engine->RecordCount();
   DicValue* info = reinterpret_cast<DicValue*>(value);
   if (num > 0) {
     ListValue* list = new ListValue();
-    while (rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)) {
+    while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
       DicValue* dict = new DicValue();
       if (rows[0] != NULL)
         dict->SetBigInteger(L"order_id_", atoll(rows[0]));
@@ -594,19 +592,19 @@ void UserMysql::CallTripRecordSelect(void* param, Value* value) {
     }
     info->Set(L"trip_list", list);
   } else {
-    LOG(WARNING) << "CallTripRecordSelect count < 0";
+    LOG(WARNING)<< "CallTripRecordSelect count < 0";
   }
 }
 
 void UserMysql::CallServiceInfoSelect(void* param, Value* value) {
   base_storage::DBStorageEngine* engine =
-      (base_storage::DBStorageEngine*)(param);
+      (base_storage::DBStorageEngine*) (param);
   MYSQL_ROW rows;
   int32 num = engine->RecordCount();
   DicValue* info = reinterpret_cast<DicValue*>(value);
   if (num > 0) {
     ListValue* list = new ListValue();
-    while (rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)) {
+    while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
       DicValue* dict = new DicValue();
       if (rows[0] != NULL)
         dict->SetBigInteger(L"service_id_", atoll(rows[0]));
@@ -626,28 +624,27 @@ void UserMysql::CallServiceInfoSelect(void* param, Value* value) {
     }
     info->Set(L"service_list", list);
   } else {
-    LOG(WARNING) << "CallServiceInfoSelect count < 0";
+    LOG(WARNING)<< "CallServiceInfoSelect count < 0";
   }
 }
 
 void UserMysql::CallInvoiceInfoInsert(void* param, Value* value) {
   base_storage::DBStorageEngine* engine =
-      (base_storage::DBStorageEngine*)(param);
+      (base_storage::DBStorageEngine*) (param);
   MYSQL_ROW rows;
   int32 num = engine->RecordCount();
   DicValue* dict = reinterpret_cast<DicValue*>(value);
   if (num > 0) {
-    while (rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)) {
+    while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
       if (rows[0] != NULL) {
         dict->SetBigInteger(L"invoice_status_", atoll(rows[0]));
       }
     }
   } else {
-    LOG(WARNING) << "CallInvoiceInfoInsert count < 0";
+    LOG(WARNING)<<"CallInvoiceInfoInsert count < 0";
   }
 }
 
-
-
-}  // namespace user
+}
+  // namespace user
 

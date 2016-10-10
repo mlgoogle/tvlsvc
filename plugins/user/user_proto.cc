@@ -127,6 +127,7 @@ RecommendGuideRecv::RecommendGuideRecv(PacketHead packet) {
   head_ = packet.head();
   body_str_ = packet.body_str();
   city_code_ = 0;
+  recommend_type_ = 0;
 }
 
 int32 RecommendGuideRecv::Deserialize() {
@@ -140,6 +141,8 @@ int32 RecommendGuideRecv::Deserialize() {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"city_code_", &city_code_);
       LOG_IF(ERROR, !r) << "RecommendGuideRecv::city_code_ parse error";
+      r = dic->GetBigInteger(L"recommend_type_", &recommend_type_);
+      LOG_IF(ERROR, !r) << "RecommendGuideRecv::recommend_type_ parse error";
     } else {
       LOG(ERROR) << "RecommendGuideRecv Deserialize error";
       err = RECOMMEND_GUIDE_JSON_ERR;
