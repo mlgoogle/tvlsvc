@@ -1,5 +1,5 @@
 
-
+#${LIB_DIR}/third_party/gtpush/lib/libgtpushsdk_gcc4.1.2_64.a
 OUT_PUT = ${SO_DIR}/chat/chat.so 
 
 SRC_DIR = ../../
@@ -24,7 +24,8 @@ INCLUDE_PATHS = -I${LIB_DIR} \
 		-I${LIB_DIR}/public \
 		-I${LIB_DIR}/base \
 		-I${LIB_DIR}/third_party/glog/include \
-		-I${LIB_DIR}/third_party
+		-I${LIB_DIR}/third_party \
+		-I${LIB_DIR}/third_party/gtpush/include
 
 all : ${OUT_PUT} del-temp-files
 
@@ -74,5 +75,7 @@ ${OUT_PUT} : chat_init.o chat_logic.o proto_buf.o chat_manager.o \
 		chat_interface.o chat_proto.o chat_mysql.o util.o data_engine.o \
 		mysql_pool.o data_mysql_engine.o data_share_mgr.o 
 	${CXX} ${CXXFLAGS} $^ -o ${OUT_PUT} ${LINK_PATH} -lpthread -lmysqlclient \
-		${LIB_DIR}/third_party/glog/lib/libglog.a ${LIB_DIR}/base/lib/mybase.a \
+		${LIB_DIR}/third_party/glog/lib/libglog.a \
+		${LIB_DIR}/third_party/gtpush/lib/libgtpushsdk_gcc4.1.2_64.a \
+		${LIB_DIR}/base/lib/mybase.a \
 		${LIB_DIR}/third_party/dmg_fp/lib/dmg_fp.a

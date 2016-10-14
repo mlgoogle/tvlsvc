@@ -19,6 +19,9 @@ typedef base_logic::Value Value;
 typedef std::map<int64, Guide*> GuideMap;
 typedef std::map<int64, Visitor*> VisitorMap;
 typedef std::map<int64, UserInfo*> UserMap;
+typedef std::map<int64, std::string> DeviceTokenMap;
+typedef std::map<int64, int32> UnReadMap;
+typedef std::map<int64, std::string> NickMap;
 
 
 

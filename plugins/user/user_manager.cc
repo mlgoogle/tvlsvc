@@ -73,6 +73,42 @@ int32 UserManager::AssignPacket(const int32 socket, PacketHead* packet) {
       interface->ObtainUserInfo(socket, packet);
       break;
     }
+    case ALIPAY_SEVER_REQ: {
+      interface->AlipayServer(socket, packet);
+      break;
+    }
+    case ALIPAY_CLIENT_REQ: {
+      interface->AlipayClient(socket, packet);
+      break;
+    }
+    case QUERY_VERIFY_CODE_REQ: {
+      interface->ObtainVerifyCode(socket, packet);
+      break;
+    }
+    case REGISTER_ACCOUNT_REQ: {
+      interface->RegisterAccount(socket, packet);
+      break;
+    }
+    case IMPROVE_DATA_REQ: {
+      interface->ImproveUserData(socket, packet);
+      break;
+    }
+    case OBTAIN_TRIP_REQ: {
+      interface->ObtainTripRecord(socket, packet);
+      break;
+    }
+    case SERVICE_INFO_REQ: {
+      interface->ObtainServiceInfo(socket, packet);
+      break;
+    }
+    case DRAW_BILL_REQ: {
+      interface->DrawBillTrip(socket, packet);
+      break;
+    }
+    case DEVICE_TOKEN_REQ: {
+      interface->DeviceToken(socket, packet);
+      break;
+    }
   }
   return err;
 }
@@ -80,6 +116,12 @@ int32 UserManager::AssignPacket(const int32 socket, PacketHead* packet) {
 int32 UserManager::CheckHeartLoss() {
   UserInterface* interface = UserInterface::GetInstance();
   interface->CheckHeartLoss();
+  return 0;
+}
+
+int32 UserManager::OnSockClose(const int fd) {
+  UserInterface* interface = UserInterface::GetInstance();
+  interface->CloseSocket(fd);
   return 0;
 }
 

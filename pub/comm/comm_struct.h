@@ -10,8 +10,4 @@ struct PluginInfo {
   char* provider;
 };
 
-struct Point {
-  double longitude;
-  double latitude;
-};
 #endif /* PUB_NET_COMM_STRUCT_H_ */

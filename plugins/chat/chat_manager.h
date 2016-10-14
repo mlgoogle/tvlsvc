@@ -24,6 +24,8 @@ class ChatManager {
   int32 AssignPacket(const int32 socket, PacketHead* packet);
 
   int32 RecordChatSave();
+
+  int32 OnSockClose(const int fd);
 };
 
 }  // namespace chat

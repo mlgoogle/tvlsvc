@@ -9,9 +9,9 @@
 
 namespace chat {
 
-class Invitation : public PacketHead {
+class AskInvitationRecv : public PacketHead {
  public:
-  Invitation(PacketHead packet);
+  AskInvitationRecv(PacketHead packet);
   int32 Deserialize();
 
   inline int64 from_uid() { return from_uid_; }
@@ -21,6 +21,22 @@ class Invitation : public PacketHead {
   int64 from_uid_;
   int64 to_uid_;
   int64 service_id_;
+};
+
+class AnswerInvitationRecv : public PacketHead {
+ public:
+  AnswerInvitationRecv(PacketHead packet);
+  int32 Deserialize();
+
+  inline int64 from_uid() { return from_uid_; }
+  inline int64 to_uid() { return to_uid_; }
+  inline int64 order_id() { return order_id_; }
+  inline int64 order_status() { return order_status_; }
+ private:
+  int64 from_uid_;
+  int64 to_uid_;
+  int64 order_id_;
+  int64 order_status_;   // 0-发起邀请1-被导游拒绝.2-接收邀请。3-等待支付。4-支付完成，5-取消支付
 };
 
 class ChatPacket : public PacketHead {
@@ -53,6 +69,37 @@ class ChatRecordRecv : public PacketHead {
   int64 to_uid_;
   int64 count_;
   int64 last_chat_id_;
+};
+
+class PushMsgReadRecv : public PacketHead {
+ public:
+  PushMsgReadRecv(PacketHead packet);
+  int32 Deserialize();
+  inline int64 uid() { return uid_; }
+  inline int64 count() { return count_; }
+ private:
+  int64 uid_;
+  int64 count_;
+};
+
+class EvaluateTripRecv : public PacketHead {
+ public:
+  EvaluateTripRecv(PacketHead packet);
+  int32 Deserialize();
+
+  inline int64 from_uid() { return from_uid_; }
+  inline int64 to_uid() { return to_uid_; }
+  inline int64 order_id() { return order_id_; }
+  inline int64 service_score() { return service_score_; }
+  inline int64 user_score() { return user_score_; }
+  inline std::string remarks() { return remarks_; }
+ private:
+  int64 from_uid_; //游客id
+  int64 to_uid_;  //导游id
+  int64 order_id_;  //订单id
+  int64 service_score_;   //服务评价
+  int64 user_score_;  //服务者评分
+  std::string remarks_;  //评论
 };
 
 }  // namespace chat

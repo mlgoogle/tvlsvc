@@ -21,22 +21,40 @@ class UserMysql {
 
  public:
   int32 UserLoginSelect(std::string phone, std::string pass, int32 type,
-                      DicValue* dic);
+                      int64 time, DicValue* dic);
 
   int32 NearGuideSelect(double* point, DicValue* dic);
   int32 GuideDetailSelect(int64 uid, DicValue* dic);
-  int32 UserDetailSelect(int64 uid, DicValue* dic);
+  int32 UserDetailSelect(std::string uids, DicValue* dic);
   int32 ServiceCitySelect(DicValue* dic);
-  int32 RecommendGuideSelect(int64 city, DicValue* dic);
-
+  int32 RecommendGuideSelect(int64 city, int64 type, DicValue* dic);
+  int32 RegisterInsertAndSelect(std::string phone, std::string pass,
+                                int64 type, DicValue* dic);
   int32 ChangePwdUpdate(int64 uid, std::string pwd);
+  int32 ImproveUserUpdate(int64 uid, int64 sex, std::string nickname,
+                          std::string headurl, std::string addr, double lon,
+                          double lat);
+
+  int32 TripRecordSelect(int64 uid, int64 oid, int64 count, DicValue* dic);
+  int32 ServiceInfoSelect(std::string sid_str, DicValue* dic);
+  int32 InvoiceInfoInsert(int64 oid, std::string title, std::string num,
+                          std::string comp, int64 type, std::string name,
+                          std::string phone, std::string area, std::string addr,
+                          std::string remarks, DicValue* dic);
+
+  int32 DeviceTokenUpdate(int64 uid, std::string dt);
 
   static void CallUserLoginSelect(void* param, Value* value);
+  static void CallUserDetailSelect(void* param, Value* value);
   static void CallNearGuideSelect(void* param, Value* value);
   static void CallGuideDetailSelect(void* param, Value* value);
   static void CallGuideServiceSelect(void* param, Value* value);
   static void CallServiceCitySelect(void* param, Value* value);
   static void CallRecommendGuideSelect(void* param, Value* value);
+  static void CallRegisterInsertAndSelect(void* param, Value* value);
+  static void CallTripRecordSelect(void* param, Value* value);
+  static void CallServiceInfoSelect(void* param, Value* value);
+  static void CallInvoiceInfoInsert(void* param, Value* value);
  private:
   base_logic::DataEngine* mysql_engine_;
 };

@@ -44,6 +44,10 @@ int32 ChatManager::AssignPacket(const int32 socket, PacketHead* packet) {
       interface->AskInvitation(socket, packet);
       break;
     }
+    case ANSWER_INVITATION_REQ: {
+      interface->AnswerInvitation(socket, packet);
+      break;
+    }
     case CHAT_MESSAGE_REQ: {
       interface->ChatMessage(socket, packet);
       break;
@@ -52,12 +56,24 @@ int32 ChatManager::AssignPacket(const int32 socket, PacketHead* packet) {
       interface->ChatRecord(socket, packet);
       break;
     }
+    case CHAT_READ_REQ: {
+      interface->PushMsgRead(socket, packet);
+      break;
+    }
+    case EVALUATE_TRIP_REQ: {
+      interface->EvaluateTrip(socket, packet);
+      break;
+    }
   }
   return err;
 }
 
 int32 ChatManager::RecordChatSave() {
   return ChatInterface::GetInterface()->RecordChatSave();
+}
+
+int32 ChatManager::OnSockClose(const int fd) {
+  return ChatInterface::GetInterface()->CloseSocket(fd);
 }
 
 }  // namespace chat
