@@ -153,6 +153,22 @@ int32 UserMysql::InvoiceInfoInsert(int64 oid, std::string title,
   return err;
 }
 
+int32 UserMysql::InvoiceRecordSelect(int64 uid, DicValue* dic) {
+  int32 err = 0;
+  bool r = false;
+  do {
+    std::stringstream ss;
+    ss << "call proc_InvoiceRecordSelect(" << uid << ")";
+    LOG(INFO)<< "sql:" << ss.str();
+    r = mysql_engine_->ReadData(ss.str(), dic, CallInvoiceRecordSelect);
+    if (!r) {
+      err = SQL_EXEC_ERROR;
+      break;
+    }
+  } while (0);
+  return err;
+}
+
 int32 UserMysql::DeviceTokenUpdate(int64 uid, std::string dt) {
   int32 err = 0;
   bool r = false;
@@ -642,6 +658,30 @@ void UserMysql::CallInvoiceInfoInsert(void* param, Value* value) {
     }
   } else {
     LOG(WARNING)<<"CallInvoiceInfoInsert count < 0";
+  }
+}
+
+void UserMysql::CallInvoiceRecordSelect(void* param, Value* value) {
+  base_storage::DBStorageEngine* engine =
+      (base_storage::DBStorageEngine*) (param);
+  MYSQL_ROW rows;
+  int32 num = engine->RecordCount();
+  DicValue* info = reinterpret_cast<DicValue*>(value);
+  if (num > 0) {
+    ListValue* list = new ListValue();
+    while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
+      DicValue* dict = new DicValue();
+      if (rows[0] != NULL)
+        dict->SetBigInteger(L"invoice_id_", atoll(rows[0]));
+      if (rows[1] != NULL)
+        dict->SetBigInteger(L"order_id_", atoll(rows[1]));
+      if (rows[2] != NULL)
+        dict->SetBigInteger(L"invoice_status_", atoll(rows[2]));
+      list->Append(dict);
+    }
+    info->Set(L"invoice_list", list);
+  } else {
+    LOG(WARNING)<< "CallInvoiceRecordSelect count < 0";
   }
 }
 

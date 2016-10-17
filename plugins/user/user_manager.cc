@@ -109,6 +109,10 @@ int32 UserManager::AssignPacket(const int32 socket, PacketHead* packet) {
       interface->DeviceToken(socket, packet);
       break;
     }
+    case INVOICE_RECORD_REQ: {
+      interface->BillingRecord(socket, packet);
+      break;
+    }
   }
   return err;
 }

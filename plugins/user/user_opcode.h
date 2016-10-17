@@ -57,6 +57,9 @@ namespace user {
 #define DEVICE_TOKEN_REQ USER_TYPE*1000 + 31
 #define DEVICE_TOKEN_RLY USER_TYPE*1000 + 32
 
+#define INVOICE_RECORD_REQ USER_TYPE*1000 + 33
+#define INVOICE_RECORD_RLY USER_TYPE*1000 + 34
+
 }  // namespace user
 
 

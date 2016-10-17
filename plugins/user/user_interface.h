@@ -57,6 +57,8 @@ class UserInterface {
 
   int32 DrawBillTrip(const int32 socket, PacketHead* packet);
 
+  int32 BillingRecord(const int32 socket, PacketHead* packet);
+
   int32 DeviceToken(const int32 socket, PacketHead* packet);
 
   int32 AuthorUser(std::string phone, std::string passwd, int32 type,

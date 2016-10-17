@@ -434,6 +434,35 @@ int32 DrawBillRecv::Deserialize() {
   return err;
 }
 
+BillRecordRecv::BillRecordRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  uid_ = -1;
+}
+
+int32 BillRecordRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer =
+     base_logic::ValueSerializer::Create(base_logic::IMPL_JSON, &body_str_);
+  std::string err_str;
+  DicValue* dic = (DicValue*)serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetBigInteger(L"uid_", &uid_);
+      LOG_IF(ERROR, !r) << "BillRecordRecv::uid_ parse error";
+    } else {
+      LOG(ERROR) << "BillRecordRecv Deserialize error";
+      err = BILL_RECORD_JSON_ERR;
+    break;
+    }
+  } while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                               serializer);
+  return err;
+}
+
+
 DeviceTokenRecv::DeviceTokenRecv(PacketHead packet) {
   head_ = packet.head();
   body_str_ = packet.body_str();

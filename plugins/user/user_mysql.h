@@ -42,6 +42,8 @@ class UserMysql {
                           std::string phone, std::string area, std::string addr,
                           std::string remarks, DicValue* dic);
 
+  int32 InvoiceRecordSelect(int64 uid, DicValue* dic);
+
   int32 DeviceTokenUpdate(int64 uid, std::string dt);
 
   static void CallUserLoginSelect(void* param, Value* value);
@@ -55,6 +57,7 @@ class UserMysql {
   static void CallTripRecordSelect(void* param, Value* value);
   static void CallServiceInfoSelect(void* param, Value* value);
   static void CallInvoiceInfoInsert(void* param, Value* value);
+  static void CallInvoiceRecordSelect(void* param, Value* value);
  private:
   base_logic::DataEngine* mysql_engine_;
 };
