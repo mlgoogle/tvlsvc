@@ -113,6 +113,18 @@ int32 UserManager::AssignPacket(const int32 socket, PacketHead* packet) {
       interface->BillingRecord(socket, packet);
       break;
     }
+    case BLACKCARD_PRIVILEGE_REQ: {
+      interface->BlackcardPrivilege(socket, packet);
+      break;
+    }
+    case BLACKCARD_INFO_REQ: {
+      interface->BlackcardInfo(socket, packet);
+      break;
+    }
+    case BLACKCARD_CONSUME_RECORD_REQ: {
+      interface->BlackcardConsumeRecord(socket,packet);
+      break;
+    }
   }
   return err;
 }

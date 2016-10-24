@@ -207,12 +207,66 @@ int32 UserInterface::DeviceToken(const int32 socket, PacketHead* packet) {
       err = user_mysql_->DeviceTokenUpdate(rev.uid(), rev.device_token());
     if (err < 0)
       break;
-    LOG(INFO)<< "DeviceToken SendMsg err:" << err;
     SendMsg(socket, packet, NULL, DEVICE_TOKEN_RLY);
   } while (0);
   if (err < 0) {
     LOG(INFO)<< "DeviceToken SendError err:" << err;
     SendError(socket, packet, err, DEVICE_TOKEN_RLY);
+  }
+  return err;
+}
+
+int32 UserInterface::BlackcardPrivilege(const int32 socket,
+                                        PacketHead* packet) {
+  int32 err = 0;
+  do {
+    DicValue dic;
+    err = user_mysql_->BlackcardPrivilegeSelect(&dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, BLACKCARD_PRIVILEGE_RLY);
+  } while (0);
+  if (err < 0) {
+    SendError(socket, packet, err, BLACKCARD_PRIVILEGE_RLY);
+  }
+  return err;
+}
+
+int32 UserInterface::BlackcardInfo(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    BlackcardInfoRecv recv(*packet);
+    err = recv.Deserialize();
+    if (err < 0)
+      break;
+    DicValue dic;
+    err = user_mysql_->BlackcardInfoSelect(recv.uid(), &dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, BLACKCARD_INFO_RLY);
+  } while (0);
+  if (err < 0) {
+    SendError(socket, packet, err, BLACKCARD_INFO_RLY);
+  }
+  return err;
+}
+
+int32 UserInterface::BlackcardConsumeRecord(const int32 socket,
+                                            PacketHead* packet) {
+  int32 err = 0;
+  do {
+    BlackcardConsumRecordRecv recv(*packet);
+    err = recv.Deserialize();
+    if (err < 0)
+      break;
+    DicValue dic;
+    err = user_mysql_->BlackcardConsumeRecordSelect(recv.uid(), &dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, BLACKCARD_CONSUME_RECORD_RLY);
+  } while (0);
+  if (err < 0) {
+    SendError(socket, packet, err, BLACKCARD_CONSUME_RECORD_RLY);
   }
   return err;
 }

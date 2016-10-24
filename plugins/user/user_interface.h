@@ -61,6 +61,12 @@ class UserInterface {
 
   int32 DeviceToken(const int32 socket, PacketHead* packet);
 
+  int32 BlackcardPrivilege(const int32 socket, PacketHead* packet);
+
+  int32 BlackcardInfo(const int32 socket, PacketHead* packet);
+
+  int32 BlackcardConsumeRecord(const int32 socket, PacketHead* packet);
+
   int32 AuthorUser(std::string phone, std::string passwd, int32 type,
                    DicValue* v);
 
