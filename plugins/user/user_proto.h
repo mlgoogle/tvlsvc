@@ -186,6 +186,15 @@ class DrawBillRecv : public PacketHead {
   std::string remarks_; //备注
 };
 
+class BillRecordRecv : public PacketHead {
+ public:
+  BillRecordRecv(PacketHead packet);
+  int32 Deserialize();
+  inline int64 uid() { return uid_; }
+ private:
+  int64 uid_;
+};
+
 class DeviceTokenRecv : public PacketHead {
  public:
   DeviceTokenRecv(PacketHead packet);
@@ -196,6 +205,26 @@ class DeviceTokenRecv : public PacketHead {
  private:
   int64 uid_;
   std::string device_token_;
+};
+
+class BlackcardInfoRecv : public PacketHead {
+ public:
+  BlackcardInfoRecv(PacketHead packet);
+  int32 Deserialize();
+
+  inline int64 uid() { return uid_; }
+ private:
+  int64 uid_;
+};
+
+class BlackcardConsumRecordRecv : public PacketHead {
+ public:
+  BlackcardConsumRecordRecv(PacketHead packet);
+  int32 Deserialize();
+
+  inline int64 uid() { return uid_; }
+ private:
+  int64 uid_;
 };
 
 typedef Heartbeat GuideDetailRecv;

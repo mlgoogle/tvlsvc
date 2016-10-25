@@ -42,7 +42,20 @@ class UserMysql {
                           std::string phone, std::string area, std::string addr,
                           std::string remarks, DicValue* dic);
 
+  int32 InvoiceRecordSelect(int64 uid, DicValue* dic);
+
   int32 DeviceTokenUpdate(int64 uid, std::string dt);
+  int32 BlackcardPrivilegeSelect(DicValue* dic);
+  int32 BlackcardInfoSelect(int64 uid, DicValue* dic);
+
+
+  //@brief 查询用户uid黑卡消费记录
+  //@author paco
+  //@param[in] uid 用户id
+  //@param[out] dic 查询结果集
+  //@return 返回mysql查询状态 正常返回0，异常返回负数 ，详情见pub/comm/comm_head.h
+  //@warning
+  int32 BlackcardConsumeRecordSelect(int64 uid, DicValue* dic);
 
   static void CallUserLoginSelect(void* param, Value* value);
   static void CallUserDetailSelect(void* param, Value* value);
@@ -55,6 +68,10 @@ class UserMysql {
   static void CallTripRecordSelect(void* param, Value* value);
   static void CallServiceInfoSelect(void* param, Value* value);
   static void CallInvoiceInfoInsert(void* param, Value* value);
+  static void CallInvoiceRecordSelect(void* param, Value* value);
+  static void CallBlackcardPrivilegeSelect(void* param, Value* value);
+  static void CallBlackcardInfoSelect(void* param, Value* value);
+  static void CallBlackcardConsumeRecordSelect(void* param, Value* value);
  private:
   base_logic::DataEngine* mysql_engine_;
 };

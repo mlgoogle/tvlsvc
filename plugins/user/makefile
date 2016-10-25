@@ -16,7 +16,7 @@ LINK_DYNAMIC = -Wl,-Bdynamic -lpthread
 LINK_STATIC = -Wl,-Bstatic -L${LIB_DIR}/third_party/glog/lib/libglog.a
 LINK_PATH = -L/usr/lib64/mysql
 
-CXXFLAGS += -g -Wextra -w -shared -fPIC 
+CXXFLAGS += -g -O0 -Wextra -w -shared -fPIC 
 
 INCLUDE_PATHS = -I${LIB_DIR} \
 		-I${SRC_PLUGINS} \
