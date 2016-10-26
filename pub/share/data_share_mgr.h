@@ -32,6 +32,8 @@ class DataShareMgr {
   void AddNick(int64 uid, std::string nick);
   std::string GetNick(int64 uid);
 
+  UserInfo* GetFreeCoordinator(); //获取当前最空闲客服信息
+
   void CheckHeartLoss();
   void UserOffline(int fd);
 
@@ -41,6 +43,7 @@ class DataShareMgr {
 
   void DelGuide(int64 uid);
   void DelVisitor(int64 uid);
+  void DelCoordinator(int64 uid);
 
  private:
   static DataShareMgr* instance_;
@@ -49,6 +52,7 @@ class DataShareMgr {
   UserMap user_map_;
   GuideMap guide_map_;
   VisitorMap visitor_map_;
+  CoordinatorMap coordinator_map_;
   DeviceTokenMap dt_map_;
   UnReadMap unread_map_;
   NickMap nick_map_;

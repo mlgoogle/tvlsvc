@@ -41,6 +41,8 @@ class ChatInterface {
   int32 PushMsgRead(const int32 socket, PacketHead* packet);
 
   int32 EvaluateTrip(const int32 socket, PacketHead* packet);
+  //请求空闲客服
+  int32 FreeCoordinator(const int32 socket, PacketHead* packet);
 
   int32 PushChatMsg(ChatPacket rev);
 

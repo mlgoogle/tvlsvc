@@ -227,6 +227,31 @@ class BlackcardConsumRecordRecv : public PacketHead {
   int64 uid_;
 };
 
+class NewAppointmentRecv : public PacketHead {
+ public:
+  NewAppointmentRecv(PacketHead packet);
+  int32 Deserialize();
+  inline int64 uid() { return uid_; }
+  inline int64 city_code() { return city_code_; }
+  inline int64 start_time() { return start_time_; }
+  inline int64 end_time() { return end_time_; }
+  inline std::string skills() { return skills_; }
+  inline int64 is_other() { return is_other_; }
+  inline std::string other_name() { return skills_; }
+  int64 other_gender() { return other_gender_; }
+  inline std::string ohter_phone() { return other_phone_; }
+ private:
+  int64 uid_;
+  int64 city_code_;
+  int64 start_time_;
+  int64 end_time_;
+  std::string skills_;
+  int64 is_other_;
+  std::string other_name_;
+  int64 other_gender_;
+  std::string other_phone_;
+};
+
 typedef Heartbeat GuideDetailRecv;
 //send
 

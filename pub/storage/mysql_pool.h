@@ -6,7 +6,6 @@
 #include <list>
 
 #include "public/basic/basictypes.h"
-#include "public/basic/basic_info.h"
 #include "base/thread/base_thread_handler.h"
 #include "base/thread/base_thread_lock.h"
 

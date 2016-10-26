@@ -26,7 +26,7 @@ DataShareMgr::~DataShareMgr() {
 }
 
 __attribute__((visibility("default")))
-DataShareMgr* DataShareMgr::GetInstance() {
+ DataShareMgr* DataShareMgr::GetInstance() {
   if (instance_ == NULL) {
     instance_ = new DataShareMgr();
   }
@@ -34,7 +34,7 @@ DataShareMgr* DataShareMgr::GetInstance() {
 }
 
 UserInfo* DataShareMgr::GetUser(int64 uid) {
-  LOG(ERROR) << "DataShareMgr GetUser lock";
+  LOG(ERROR)<< "DataShareMgr GetUser lock";
   base_logic::RLockGd lk(lock_);
   UserMap::iterator it1 = user_map_.find(uid);
   if (it1 != user_map_.end()) {
@@ -45,25 +45,46 @@ UserInfo* DataShareMgr::GetUser(int64 uid) {
   return NULL;
 }
 
+UserInfo* DataShareMgr::GetFreeCoordinator() {
+  base_logic::RLockGd lk(lock_);
+  Coordinator* info = NULL;
+  if (coordinator_map_.empty())
+    return info;
+  CoordinatorMap::iterator it = coordinator_map_.begin();
+  info = it->second;
+  ++it;
+  for (; it != coordinator_map_.end(); ++it) {
+    if (it->second != NULL) {
+       if (it->second->customers_num() < info->customers_num()) {
+         info = it->second;
+       }
+    }
+  }
+  return info;
+}
+
 void DataShareMgr::AddUser(UserInfo* user) {
   AddNick(user->uid(), user->nickname());
-  LOG(ERROR) << "DataShareMgr AddUser lock";
+  LOG(ERROR)<< "DataShareMgr AddUser lock";
   base_logic::WLockGd lk(lock_);
-  LOG(ERROR) << "DataShareMgr AddUser locked";
+  LOG(ERROR)<< "DataShareMgr AddUser locked";
   user_map_[user->uid()] = user;
   if (user->user_type() == 1)
     visitor_map_[user->uid()] = reinterpret_cast<Visitor*>(user);
-  else
+  else if (user->user_type() == 2)
     guide_map_[user->uid()] = reinterpret_cast<Guide*>(user);
-  LOG(ERROR) << "DataShareMgr AddUser unlock";
+  else if (user->user_type() == 3)
+    coordinator_map_[user->uid()] = reinterpret_cast<Coordinator*>(user);
+  LOG(ERROR)<< "DataShareMgr AddUser unlock";
 }
 
 void DataShareMgr::DelUser(int64 uid) {
   UserInfo* p_user = NULL;
   DelGuide(uid);
   DelVisitor(uid);
+  DelCoordinator(uid);
   {
-    LOG(ERROR) << "DataShareMgr DelUser lock";
+    LOG(ERROR)<< "DataShareMgr DelUser lock";
     base_logic::WLockGd lk(lock_);
     LOG(ERROR) << "DataShareMgr DelUser locked";
     UserMap::iterator it1 = user_map_.find(uid);
@@ -77,11 +98,11 @@ void DataShareMgr::DelUser(int64 uid) {
     delete p_user;
     p_user = NULL;
   }
-  LOG(ERROR) << "DataShareMgr DelUser unlock";
+  LOG(ERROR)<< "DataShareMgr DelUser unlock";
 }
 
 void DataShareMgr::UserOffline(int fd) {
-  LOG(ERROR) << "DataShareMgr UserOffline lock";
+  LOG(ERROR)<< "DataShareMgr UserOffline lock";
   base_logic::WLockGd lk(lock_);
   LOG(ERROR) << "DataShareMgr UserOffline locked";
   UserMap::iterator it1 = user_map_.begin();
@@ -104,6 +125,11 @@ void DataShareMgr::UserOffline(int fd) {
         Visitor* p = itv->second;
         visitor_map_.erase(itv);
       }
+      CoordinatorMap::iterator itc = coordinator_map_.find(p->uid());
+      if (itc != coordinator_map_.end()) {
+        Coordinator* p = itc->second;
+        coordinator_map_.erase(itc);
+      }
       delete p;
       p = NULL;
       break;
@@ -116,7 +142,7 @@ void DataShareMgr::UserOffline(int fd) {
 }
 
 void DataShareMgr::CheckHeartLoss() {
-  LOG(ERROR) << "DataShareMgr CheckHeartLoss lock";
+  LOG(ERROR)<< "DataShareMgr CheckHeartLoss lock";
   base_logic::WLockGd lk(lock_);
   LOG(ERROR) << "DataShareMgr CheckHeartLoss locked";
   UserMap::iterator it1 = user_map_.begin();
@@ -144,6 +170,11 @@ void DataShareMgr::CheckHeartLoss() {
         Visitor* p = itv->second;
         visitor_map_.erase(itv);
       }
+      CoordinatorMap::iterator itc = coordinator_map_.find(p->uid());
+      if (itc != coordinator_map_.end()) {
+        Coordinator* p = itc->second;
+        coordinator_map_.erase(itc);
+      }
       close(p->socket_fd());
       delete p;
       p = NULL;
@@ -153,7 +184,7 @@ void DataShareMgr::CheckHeartLoss() {
 }
 
 void DataShareMgr::UserHeart(int64 uid) {
-  LOG(ERROR) << "DataShareMgr UserHeart lock";
+  LOG(ERROR)<< "DataShareMgr UserHeart lock";
   base_logic::WLockGd lk(lock_);
   LOG(ERROR) << "DataShareMgr UserHeart locked";
   UserMap::iterator it1 = user_map_.find(uid);
@@ -166,9 +197,9 @@ void DataShareMgr::UserHeart(int64 uid) {
   LOG(ERROR) << "DataShareMgr UserHeart unlock";
 }
 
-
+//只清理map,内存由user管理
 void DataShareMgr::DelGuide(int64 uid) {
-  LOG(ERROR) << "DataShareMgr DelGuide lock";
+  LOG(ERROR)<< "DataShareMgr DelGuide lock";
   base_logic::WLockGd lk(lock_);
   LOG(ERROR) << "DataShareMgr DelGuide locked";
   GuideMap::iterator it1 = guide_map_.find(uid);
@@ -180,7 +211,7 @@ void DataShareMgr::DelGuide(int64 uid) {
 }
 
 void DataShareMgr::DelVisitor(int64 uid) {
-  LOG(ERROR) << "DataShareMgr DelVisitor lock";
+  LOG(ERROR)<< "DataShareMgr DelVisitor lock";
   base_logic::WLockGd lk(lock_);
   LOG(ERROR) << "DataShareMgr DelVisitor locked";
   VisitorMap::iterator it1 = visitor_map_.find(uid);
@@ -191,16 +222,28 @@ void DataShareMgr::DelVisitor(int64 uid) {
   LOG(ERROR) << "DataShareMgr DelVisitor unlock";
 }
 
+void DataShareMgr::DelCoordinator(int64 uid) {
+  LOG(ERROR)<< "DataShareMgr DelCoordinator lock";
+  base_logic::WLockGd lk(lock_);
+  LOG(ERROR) << "DataShareMgr DelCoordinator locked";
+  CoordinatorMap::iterator it1 = coordinator_map_.find(uid);
+  if (it1 != coordinator_map_.end()) {
+    Coordinator* p = it1->second;
+    coordinator_map_.erase(it1);
+  }
+  LOG(ERROR) << "DataShareMgr DelCoordinator unlock";
+}
+
 int32 DataShareMgr::AddDeviceToken(int64 uid, std::string token) {
   int32 result = 0;
-  LOG(ERROR) << "DataShareMgr AddDeviceToken lock";
+  LOG(ERROR)<< "DataShareMgr AddDeviceToken lock";
   base_logic::WLockGd lk(lock_);
-  LOG(ERROR) << "DataShareMgr AddDeviceToken locked";
+  LOG(ERROR)<< "DataShareMgr AddDeviceToken locked";
   DeviceTokenMap::iterator it = dt_map_.find(uid);
   do {
     if (it != dt_map_.end()) {
       if (it->second == token) {
-        result  = -1;
+        result = -1;
         break;
       } else {
         dt_map_[uid] = token;
@@ -212,12 +255,12 @@ int32 DataShareMgr::AddDeviceToken(int64 uid, std::string token) {
       result = 0;
     }
   } while (0);
-  LOG(ERROR) << "DataShareMgr AddDeviceToken unlock";
+  LOG(ERROR)<< "DataShareMgr AddDeviceToken unlock";
   return result;
 }
 
 std::string DataShareMgr::GetDeviceToken(int64 uid) {
-  LOG(ERROR) << "DataShareMgr GetDeviceToken lock";
+  LOG(ERROR)<< "DataShareMgr GetDeviceToken lock";
   base_logic::RLockGd lk(lock_);
   LOG(ERROR) << "DataShareMgr GetDeviceToken locked";
   DeviceTokenMap::iterator it = dt_map_.find(uid);
@@ -233,9 +276,9 @@ std::string DataShareMgr::GetDeviceToken(int64 uid) {
 
 int32 DataShareMgr::AddUnReadCount(int64 uid) {
   int32 count = 0;
-  LOG(ERROR) << "DataShareMgr AddUnReadCount lock";
+  LOG(ERROR)<< "DataShareMgr AddUnReadCount lock";
   base_logic::WLockGd lk(lock_);
-  LOG(ERROR) << "DataShareMgr AddUnReadCount locked";
+  LOG(ERROR)<< "DataShareMgr AddUnReadCount locked";
   UnReadMap::iterator it = unread_map_.find(uid);
   if (it != unread_map_.end()) {
     count = it->second + 1;
@@ -244,7 +287,7 @@ int32 DataShareMgr::AddUnReadCount(int64 uid) {
     count = 1;
     unread_map_[uid] = count;
   }
-  LOG(ERROR) << "DataShareMgr AddUnReadCount unlock";
+  LOG(ERROR)<< "DataShareMgr AddUnReadCount unlock";
   return count;
 }
 
@@ -269,7 +312,7 @@ void DataShareMgr::DelUnReadCount(int64 uid, int32 count) {
 }
 
 void DataShareMgr::AddNick(int64 uid, std::string nick) {
-  LOG(ERROR) << "DataShareMgr AddNick lock";
+  LOG(ERROR)<< "DataShareMgr AddNick lock";
   base_logic::WLockGd lk(lock_);
   LOG(ERROR) << "DataShareMgr AddNick locked";
   nick_map_[uid] = nick;
@@ -277,17 +320,18 @@ void DataShareMgr::AddNick(int64 uid, std::string nick) {
 }
 
 std::string DataShareMgr::GetNick(int64 uid) {
-  LOG(ERROR) << "DataShareMgr GetNick lock";
+  LOG(ERROR)<<"DataShareMgr GetNick lock";
   base_logic::RLockGd lk(lock_);
   LOG(ERROR) << "DataShareMgr GetNick locked";
   NickMap::iterator it = nick_map_.find(uid);
   if (it != nick_map_.end()) {
-      LOG(ERROR) << "DataShareMgr GetNick unlock";
+    LOG(ERROR) << "DataShareMgr GetNick unlock";
     return it->second;
   } else {
-      LOG(ERROR) << "DataShareMgr GetNick unlock";
+    LOG(ERROR) << "DataShareMgr GetNick unlock";
     return "";
   }
 }
 
-}  // namespace share
+}
+  // namespace share

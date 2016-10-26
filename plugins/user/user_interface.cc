@@ -164,6 +164,16 @@ int32 UserInterface::DrawBillTrip(const int32 socket, PacketHead* packet) {
                                          &dic);
     if (err < 0)
       break;
+    int64 result = 1;
+    dic.GetBigInteger(L"result_", &result);
+    if (result == -2) {
+      err =   ALREADY_INVOICE_RECORD;
+      break;
+    } else if (result == -3) {
+      err = ORDER_NOT_PAY;//订单为支付
+      break;
+    }
+
     dic.SetBigInteger(L"order_id_", rev.order_id());
     SendMsg(socket, packet, &dic, DRAW_BILL_RLY);
   } while (0);
@@ -267,6 +277,44 @@ int32 UserInterface::BlackcardConsumeRecord(const int32 socket,
   } while (0);
   if (err < 0) {
     SendError(socket, packet, err, BLACKCARD_CONSUME_RECORD_RLY);
+  }
+  return err;
+}
+
+int32 UserInterface::SkillsInfo(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    DicValue dic;
+    err = user_mysql_->SkillsInfoSelect(&dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, SKILL_INFO_RLY);
+  } while (0);
+  if (err < 0) {
+    SendError(socket, packet, err, SKILL_INFO_RLY);
+  }
+  return err;
+}
+
+int32 UserInterface::NewAppointment(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    NewAppointmentRecv recv(*packet);
+    err = recv.Deserialize();
+    if (err < 0)
+      break;
+    err = user_mysql_->NewAppointmentInsert(recv.uid(), recv.city_code(),
+                                            recv.start_time(), recv.end_time(),
+                                            recv.skills(), recv.is_other(),
+                                            recv.other_name(),
+                                            recv.other_gender(),
+                                            recv.ohter_phone());
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, NULL, NEW_APPOINTMENT_RLY);
+  } while (0);
+  if (err < 0) {
+    SendError(socket, packet, err, NEW_APPOINTMENT_RLY);
   }
   return err;
 }
@@ -514,8 +562,10 @@ void UserInterface::AddUser(int32 fd, DicValue* v, int64 type,
   //游客
   if (type == 1)
     user = new Visitor();
-  else
+  else if (type == 2)
     user = new Guide();
+  else
+    user = new Coordinator();
   user->Serialization(v);
   user->set_user_type(type);
   user->set_is_login(true);

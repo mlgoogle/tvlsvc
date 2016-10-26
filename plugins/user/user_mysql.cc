@@ -355,6 +355,42 @@ int32 UserMysql::BlackcardConsumeRecordSelect(int64 uid, DicValue* dic) {
   return err;
 }
 
+int32 UserMysql::SkillsInfoSelect(DicValue* dic) {
+  int32 err = 0;
+  bool r = false;
+  do {
+    std::stringstream ss;
+    ss << "call proc_SkillsInfoSelect()";
+    LOG(INFO)<< "sql:" << ss.str();
+    r = mysql_engine_->ReadData(ss.str(), dic, CallSkillsInfoSelect);
+    if (!r) {
+      err = SQL_EXEC_ERROR;
+      break;
+    }
+  } while (0);
+  return err;
+}
+
+int32 UserMysql::NewAppointmentInsert(int64 uid, int64 city, int64 start,
+                                      int64 end, std::string skill, int64 other,
+                                      std::string name, int64 gender,
+                                      std::string phone) {
+  int err = 0;
+  bool r = false;
+  do {
+    std::stringstream ss;
+    ss << "call proc_NewAppointmentInsert(" << uid << "," << city << ","
+        << start << "," << end << ",'" << skill << "'," << other << ",'"
+        << name << "'," << gender << ",'" << phone << "')";
+    LOG(INFO)<< "sql:" << ss.str();
+    r = mysql_engine_->WriteData(ss.str());
+    if (!r) {
+      err = SQL_EXEC_ERROR;
+      break;
+    }
+  } while (0);
+  return err;
+}
 
 void UserMysql::CallServiceCitySelect(void* param, Value* value) {
   base_storage::DBStorageEngine* engine =
@@ -707,7 +743,7 @@ void UserMysql::CallInvoiceInfoInsert(void* param, Value* value) {
   if (num > 0) {
     while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
       if (rows[0] != NULL) {
-        dict->SetBigInteger(L"invoice_status_", atoll(rows[0]));
+        dict->SetBigInteger(L"result_", atoll(rows[0]));
       }
     }
   } else {
@@ -826,6 +862,29 @@ void UserMysql::CallBlackcardConsumeRecordSelect(void* param, Value* value) {
   }
 }
 
+void UserMysql::CallSkillsInfoSelect(void* param, Value* value) {
+  base_storage::DBStorageEngine* engine =
+      (base_storage::DBStorageEngine*) (param);
+  MYSQL_ROW rows;
+  int32 num = engine->RecordCount();
+  DicValue* info = reinterpret_cast<DicValue*>(value);
+  if (num > 0) {
+    ListValue* list = new ListValue();
+    while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
+      DicValue* dict = new DicValue();
+      if (rows[0] != NULL)
+        dict->SetBigInteger(L"skill_id_", atoll(rows[0]));
+      if (rows[1] != NULL)
+        dict->SetString(L"skill_name_", rows[1]);
+      if (rows[2] != NULL)
+        dict->SetBigInteger(L"skill_type", atoll(rows[2]));
+      list->Append(dict);
+    }
+    info->Set(L"skills_list", list);
+  } else {
+    LOG(WARNING)<<"CallSkillsInfoSelect count < 0";
+  }
+}
 }
   // namespace user
 

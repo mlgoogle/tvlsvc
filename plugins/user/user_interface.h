@@ -67,6 +67,10 @@ class UserInterface {
 
   int32 BlackcardConsumeRecord(const int32 socket, PacketHead* packet);
 
+  int32 SkillsInfo(const int32 socket, PacketHead* packet);
+
+  int32 NewAppointment(const int32 socket, PacketHead* packet);
+
   int32 AuthorUser(std::string phone, std::string passwd, int32 type,
                    DicValue* v);
 

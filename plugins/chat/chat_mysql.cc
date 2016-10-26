@@ -170,6 +170,7 @@ int32 ChatMysql::NewOrderInsertAndSelect(int64 from, int64 to, int64 sid,
       break;
     }
     if (dic->empty()) {
+      //这里不应该运行
       err = NEW_ORDER_ERR;
       break;
     }
@@ -215,6 +216,8 @@ void ChatMysql::CallNewOrderInsertAndSelect(void* param, Value* value) {
         dict->SetBigInteger(L"end_", atoll(rows[13]));
       if (rows[14] != NULL)
         dict->SetBigInteger(L"service_type_", atoll(rows[14]));
+      if (rows[15] != NULL)
+        dict->SetBigInteger(L"is_asked_", atoll(rows[15]));
     }
   } else {
     LOG(WARNING) << "Call NewOrderInsertAndSelect count < 0";

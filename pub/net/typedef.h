@@ -16,6 +16,7 @@ typedef base_logic::DictionaryValue DicValue;
 typedef base_logic::ListValue ListValue;
 typedef base_logic::Value Value;
 
+typedef std::map<int64, Coordinator*> CoordinatorMap;
 typedef std::map<int64, Guide*> GuideMap;
 typedef std::map<int64, Visitor*> VisitorMap;
 typedef std::map<int64, UserInfo*> UserMap;

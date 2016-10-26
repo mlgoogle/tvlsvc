@@ -19,7 +19,7 @@ class UserData : public RefBase {
  public:
   UserData():uid_(-1), usual_lon_(0.0), usual_lat_(0.0), credit_lv_(0),
     praise_lv_(0), cash_lv_(0), user_type_(-1), socket_fd_(-1), heart_loss_(0),
-    is_login_(false) {
+    gender_(0), is_login_(false) {
   }
   ~UserData() {}
  public:
@@ -39,6 +39,7 @@ class UserData : public RefBase {
   int32 user_type_;
   int32 socket_fd_;
   int32 heart_loss_;
+  int64 gender_;
   bool is_login_;
 };
 
@@ -53,6 +54,16 @@ class GuideData : public UserData {
   std::string travel_label_;
   std::string business_label_;
   std::list<std::string> photo_list_;
+};
+
+class CoordinatorData : public UserData {
+ public:
+  CoordinatorData() {
+    UserData();
+    customers_num_ = 0;
+  }
+ public:
+  int32 customers_num_;
 };
 
 class UserInfo {
@@ -78,6 +89,7 @@ class UserInfo {
   inline bool is_login() const { return data_->is_login_; }
   inline int32 socket_fd() const { return data_->socket_fd_; }
   inline int32 heart_loss() const { return data_->heart_loss_; }
+  inline int64 gender() const { return data_->gender_; }
 
   inline void set_uid(int64 id) { data_->uid_ = id; }
   inline void set_phone_num(std::string mob) { data_->phone_num_ = mob; }
@@ -94,23 +106,9 @@ class UserInfo {
   inline void set_is_login(bool login) { data_->is_login_ = login; }
   inline void set_socket_fd(int32 fd) { data_->socket_fd_ = fd; }
   inline void set_heart_loss(int32 loss) { data_->heart_loss_ = loss; }
+  inline void set_gender(int64 sex) { data_->gender_ = sex; }
  public:
   UserData* data_;
-//  int64 uid_;
-//  std::string phone_num_;
-//  std::string nickname_;
-//  std::string passwd_;
-//  std::string head_url_;
-//  std::string usual_addr_;
-//  double usual_lon_;
-//  double usual_lat_;
-//  //信用度
-//  int32 credit_lv_;
-//  int32 praise_lv_;
-//  int32 cash_lv_;
-//
-//  int32 user_type_;
-//  bool is_login_;
 };
 
 class Guide : public UserInfo {
@@ -141,14 +139,26 @@ class Guide : public UserInfo {
   inline void AddPhone(std::string url) {
     ((GuideData*)data_)->photo_list_.push_back(url);
   }
-//  int32 business_lv_;
-//  std::string travel_label_;
-//  std::string business_label_;
-//  std::list<std::string> photo_list_;
 };
 
 class Visitor : public UserInfo {
 
+};
+
+class Coordinator : public UserInfo {
+ public:
+  Coordinator();
+  inline int32 customers_num() {
+    return  ((CoordinatorData*)data_)->customers_num_;
+  }
+  inline void add_customers() {
+    ((CoordinatorData*)data_)->customers_num_++;
+  }
+  inline void del_customers() {
+    ((CoordinatorData*)data_)->customers_num_ --;
+    if (((CoordinatorData*)data_)->customers_num_ < 0)
+      ((CoordinatorData*)data_)->customers_num_ = 0;
+  }
 };
 
 

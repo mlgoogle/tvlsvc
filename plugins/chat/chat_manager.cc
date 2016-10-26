@@ -64,6 +64,10 @@ int32 ChatManager::AssignPacket(const int32 socket, PacketHead* packet) {
       interface->EvaluateTrip(socket, packet);
       break;
     }
+    case FREE_COORDINATOR_REQ: {
+      interface->FreeCoordinator(socket, packet);
+      break;
+    }
   }
   return err;
 }

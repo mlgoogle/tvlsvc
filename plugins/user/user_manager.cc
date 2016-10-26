@@ -125,6 +125,14 @@ int32 UserManager::AssignPacket(const int32 socket, PacketHead* packet) {
       interface->BlackcardConsumeRecord(socket,packet);
       break;
     }
+    case SKILL_INFO_REQ: {
+      interface->SkillsInfo(socket,packet);
+      break;
+    }
+    case NEW_APPOINTMENT_REQ: {
+      interface->NewAppointment(socket,packet);
+      break;
+    }
   }
   return err;
 }
