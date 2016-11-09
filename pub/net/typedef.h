@@ -8,6 +8,7 @@
 #include <map>
 
 #include "pub/comm/user_info.h"
+#include "pub/comm/share_guide.h"
 #include "base/logic/base_values.h"
 
 
@@ -23,6 +24,10 @@ typedef std::map<int64, UserInfo*> UserMap;
 typedef std::map<int64, std::string> DeviceTokenMap;
 typedef std::map<int64, int32> UnReadMap;
 typedef std::map<int64, std::string> NickMap;
+typedef std::map<int64, ShareTourism*> ShareTourismMap;
+typedef std::map<int64, ShareSkill*> ShareSkillMap;
+typedef std::map<int64, int64> ShareIdMap;
+typedef std::map<int64, ShareIdMap> ShareTypeMap;
 
 
 

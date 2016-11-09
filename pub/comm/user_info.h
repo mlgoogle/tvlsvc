@@ -21,7 +21,7 @@ class UserData : public RefBase {
     praise_lv_(0), cash_lv_(0), user_type_(-1), socket_fd_(-1), heart_loss_(0),
     gender_(0), is_login_(false) {
   }
-  ~UserData() {}
+  virtual ~UserData() {}
  public:
   int64 uid_;
   std::string phone_num_;
@@ -56,6 +56,7 @@ class GuideData : public UserData {
   std::list<std::string> photo_list_;
 };
 
+//客服
 class CoordinatorData : public UserData {
  public:
   CoordinatorData() {

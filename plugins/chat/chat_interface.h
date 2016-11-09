@@ -39,10 +39,15 @@ class ChatInterface {
   int32 ChatRecord(const int32 socket, PacketHead* packet);
 
   int32 PushMsgRead(const int32 socket, PacketHead* packet);
-
+//评论
   int32 EvaluateTrip(const int32 socket, PacketHead* packet);
+//回去评论信息
+  int32 EvaluateInfo(const int32 socket, PacketHead* packet);
+
   //请求空闲客服
   int32 FreeCoordinator(const int32 socket, PacketHead* packet);
+//余额支付 邀约-黑卡
+  int32 SpentCash(const int32 socket, PacketHead* packet);
 
   int32 PushChatMsg(ChatPacket rev);
 

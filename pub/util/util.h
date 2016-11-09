@@ -26,7 +26,14 @@ void BonderOfCoordinate(double lon, double lat, double dis, double* out);
 int Random(int min, int max);
 
 int PushApnChatMsg(char* dt, int unreadcount, char* locKey, char* body);
-}  // namespace util
+
+bool GetIPAddress(const int socket, std::string* ip, int* port);
+
+//获取随机字符串
+//length 要获取字符串的长度 不含 '/0'
+std::string RandomString(int length);
+
+} // namespace util
 
 
 

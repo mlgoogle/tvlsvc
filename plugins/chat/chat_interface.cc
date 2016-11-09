@@ -92,7 +92,6 @@ int32 ChatInterface::AnswerInvitation(const int32 socket, PacketHead* packet) {
     //回复游客（发起人）
     UserInfo* u = data_share_mgr_->GetUser(rev.from_uid());
     if (u == NULL || !u->is_login()) {
-      //todo 不在线
       std::string content;
       if (rev.order_status() == 2)
         content = " 愿与你同游";
@@ -132,7 +131,6 @@ int32 ChatInterface::AskInvitation(const int32 socket, PacketHead* packet) {
       break;
     // 通知被邀约者
     if (u == NULL || !u->is_login()) {
-      //todo 不在线处理
       LOG(INFO)<< "invitate to user is not login";
       // 回复被邀请者
       PushGtMsg(rev.from_uid(), rev.to_uid(), rev.body_str(), " 邀你同游", 2);
@@ -260,6 +258,14 @@ int32 ChatInterface::FreeCoordinator(const int32 socket, PacketHead* packet) {
   return err;
 }
 
+int32 ChatInterface::SpentCash(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+
+  } while (0);
+  return err;
+}
+
 int32 ChatInterface::EvaluateTrip(const int32 socket, PacketHead* packet) {
   int32 err = 0;
   do {
@@ -281,6 +287,25 @@ int32 ChatInterface::EvaluateTrip(const int32 socket, PacketHead* packet) {
   } while (0);
   if (err < 0)
     SendError(socket, packet, err, EVALUATE_TRIP_RLY);
+  return err;
+}
+
+int32 ChatInterface::EvaluateInfo(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    EvaluateInfoRecv rev(*packet);
+    err = rev.Deserialize();
+    if (err < 0)
+      break;
+    DicValue dic;
+    err = chat_mysql_->EvaluateInfoSelect(rev.order_id(), &dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, ORDER_EVALUATE_INFO_RLY);
+
+  } while (0);
+  if (err < 0)
+    SendError(socket, packet, err, ORDER_EVALUATE_INFO_RLY);
   return err;
 }
 

@@ -61,6 +61,45 @@ int32 LoginRecv::Deserialize() {
   return err;
 }
 
+
+SMSCodeLoginRecv::SMSCodeLoginRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  timestamp_ = 0;
+  verify_code_ = 0;
+  user_type_ = 0;
+}
+
+int32 SMSCodeLoginRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+      base_logic::IMPL_JSON, &body_str_);
+  std::string err_str;
+  DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetBigInteger(L"timestamp_", &timestamp_);
+      LOG_IF(ERROR, !r) << "SMSCodeLoginRecv::timestamp_ parse error";
+      r = dic->GetBigInteger(L"verify_code_", &verify_code_);
+      LOG_IF(ERROR, !r) << "SMSCodeLoginRecv::verify_code_ parse error";
+      r = dic->GetBigInteger(L"user_type_", &user_type_);
+      LOG_IF(ERROR, !r) << "SMSCodeLoginRecv::user_type_ parse error";
+      r = dic->GetString(L"phone_num_", &phone_num_);
+      LOG_IF(ERROR, !r) << "SMSCodeLoginRecv::phone_num_ parse error";
+      r = dic->GetString(L"token_", &token_);
+      LOG_IF(ERROR, !r) << "SMSCodeLoginRecv::token_ parse error";
+    } else {
+      LOG(ERROR)<< "SMSCodeLoginRecv Deserialize error";
+      err = SMS_CODE_LOGIN_JSON_ERR;
+      break;
+    }
+  }while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                                serializer);
+  return err;
+}
+
 ObtainGuideRecv::ObtainGuideRecv(PacketHead packet) {
   head_ = packet.head();
   body_str_ = packet.body_str();
@@ -375,8 +414,8 @@ int32 ServiceDetailsRecv::Deserialize() {
   DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
   do {
     if (dic != NULL) {
-      r = dic->GetString(L"sid_str_", &sid_str_);
-      LOG_IF(ERROR, !r) << "ServiceDetailsRecv::uid_str_ parse error";
+      r = dic->GetString(L"oid_str_", &oid_str_);
+      LOG_IF(ERROR, !r) << "ServiceDetailsRecv::oid_str_ parse error";
 
     } else {
       LOG(ERROR)<< "ServiceDetailsRecv Deserialize error";
@@ -392,8 +431,8 @@ int32 ServiceDetailsRecv::Deserialize() {
 DrawBillRecv::DrawBillRecv(PacketHead packet) {
   head_ = packet.head();
   body_str_ = packet.body_str();
-  order_id_ = 0;
   invoice_type_ = 0;
+  uid_ = 0;
 }
 
 int32 DrawBillRecv::Deserialize() {
@@ -405,8 +444,10 @@ int32 DrawBillRecv::Deserialize() {
   DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
   do {
     if (dic != NULL) {
-      r = dic->GetBigInteger(L"order_id_", &order_id_);
-      LOG_IF(ERROR, !r) << "DrawBillRecv::order_id_ parse error";
+      r = dic->GetBigInteger(L"uid_", &uid_);
+      LOG_IF(ERROR, !r) << "DrawBillRecv::uid_ parse error";
+      r = dic->GetString(L"oid_str_", &oid_str_);
+      LOG_IF(ERROR, !r) << "DrawBillRecv::oid_str_ parse error";
       r = dic->GetString(L"title_", &title_);
       LOG_IF(ERROR, !r) << "DrawBillRecv::title_ parse error";
       r = dic->GetString(L"taxpayer_num_", &taxpayer_num_);
@@ -438,6 +479,8 @@ BillRecordRecv::BillRecordRecv(PacketHead packet) {
   head_ = packet.head();
   body_str_ = packet.body_str();
   uid_ = -1;
+  count_ = 0;
+  last_invoice_id_ = 0;
 }
 
 int32 BillRecordRecv::Deserialize() {
@@ -451,9 +494,43 @@ int32 BillRecordRecv::Deserialize() {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"uid_", &uid_);
       LOG_IF(ERROR, !r) << "BillRecordRecv::uid_ parse error";
+      r = dic->GetBigInteger(L"count_", &count_);
+      LOG_IF(ERROR, !r) << "BillRecordRecv::count_ parse error";
+      if (count_ == 0 || count_ < 0 || count_ > 20)
+        count_ = 20;
+      r = dic->GetBigInteger(L"last_invoice_id_", &last_invoice_id_);
+      LOG_IF(ERROR, !r) << "BillRecordRecv::last_invoice_id_ parse error";
     } else {
       LOG(ERROR)<< "BillRecordRecv Deserialize error";
       err = BILL_RECORD_JSON_ERR;
+      break;
+    }
+  }while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                                serializer);
+  return err;
+}
+
+InvoiceDetailRecv::InvoiceDetailRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  invoice_id_ = 0;
+}
+
+int32 InvoiceDetailRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+      base_logic::IMPL_JSON, &body_str_);
+  std::string err_str;
+  DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetBigInteger(L"invoice_id_", &invoice_id_);
+      LOG_IF(ERROR, !r) << "InvoiceDetailRecv::invoice_id_ parse error";
+    } else {
+      LOG(ERROR)<< "InvoiceDetailRecv Deserialize error";
+      err = INVOICE_DETAIL_JSON_ERR;
       break;
     }
   }while (0);
@@ -554,7 +631,7 @@ NewAppointmentRecv::NewAppointmentRecv(PacketHead packet) {
   uid_ = 0;
   city_code_ = 0;
   start_time_ = 0;
-  ;
+  other_gender_ = 1;
   end_time_ = 0;
   is_other_ = 0;
   ;
@@ -596,6 +673,454 @@ int32 NewAppointmentRecv::Deserialize() {
     } else {
       LOG(ERROR)<< "NewAppointmentRecv Deserialize error";
       err = NEW_APPOINTMENT_JSON_ERR;
+      break;
+    }
+  }while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                                serializer);
+  return err;
+}
+
+WxPlaceOrderRecv::WxPlaceOrderRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  uid_ = 0;
+  price_ = 0;  // 订单总价  单位 分
+}
+
+int32 WxPlaceOrderRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+      base_logic::IMPL_JSON, &body_str_);
+  std::string err_str;
+  DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetBigInteger(L"uid_", &uid_);
+      LOG_IF(ERROR, !r) << "WxPlaceOrderRecv::uid_ parse error";
+      r = dic->GetString(L"title_", &title_);
+      LOG_IF(ERROR, !r) << "WxPlaceOrderRecv::title_ parse error";
+      r = dic->GetBigInteger(L"price_", &price_);
+      LOG_IF(ERROR, !r) << "WxPlaceOrderRecv::price_ parse error";
+    } else {
+      LOG(ERROR)<< "WxPlaceOrderRecv Deserialize error";
+      err = WX_PLACE_ORDER_JSON_ERR;
+      break;
+    }
+  }while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                                serializer);
+  return err;
+}
+
+WXPayClientRecv::WXPayClientRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  uid_ = 0;
+  recharge_id_ = 0;
+  pay_result_ = 0;
+}
+
+int32 WXPayClientRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+      base_logic::IMPL_JSON, &body_str_);
+  std::string err_str;
+  DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetBigInteger(L"uid_", &uid_);
+      LOG_IF(ERROR, !r) << "WXPayClientRecv::uid_ parse error";
+      r = dic->GetBigInteger(L"recharge_id_", &recharge_id_);
+      LOG_IF(ERROR, !r) << "WXPayClientRecv::recharge_id_ parse error";
+      r = dic->GetBigInteger(L"pay_result_", &pay_result_);
+      LOG_IF(ERROR, !r) << "WXPayClientRecv::pay_result_ parse error";
+    } else {
+      LOG(ERROR)<< "WxPlaceOrderRecv Deserialize error";
+      err = WXPAY_CLIENT_JSON_ERR;
+      break;
+    }
+  }while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                                serializer);
+  return err;
+}
+
+IdentityPicRecv::IdentityPicRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  uid_ = 0;
+}
+
+int32 IdentityPicRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+      base_logic::IMPL_JSON, &body_str_);
+  std::string err_str;
+  DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetBigInteger(L"uid_", &uid_);
+      LOG_IF(ERROR, !r) << "IdentityPicRecv::uid_ parse error";
+      r = dic->GetString(L"front_pic_", &front_pic_);
+      LOG_IF(ERROR, !r) << "IdentityPicRecv::front_pic_ parse error";
+      r = dic->GetString(L"back_pic_", &back_pic_);
+      LOG_IF(ERROR, !r) << "IdentityPicRecv::back_pic_ parse error";
+    } else {
+      LOG(ERROR)<< "IdentityPicRecv Deserialize error";
+      err = IDENTITY_PIC_JSON_ERR;
+      break;
+    }
+  }while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                                serializer);
+  return err;
+}
+
+GuideDetailRecv::GuideDetailRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  uid_ = 0;
+}
+
+int32 GuideDetailRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+      base_logic::IMPL_JSON, &body_str_);
+  std::string err_str;
+  DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetBigInteger(L"uid_", &uid_);
+      LOG_IF(ERROR, !r) << "GuideDetailRecv::uid_ parse error";
+    } else {
+      LOG(ERROR)<< "GuideDetailRecv Deserialize error";
+      err = GUIDE_DETAIL_JSON_ERR;
+      break;
+    }
+  }while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                                serializer);
+  return err;
+  return err;
+}
+
+IdentityStatusRecv::IdentityStatusRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  uid_ = 0;
+}
+
+int32 IdentityStatusRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+      base_logic::IMPL_JSON, &body_str_);
+  std::string err_str;
+  DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetBigInteger(L"uid_", &uid_);
+      LOG_IF(ERROR, !r) << "IdentityStatusRecv::uid_ parse error";
+    } else {
+      LOG(ERROR)<< "IdentityStatusRecv Deserialize error";
+      err = IDENTITY_STATUS_JSON_ERR;
+      break;
+    }
+  }while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                                serializer);
+  return err;
+}
+
+PaggingRecv::PaggingRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  last_id_ = 0;
+  count_ = 10;
+  page_type_ = 0;
+}
+
+int32 PaggingRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+      base_logic::IMPL_JSON, &body_str_);
+  std::string err_str;
+  DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetBigInteger(L"last_id_", &last_id_);
+      LOG_IF(ERROR, !r) << "PaggingRecv::last_id_ parse error";
+      r = dic->GetBigInteger(L"count_", &count_);
+      LOG_IF(ERROR, !r) << "PaggingRecv::count_ parse error";
+      r = dic->GetBigInteger(L"page_type_", &page_type_);
+      LOG_IF(ERROR, !r) << "PaggingRecv::page_type_ parse error";
+      if (count_ <= 0 || count_ > 10)
+        count_ = 10;
+    } else {
+      LOG(ERROR)<< "PaggingRecv Deserialize error";
+      err = SHARE_PAGING_JSON_ERR;
+      break;
+    }
+  }while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                                serializer);
+  return err;
+}
+
+ShareTourismDetailRecv::ShareTourismDetailRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  share_id_ = 0;
+}
+
+int32 ShareTourismDetailRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+      base_logic::IMPL_JSON, &body_str_);
+  std::string err_str;
+  DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetBigInteger(L"share_id_", &share_id_);
+      LOG_IF(ERROR, !r) << "ShareTourismDetailRecv::share_id_ parse error";
+    } else {
+      LOG(ERROR)<< "ShareTourismDetailRecv Deserialize error";
+      err = SHARE_TOURISM_DETAILS_JSON_ERR;
+      break;
+    }
+  }while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                                serializer);
+  return err;
+}
+
+ShareSkillDetailRecv::ShareSkillDetailRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  share_id_ = 0;
+}
+
+int32 ShareSkillDetailRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+      base_logic::IMPL_JSON, &body_str_);
+  std::string err_str;
+  DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetBigInteger(L"share_id_", &share_id_);
+      LOG_IF(ERROR, !r) << "ShareSkillDetailRecv::share_id_ parse error";
+    } else {
+      LOG(ERROR)<< "ShareSkillDetailRecv Deserialize error";
+      err = SHARE_SKILL_DETAILS_JSON_ERR;
+      break;
+    }
+  }while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                                serializer);
+  return err;
+}
+
+ShareSkillDiscussRecv::ShareSkillDiscussRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  share_id_ = 0;
+  last_id_ = 0;
+  count_ = 0;
+}
+
+int32 ShareSkillDiscussRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+      base_logic::IMPL_JSON, &body_str_);
+  std::string err_str;
+  DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetBigInteger(L"share_id_", &share_id_);
+      LOG_IF(ERROR, !r) << "ShareSkillDiscussRecv::share_id_ parse error";
+      r = dic->GetBigInteger(L"last_id_", &last_id_);
+      LOG_IF(ERROR, !r) << "ShareSkillDiscussRecv::last_id_ parse error";
+      r = dic->GetBigInteger(L"count_", &count_);
+      LOG_IF(ERROR, !r) << "ShareSkillDiscussRecv::share_id_ parse error";
+      if (count_ <=0 || count_ >50)
+        count_ = 50;
+    } else {
+      LOG(ERROR)<< "ShareSkillDiscussRecv Deserialize error";
+      err = SHARE_SKILL_DISCUSS_JSON_ERR;
+      break;
+    }
+  }while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                                serializer);
+  return err;
+}
+
+EntryShareSkillRecv::EntryShareSkillRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  share_id_ = 0;
+  uid_ = 0;
+}
+
+int32 EntryShareSkillRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+      base_logic::IMPL_JSON, &body_str_);
+  std::string err_str;
+  DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetBigInteger(L"share_id_", &share_id_);
+      LOG_IF(ERROR, !r) << "EntryShareSkillRecv::share_id_ parse error";
+      r = dic->GetBigInteger(L"uid_", &uid_);
+      LOG_IF(ERROR, !r) << "EntryShareSkillRecv::uid_ parse error";
+    } else {
+      LOG(ERROR)<< "EntryShareSkillRecv Deserialize error";
+      err = ENTRY_SHARE_SKILL_JSON_ERR;
+      break;
+    }
+  }while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                                serializer);
+  return err;
+}
+
+UserCashRecv::UserCashRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  uid_ = 0;
+}
+
+int32 UserCashRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+      base_logic::IMPL_JSON, &body_str_);
+  std::string err_str;
+  DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetBigInteger(L"uid_", &uid_);
+      LOG_IF(ERROR, !r) << "UserCashRecv::uid_ parse error";
+    } else {
+      LOG(ERROR)<< "UserCashRecv Deserialize error";
+      err = USER_CASH_JSON_ERR;
+      break;
+    }
+  }while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                                serializer);
+  return err;
+}
+
+AppointmentRecordRecv::AppointmentRecordRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  uid_ = 0;
+  last_id_ = 0;
+  count_ = 10;
+}
+
+int32 AppointmentRecordRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+      base_logic::IMPL_JSON, &body_str_);
+  std::string err_str;
+  DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetBigInteger(L"uid_", &uid_);
+      LOG_IF(ERROR, !r) << "AppointmentRecordRecv::uid_ parse error";
+      r = dic->GetBigInteger(L"last_id_", &last_id_);
+      LOG_IF(ERROR, !r) << "AppointmentRecordRecv::last_id_ parse error";
+      r = dic->GetBigInteger(L"count_", &count_);
+      LOG_IF(ERROR, !r) << "AppointmentRecordRecv::count_ parse error";
+      if (count_ > 20 || count_ < 0)
+        count_ = 20;
+    } else {
+      LOG(ERROR)<< "AppointmentRecordRecv Deserialize error";
+      err = APPOINTMENT_RECORD_JSON_ERR;
+      break;
+    }
+  }while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                                serializer);
+  return err;
+}
+
+ChangeGuideServiceRecv::ChangeGuideServiceRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  uid_ = 0;
+  verify_code_ = 0;
+  timestamp_ = 0;
+}
+
+ChangeGuideServiceRecv::~ChangeGuideServiceRecv() {
+  std::list<ServiceData*>::iterator it = service_list_.begin();
+  for (; it != service_list_.end(); it++) {
+    ServiceData* data = *it;
+    if (data != NULL) {
+      delete data;
+      data = NULL;
+    }
+  }
+  service_list_.clear();
+}
+
+int32 ChangeGuideServiceRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+      base_logic::IMPL_JSON, &body_str_);
+  std::string err_str;
+  DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetBigInteger(L"uid_", &uid_);
+      LOG_IF(ERROR, !r) << "ChangeGuideServiceRecv::uid_ parse error";
+      r = dic->GetBigInteger(L"verify_code_", &verify_code_);
+      LOG_IF(ERROR, !r) << "ChangeGuideServiceRecv::verify_code_ parse error";
+      r = dic->GetBigInteger(L"timestamp_", &timestamp_);
+      LOG_IF(ERROR, !r) << "ChangeGuideServiceRecv::phone_num_ parse error";
+      r = dic->GetString(L"token_", &token_);
+      LOG_IF(ERROR, !r) << "ChangeGuideServiceRecv::token_ parse error";
+      ListValue* list;
+      r = dic->GetList(L"serveice", &list);
+      if (!r) {
+        err = REQUEST_JSON_ERR;
+        break;
+      }
+      int count = list->GetSize();
+      for (int i = 0; i < count; i++) {
+        DicValue* info ;
+        r = list->GetDictionary(i, &info);
+        if (r) {
+          ServiceData* data = new ServiceData;
+          info->GetBigInteger(L"service_id_", &data->service_id_);
+          info->GetBigInteger(L"service_type_", &data->service_type_);
+          info->GetBigInteger(L"change_type_", &data->change_type_);
+          info->GetString(L"service_name_", &data->service_name_);
+          info->GetBigInteger(L"service_price_", &data->service_price_);
+          info->GetString(L"service_time_", &data->service_time_);
+          service_list_.push_back(data);
+        }
+      }
+    } else {
+      LOG(ERROR)<< "AppointmentRecordRecv Deserialize error";
+      err = REQUEST_JSON_ERR;
       break;
     }
   }while (0);

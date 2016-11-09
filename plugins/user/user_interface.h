@@ -21,7 +21,7 @@ class UserInterface {
  public:
   static UserInterface* GetInstance();
   static void FreeInstance();
-
+  void test();
  public:
   void InitConfig(config::FileConfig* config);
 
@@ -59,6 +59,8 @@ class UserInterface {
 
   int32 BillingRecord(const int32 socket, PacketHead* packet);
 
+  int32 InvoiceDetail(const int32 socket, PacketHead* packet);
+
   int32 DeviceToken(const int32 socket, PacketHead* packet);
 
   int32 BlackcardPrivilege(const int32 socket, PacketHead* packet);
@@ -69,12 +71,51 @@ class UserInterface {
 
   int32 SkillsInfo(const int32 socket, PacketHead* packet);
 
+
   int32 NewAppointment(const int32 socket, PacketHead* packet);
+  int32 AppointmentRecord(const int32 socket, PacketHead* packet);
+
+  int32 UpImgToken(const int32 socket, PacketHead* packet);
+
+  int32 WXPlaceOrder(const int32 socket, PacketHead* packet);
+
+  int32 WXPayClientResponse(const int32 socket, PacketHead* packet);
+
+  int32 WXPayServerResponse(const int32 socket, PacketHead* packet);
+
+  //服务者上传身份证信息
+  int32 IdentityPicInfo(const int32 socket, PacketHead* packet);
+
+  int32 IdentityReviewStatus(const int32 socket, PacketHead* packet);
+
+  int32 TourismShareTypeInfo(const int32 socket, PacketHead* packet);
+
+  int32 TourismShareRecommend(const int32 socket, PacketHead* packet);
+
+  int32 TourismShareList(const int32 socket, PacketHead* packet);
+
+  int32 SkillShareList(const int32 socket, PacketHead* packet);
+
+  int32 TourismShareDetail(const int32 socket, PacketHead* packet);
+
+  int32 SkillShareDetail(const int32 socket, PacketHead* packet);
+
+  int32 SkillShareDiscuss(const int32 socket, PacketHead* packet);
+
+  int32 EntrySkillShare(const int32 socket, PacketHead* packet);
+
+  int32 GuideServiceList(const int32 socket, PacketHead* packet);
+
+  int32 ChangeGuideService(const int32 socket, PacketHead* packet);
+
+  int32 UserCashInfo(const int32 socket, PacketHead* packet);
 
   int32 AuthorUser(std::string phone, std::string passwd, int32 type,
                    DicValue* v);
 
   int32 CheckHeartLoss();
+//更新共享数据，旅游分享和技能分享
+  int32 InitShareGuide();
   int32 CloseSocket(const int fd);
 
   void AddUser(int32 fd, DicValue* v, int64 type, std::string pwd);
@@ -91,6 +132,10 @@ class UserInterface {
 
   void InitShareDataMgr(share::DataShareMgr* data);
  private:
+  int32 InitShareType();
+  int32 InitShareDetails();
+  int32 InitShareSkills();
+
   static UserInterface* instance_;
   UserMysql* user_mysql_;
   share::DataShareMgr* data_share_mgr_;

@@ -11,6 +11,7 @@ SRC_PUB_UTIL = ${SRC_DIR}pub/util
 SRC_PUB_STORAGE = ${SRC_DIR}pub/storage
 SRC_PUB_SHARE = ${SRC_DIR}pub/share
 SRC_PUB_COMM = ${SRC_DIR}pub/comm
+SRC_PUB_PAY = ${SRC_DIR}pub/pay
 
 LINK_DYNAMIC = -Wl,-Bdynamic -lpthread
 LINK_STATIC = -Wl,-Bstatic -L${LIB_DIR}/third_party/glog/lib/libglog.a
@@ -70,12 +71,18 @@ data_mysql_engine.o : ${SRC_PUB_STORAGE}/data_mysql_engine.cc  ${SRC_PUB_STORAGE
 user_info.o : ${SRC_PUB_COMM}/user_info.cc  ${SRC_PUB_COMM}/user_info.h 
 	${CXX} ${CXXFLAGS} -c ${SRC_PUB_COMM}/user_info.cc ${INCLUDE_PATHS}
 
+share_guide.o : ${SRC_PUB_COMM}/share_guide.cc  ${SRC_PUB_COMM}/share_guide.h 
+	${CXX} ${CXXFLAGS} -c ${SRC_PUB_COMM}/share_guide.cc ${INCLUDE_PATHS}
+
 data_share_mgr.o : ${SRC_PUB_SHARE}/data_share_mgr.cc  ${SRC_PUB_SHARE}/data_share_mgr.h 
 	${CXX} ${CXXFLAGS} -c ${SRC_PUB_SHARE}/data_share_mgr.cc ${INCLUDE_PATHS}
 
+wx_order.o : ${SRC_PUB_PAY}/wxpay/wx_order.cc  ${SRC_PUB_PAY}/wxpay/wx_order.h 
+	${CXX} ${CXXFLAGS} -c ${SRC_PUB_PAY}/wxpay/wx_order.cc ${INCLUDE_PATHS}
+
 ${OUT_PUT} : user_init.o user_logic.o proto_buf.o user_manager.o \
 		user_interface.o user_proto.o user_mysql.o util.o data_engine.o \
-		mysql_pool.o data_mysql_engine.o user_info.o data_share_mgr.o 
+		mysql_pool.o data_mysql_engine.o user_info.o share_guide.o data_share_mgr.o wx_order.o 
 	${CXX} ${CXXFLAGS} $^ -o ${OUT_PUT} ${LINK_PATH} -lpthread -lmysqlclient \
 		-lcurl ${LIB_DIR}/third_party/glog/lib/libglog.a \
 		${LIB_DIR}/third_party/gtpush/lib/libgtpushsdk_gcc4.1.2_64.a \
