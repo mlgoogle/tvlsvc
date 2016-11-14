@@ -120,6 +120,27 @@ int32 ChatMysql::DeviceTokenSelect(int64 uid, std::string* token) {
   return err;
 }
 
+//todo
+int32 ChatMysql::EvaluateInfoSelect(int64 oid, DicValue* dic) {
+  int32 err = 0;
+  bool r = false;
+  do {
+    std::stringstream ss;
+    ss << "call proc_EvaluateInfoSelect(" << oid << ")";
+    LOG(INFO) << "sql:" << ss.str();
+    r = mysql_engine_->ReadData(ss.str(), dic, CallEvaluateInfoSelect);
+    if (!r) {
+      err = SQL_EXEC_ERROR;
+      break;
+    }
+    if (dic->empty()) {
+      err = NO_EVALUTE_INFO;
+      break;
+    }
+  } while (0);
+  return err;
+}
+
 int32 ChatMysql::EvaluateTripInsert(int64 oid, int64 s_score, int64 u_score,
                          std::string remarks, int64 from, int64 to) {
   int32 err = 0;
@@ -170,6 +191,7 @@ int32 ChatMysql::NewOrderInsertAndSelect(int64 from, int64 to, int64 sid,
       break;
     }
     if (dic->empty()) {
+      //这里不应该运行
       err = NEW_ORDER_ERR;
       break;
     }
@@ -215,6 +237,8 @@ void ChatMysql::CallNewOrderInsertAndSelect(void* param, Value* value) {
         dict->SetBigInteger(L"end_", atoll(rows[13]));
       if (rows[14] != NULL)
         dict->SetBigInteger(L"service_type_", atoll(rows[14]));
+      if (rows[15] != NULL)
+        dict->SetBigInteger(L"is_asked_", atoll(rows[15]));
     }
   } else {
     LOG(WARNING) << "Call NewOrderInsertAndSelect count < 0";
@@ -281,5 +305,26 @@ void ChatMysql::CallUserNickSelect(void* param, Value* value) {
   }
 }
 
+void ChatMysql::CallEvaluateInfoSelect(void* param, Value* value) {
+  base_storage::DBStorageEngine* engine =
+      (base_storage::DBStorageEngine*)(param);
+  MYSQL_ROW rows;
+  int32 num = engine->RecordCount();
+  DicValue* dict = reinterpret_cast<DicValue*>(value);
+  if (num > 0) {
+    while (rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)) {
+      if (rows[0] != NULL)
+        dict->SetBigInteger(L"order_id_", atoll(rows[0]));
+      if (rows[1] != NULL)
+        dict->SetBigInteger(L"service_score_", atoll(rows[1]));
+      if (rows[2] != NULL)
+        dict->SetBigInteger(L"user_score_", atoll(rows[2]));
+      if (rows[3] != NULL)
+        dict->SetString(L"remarks_", rows[3]);
+    }
+  } else {
+    LOG(WARNING) << "Call CallEvaluateInfoSelect count < 0";
+  }
+}
 
 }  // namespace chat

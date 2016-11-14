@@ -232,5 +232,33 @@ int32 EvaluateTripRecv::Deserialize() {
   return err;
 }
 
+EvaluateInfoRecv::EvaluateInfoRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  order_id_ = 0;
+}
+
+int32 EvaluateInfoRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer =
+     base_logic::ValueSerializer::Create(base_logic::IMPL_JSON, &body_str_);
+  std::string err_str;
+  DicValue* dic = (DicValue*)serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetBigInteger(L"order_id_", &order_id_);
+      LOG_IF(ERROR, !r) << "EvaluateInfoRecv::order_id_ parse error";
+    } else {
+      LOG(ERROR) << "EvaluateInfoRecv Deserialize error";
+      err = EVALUATE_INFO_JSON_ERR;
+    break;
+    }
+  } while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                               serializer);
+  return err;
+}
+
 
 }  // namespace chat

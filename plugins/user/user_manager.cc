@@ -113,6 +113,10 @@ int32 UserManager::AssignPacket(const int32 socket, PacketHead* packet) {
       interface->BillingRecord(socket, packet);
       break;
     }
+    case INVOICE_DETAIL_REQ : {
+      interface->InvoiceDetail(socket, packet);
+      break;
+    }
     case BLACKCARD_PRIVILEGE_REQ: {
       interface->BlackcardPrivilege(socket, packet);
       break;
@@ -125,6 +129,86 @@ int32 UserManager::AssignPacket(const int32 socket, PacketHead* packet) {
       interface->BlackcardConsumeRecord(socket,packet);
       break;
     }
+    case SKILL_INFO_REQ: {
+      interface->SkillsInfo(socket,packet);
+      break;
+    }
+    case NEW_APPOINTMENT_REQ: {
+      interface->NewAppointment(socket,packet);
+      break;
+    }
+    case APPOINTMENT_RECORD_REQ: {
+      interface->AppointmentRecord(socket,packet);
+      break;
+    }
+    case IMG_TOKEN_REQ: {
+      interface->UpImgToken(socket,packet);
+      break;
+    }
+    case WX_PLACE_ORDER_REQ: {
+      interface->WXPlaceOrder(socket,packet);
+      break;
+    }
+    case WXPAY_CLIENT_REQ: {
+      interface->WXPayClientResponse(socket,packet);
+      break;
+    }
+    case WXPAY_SERVER_REQ: {
+      interface->WXPayServerResponse(socket,packet);
+      break;
+    }
+    case IDENTITY_PIC_REQ: {
+      interface->IdentityPicInfo(socket,packet);
+      break;
+    }
+    case IDENTITY_STATUS_REQ: {
+      interface->IdentityReviewStatus(socket,packet);
+      break;
+    }
+    case SHARE_TOURISM_TYPE_REQ: {
+      interface->TourismShareTypeInfo(socket,packet);
+      break;
+    }
+    case SHARE_TOURISM_RECOMMEND_REQ: {
+      interface->TourismShareRecommend(socket,packet);
+      break;
+    }
+    case SHARE_TOURISM_LIST_REQ: {
+      interface->TourismShareList(socket,packet);
+      break;
+    }
+    case SHARE_SKILL_LIST_REQ: {
+      interface->SkillShareList(socket,packet);
+      break;
+    }
+    case SHARE_TOURISM_DETAIL_REQ: {
+      interface->TourismShareDetail(socket,packet);
+      break;
+    }
+    case USER_CASH_REQ: {
+      interface->UserCashInfo(socket,packet);
+      break;
+    }
+    case SHARE_SKILL_DETAIL_REQ: {
+      interface->SkillShareDetail(socket,packet);
+      break;
+    }
+    case SHARE_SKILL_DISCUSS_REQ: {
+      interface->SkillShareDiscuss(socket,packet);
+      break;
+    }
+    case ENTRY_SHARE_SKILL_REQ: {
+      interface->EntrySkillShare(socket,packet);
+      break;
+    }
+    case GUIDE_SERVICE_LIST_REQ: {
+      interface->GuideServiceList(socket,packet);
+      break;
+    }
+    case CHANGE_GUIDE_SERVICE_REQ: {
+      interface->ChangeGuideService(socket,packet);
+      break;
+    }
   }
   return err;
 }
@@ -132,6 +216,12 @@ int32 UserManager::AssignPacket(const int32 socket, PacketHead* packet) {
 int32 UserManager::CheckHeartLoss() {
   UserInterface* interface = UserInterface::GetInstance();
   interface->CheckHeartLoss();
+  return 0;
+}
+
+int32 UserManager::InitShareGuideData() {
+  UserInterface* interface = UserInterface::GetInstance();
+  interface->InitShareGuide();
   return 0;
 }
 

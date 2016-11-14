@@ -102,6 +102,25 @@ class EvaluateTripRecv : public PacketHead {
   std::string remarks_;  //评论
 };
 
+class EvaluateInfoRecv : public PacketHead {
+ public:
+  EvaluateInfoRecv(PacketHead packet);
+  int32 Deserialize();
+
+  inline int64 order_id() { return order_id_; }
+ private:
+  int64 order_id_;
+};
+
+class SpentCashRecv : public PacketHead {
+ public:
+
+ private:
+  int64 uid_;
+  int64 oid_;
+  int64 cash_type_;
+};
+
 }  // namespace chat
 
 

@@ -28,7 +28,6 @@ static char *host ="http://sdk.open.api.getui.net/apiex.htm";
 static char *appKey = "yEIPB4YFxw64Ag9yJpaXT9";
 static char *masterSecret = "bMsRgf7RrA6jBG4sNbv0F6";
 
-#define CONNECT_CKECK 100
 namespace user {
 Userlogic* Userlogic::instance_ = NULL;
 
@@ -143,6 +142,8 @@ bool Userlogic::OnBroadcastClose(struct server *srv, const int socket) {
 
 bool Userlogic::OnInitTimer(struct server *srv) {
   srv->add_time_task(srv, "user", CONNECT_CKECK, 10, -1);
+  srv->add_time_task(srv, "user", SHARE_DATA_INIT, 1, 1);
+  srv->add_time_task(srv, "user", SHARE_DATA_INIT_TEN, 10*60, 1);
   return true;
 }
 
@@ -152,6 +153,14 @@ bool Userlogic::OnTimeout(struct server *srv, char *id, int opcode, int time) {
   switch (opcode) {
     case CONNECT_CKECK: {
 //      user_manager_->CheckHeartLoss();
+      break;
+    }
+    case SHARE_DATA_INIT: {
+      user_manager_->InitShareGuideData();
+      break;
+    }
+    case SHARE_DATA_INIT_TEN: {
+      user_manager_->InitShareGuideData();
       break;
     }
   }

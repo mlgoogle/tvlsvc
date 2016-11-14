@@ -6,6 +6,7 @@
 
 #include <string.h>
 #include <sys/socket.h>
+#include <arpa/inet.h>
 #include <stdlib.h>
 #include <cmath>
 
@@ -148,6 +149,31 @@ int PushApnChatMsg(char* dt, int unreadcount, char* locKey, char* body) {
   //打印结果
 //  printResult(result);
   return 0;
+}
+
+bool GetIPAddress(const int socket, std::string* ip, int* port) {
+  struct sockaddr_in sa;
+  socklen_t len;
+  len = sizeof(sa);
+  if (!getpeername(socket, (struct sockaddr *) &sa, &len)) {
+    *ip = inet_ntoa(sa.sin_addr);
+    *port = ntohs(sa.sin_port);
+    return true;
+  }
+  return false;
+}
+
+std::string RandomString(int length) {
+  std::string ran;
+  while (length > 0) {
+    int n = Random(65, 122);
+    if (n > 90 && n < 97)
+      continue;
+    char p = (char) n;
+    ran.push_back(p);
+    length--;
+  }
+  return ran;
 }
 
 }  // namespace util

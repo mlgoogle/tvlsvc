@@ -15,6 +15,7 @@
 #include "user/user_proto.h"
 #include "user/user_opcode.h"
 #include "pub/util/util.h"
+#include "pub/pay/wxpay/wx_order.h"
 
 #define SHELL_SMS "./verify_code_sms.sh"
 #define SMS_KEY "yd1742653sd"
@@ -58,6 +59,268 @@ int32 UserInterface::CheckHeartLoss() {
     data_share_mgr_->CheckHeartLoss();
   } while (0);
 
+  return err;
+}
+
+int32 UserInterface::InitShareGuide() {
+  int err = 0;
+  InitShareType();
+  InitShareDetails();
+  InitShareSkills();
+
+//  do {
+//    DicValue type_dic;
+//    err = user_mysql_->ShareTourismTypeSelect(&type_dic);
+//    if (err < 0)
+//      break;
+//    if (!type_dic.empty()) {
+//      ListValue* info;
+//      type_dic.GetList(L"data_list", &info);
+//      if (info != NULL && !info->empty()) {
+//        data_share_mgr_->InitShareType(info);
+//      }
+//    } else {
+//      break;
+//    }
+//    DicValue detail_dic;
+//    err = user_mysql_->ShareTourismDetailsSelect(&detail_dic);
+//    if (err < 0)
+//      break;
+//    if (!detail_dic.empty()) {
+//      ListValue* info;
+//      detail_dic.GetList(L"data_list", &info);
+//      if (info != NULL && !info->empty()) {
+//        data_share_mgr_->InitTourismShare(info);
+//      }
+//    }
+//  } while (0);
+  test();
+  return err;
+}
+
+int32 UserInterface::InitShareType() {
+  int err = 0;
+  do {
+    DicValue type_dic;
+    err = user_mysql_->ShareTourismTypeSelect(&type_dic);
+    if (err < 0)
+      break;
+    if (!type_dic.empty()) {
+      ListValue* info;
+      type_dic.GetList(L"data_list", &info);
+      if (info != NULL && !info->empty()) {
+        data_share_mgr_->InitShareType(info);
+      }
+    } else {
+      break;
+    }
+  } while (0);
+  return err;
+}
+
+int32 UserInterface::InitShareDetails() {
+  int32 err = 0;
+  do {
+    DicValue detail_dic;
+    err = user_mysql_->ShareTourismDetailsSelect(&detail_dic);
+    if (err < 0)
+      break;
+    if (!detail_dic.empty()) {
+      ListValue* info;
+      detail_dic.GetList(L"data_list", &info);
+      if (info != NULL && !info->empty()) {
+        data_share_mgr_->InitTourismShare(info);
+      }
+    }
+  } while (0);
+  return err;
+}
+int32 UserInterface::InitShareSkills() {
+  int32 err = 0;
+  do {
+    DicValue skill_info;
+    err = user_mysql_->ShareSkillDetailsSelect(&skill_info);
+    if (err < 0)
+      break;
+    if (!skill_info.empty()) {
+      ListValue* info;
+      skill_info.GetList(L"data_list", &info);
+      if (info != NULL && !info->empty()) {
+        data_share_mgr_->InitSkillShare(info);
+      }
+    }
+  } while (0);
+  return err;
+}
+
+int32 UserInterface::TourismShareTypeInfo(const int32 socket,
+                                          PacketHead* packet) {
+  int32 err = 0;
+  do {
+    DicValue type_dic;
+    err = user_mysql_->ShareTourismTypeSelect(&type_dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &type_dic, SHARE_TOURISM_TYPE_RLY);
+  } while (0);
+  if (err < 0)
+    SendError(socket, packet, err, SHARE_TOURISM_TYPE_RLY);
+  return err;
+
+}
+
+int32 UserInterface::TourismShareRecommend(const int32 socket,
+                                           PacketHead* packet) {
+  int32 err = 0;
+  do {
+    PaggingRecv recv(*packet);
+    err = recv.Deserialize();
+    if (err < 0)
+      break;
+    DicValue dic;
+    err = data_share_mgr_->QueryRecommendShare(recv.last_id(), recv.count(),
+                                               recv.page_type(), &dic);
+    if (err < 0)
+      break;
+    dic.SetBigInteger(L"page_type", recv.page_type());
+    SendMsg(socket, packet, &dic, SHARE_TOURISM_RECOMMEND_RLY);
+  } while (0);
+  if (err < 0)
+    SendError(socket, packet, err, SHARE_TOURISM_RECOMMEND_RLY);
+  return err;
+}
+
+//
+int32 UserInterface::TourismShareList(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    PaggingRecv recv(*packet);
+    err = recv.Deserialize();
+    if (err < 0)
+      break;
+    DicValue dic;
+    err = data_share_mgr_->QueryRecommendShare(recv.last_id(), recv.count(),
+                                               recv.page_type(), &dic);
+    if (err < 0)
+      break;
+    dic.SetBigInteger(L"page_type", recv.page_type());
+    SendMsg(socket, packet, &dic, SHARE_TOURISM_LIST_RLY);
+  } while (0);
+  if (err < 0)
+    SendError(socket, packet, err, SHARE_TOURISM_LIST_RLY);
+  return err;
+}
+
+int32 UserInterface::SkillShareList(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    PaggingRecv recv(*packet);
+    err = recv.Deserialize();
+    if (err < 0)
+      break;
+    DicValue dic;
+    err = data_share_mgr_->QuerySkillShare(recv.last_id(), recv.count(), &dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, SHARE_SKILL_LIST_RLY);
+  } while (0);
+  if (err < 0)
+    SendError(socket, packet, err, SHARE_SKILL_LIST_RLY);
+  return err;
+}
+
+int32 UserInterface::TourismShareDetail(const int32 socket,
+                                        PacketHead* packet) {
+  int32 err = 0;
+  do {
+    ShareTourismDetailRecv recv(*packet);
+    err = recv.Deserialize();
+    if (err < 0)
+      break;
+    DicValue dic;
+    err = data_share_mgr_->QueryShareTourismDetail(recv.share_id(), &dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, SHARE_TOURISM_DETAIL_REQ);
+  } while (0);
+  if (err < 0)
+    SendError(socket, packet, err, SHARE_TOURISM_DETAIL_REQ);
+  return err;
+}
+
+int32 UserInterface::SkillShareDetail(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    ShareSkillDetailRecv recv(*packet);
+    err = recv.Deserialize();
+    if (err < 0)
+      break;
+    DicValue dic;
+    err = data_share_mgr_->QueryShareSkillDetail(recv.share_id(), &dic);
+    if (err < 0)
+      break;
+    err = user_mysql_->ShareSkillEntrySelect(recv.share_id(), &dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, SHARE_SKILL_DETAIL_RLY);
+  } while (0);
+  if (err < 0)
+    SendError(socket, packet, err, SHARE_SKILL_DETAIL_RLY);
+  return err;
+}
+
+int32 UserInterface::SkillShareDiscuss(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    ShareSkillDiscussRecv recv(*packet);
+    err = recv.Deserialize();
+    if (err < 0)
+      break;
+    DicValue dic;
+    err = user_mysql_->ShareSkillDiscussSelect(recv.share_id(), recv.last_id(),
+                                               recv.count(), &dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, SHARE_SKILL_DISCUSS_RLY);
+  } while (0);
+  if (err < 0)
+    SendError(socket, packet, err, SHARE_SKILL_DISCUSS_RLY);
+  return err;
+}
+
+int32 UserInterface::EntrySkillShare(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    EntryShareSkillRecv recv(*packet);
+    err = recv.Deserialize();
+    if (err < 0)
+      break;
+    DicValue dic;
+    err = user_mysql_->EntryShareSkillInsert(recv.share_id(), recv.uid(), &dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, ENTRY_SHARE_SKILL_RLY);
+  } while (0);
+  if (err < 0)
+    SendError(socket, packet, err, ENTRY_SHARE_SKILL_RLY);
+  return err;
+}
+
+int32 UserInterface::UserCashInfo(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    UserCashRecv recv(*packet);
+    err = recv.Deserialize();
+    if (err < 0)
+      break;
+    DicValue dic;
+    err = user_mysql_->UserCashSelect(recv.uid(), &dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, USER_CASH_RLY);
+  } while (0);
+  if (err < 0)
+    SendError(socket, packet, err, USER_CASH_RLY);
   return err;
 }
 
@@ -137,7 +400,7 @@ int32 UserInterface::ObtainServiceInfo(const int32 socket, PacketHead* packet) {
     if (err < 0)
       break;
     DicValue dic;
-    err = user_mysql_->ServiceInfoSelect(rev.sid_str(), &dic);
+    err = user_mysql_->ServiceInfoSelect(rev.oid_str(), &dic);
     if (err < 0)
       break;
     SendMsg(socket, packet, &dic, SERVICE_INFO_RLY);
@@ -156,7 +419,7 @@ int32 UserInterface::DrawBillTrip(const int32 socket, PacketHead* packet) {
     if (err < 0)
       break;
     DicValue dic;
-    err = user_mysql_->InvoiceInfoInsert(rev.order_id(), rev.title(),
+    err = user_mysql_->InvoiceInfoInsert(rev.uid(), rev.oid_str(), rev.title(),
                                          rev.taxpayer_num(), rev.company_addr(),
                                          rev.invoice_type(), rev.user_name(),
                                          rev.user_mobile(), rev.area(),
@@ -164,7 +427,17 @@ int32 UserInterface::DrawBillTrip(const int32 socket, PacketHead* packet) {
                                          &dic);
     if (err < 0)
       break;
-    dic.SetBigInteger(L"order_id_", rev.order_id());
+    int64 result = 1;
+    dic.GetBigInteger(L"result_", &result);
+    if (result == -2) {
+      err = ALREADY_INVOICE_RECORD;
+      break;
+    } else if (result == -3) {
+      err = ORDER_NOT_PAY;  //订单未支付
+      break;
+    }
+
+    dic.SetString(L"oid_str_", rev.oid_str());
     SendMsg(socket, packet, &dic, DRAW_BILL_RLY);
   } while (0);
   if (err < 0) {
@@ -181,13 +454,33 @@ int32 UserInterface::BillingRecord(const int32 socket, PacketHead* packet) {
     if (err < 0)
       break;
     DicValue dic;
-    err = user_mysql_->InvoiceRecordSelect(rev.uid(), &dic);
+    err = user_mysql_->InvoiceRecordSelect(rev.uid(), rev.count(),
+                                           rev.last_invoice_id(), &dic);
     if (err < 0)
       break;
     SendMsg(socket, packet, &dic, INVOICE_RECORD_RLY);
   } while (0);
   if (err < 0) {
     SendError(socket, packet, err, INVOICE_RECORD_RLY);
+  }
+  return err;
+}
+
+int32 UserInterface::InvoiceDetail(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    InvoiceDetailRecv rev(*packet);
+    err = rev.Deserialize();
+    if (err < 0)
+      break;
+    DicValue dic;
+    err = user_mysql_->InvoiceDetailSelect(rev.invoice_id(), &dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, INVOICE_DETAIL_RLY);
+  } while (0);
+  if (err < 0) {
+    SendError(socket, packet, err, INVOICE_DETAIL_RLY);
   }
   return err;
 }
@@ -267,6 +560,332 @@ int32 UserInterface::BlackcardConsumeRecord(const int32 socket,
   } while (0);
   if (err < 0) {
     SendError(socket, packet, err, BLACKCARD_CONSUME_RECORD_RLY);
+  }
+  return err;
+}
+
+int32 UserInterface::SkillsInfo(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    DicValue dic;
+    err = user_mysql_->SkillsInfoSelect(&dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, SKILL_INFO_RLY);
+  } while (0);
+  if (err < 0) {
+    SendError(socket, packet, err, SKILL_INFO_RLY);
+  }
+  return err;
+}
+
+int32 UserInterface::NewAppointment(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    NewAppointmentRecv recv(*packet);
+    err = recv.Deserialize();
+    if (err < 0)
+      break;
+    err = user_mysql_->NewAppointmentInsert(recv.uid(), recv.city_code(),
+                                            recv.start_time(), recv.end_time(),
+                                            recv.skills(), recv.is_other(),
+                                            recv.other_name(),
+                                            recv.other_gender(),
+                                            recv.ohter_phone());
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, NULL, NEW_APPOINTMENT_RLY);
+  } while (0);
+  if (err < 0) {
+    SendError(socket, packet, err, NEW_APPOINTMENT_RLY);
+  }
+  return err;
+}
+
+int32 UserInterface::AppointmentRecord(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    AppointmentRecordRecv recv(*packet);
+    err = recv.Deserialize();
+    if (err < 0)
+      break;
+    DicValue dic;
+    err = user_mysql_->AppointmentRecordSelect(recv.uid(), recv.last_id(),
+                                               recv.count(), &dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, APPOINTMENT_RECORD_RLY);
+  } while (0);
+  if (err < 0) {
+    SendError(socket, packet, err, APPOINTMENT_RECORD_RLY);
+  }
+  return err;
+}
+
+int32 UserInterface::UpImgToken(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    DicValue dic;
+    std::string token;
+    int64 tim;
+    data_share_mgr_->GetImgToken(&token, &tim);
+    if (token.length() > 0 && (tim - time(NULL)) > 60 * 2) {
+      dic.SetString(L"img_token_", token);
+      dic.SetBigInteger(L"valid_time_", tim);
+    } else {
+      err = user_mysql_->ImgTokenSelect(&dic);
+      if (err < 0)
+        break;
+      dic.GetString(L"img_token_", &token);
+      dic.GetBigInteger(L"valid_time_", &tim);
+      data_share_mgr_->SetImgToken(token, tim);
+    }
+    SendMsg(socket, packet, &dic, IMG_TOKEN_RLY);
+  } while (0);
+  if (err < 0) {
+    SendError(socket, packet, err, IMG_TOKEN_RLY);
+  }
+  return err;
+}
+
+void UserInterface::test() {
+  LOG(INFO)<< "UserInterface::test()";
+  DicValue dic1;
+  std::string temp;
+  data_share_mgr_->QueryRecommendShare(0, 10, 0, &dic1);
+  base_logic::ValueSerializer* serializer =
+  base_logic::ValueSerializer::Create(base_logic::IMPL_JSON);
+  serializer->Serialize(dic1, &temp);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+      serializer);
+  LOG(INFO) << temp;
+  LOG(INFO) << "----------------";
+  DicValue dic2;
+  std::string temp2;
+  data_share_mgr_->QueryRecommendShare(126, 10, 1, &dic2);
+  base_logic::ValueSerializer* serializer2 =
+  base_logic::ValueSerializer::Create(base_logic::IMPL_JSON);
+  serializer2->Serialize(dic2, &temp2);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+      serializer2);
+  LOG(INFO) << temp2;
+  LOG(INFO) << "----------------";
+  DicValue dic3;
+  std::string temp3;
+  data_share_mgr_->QueryRecommendShare(4, 10, 2, &dic3);
+  base_logic::ValueSerializer* serializer3 =
+  base_logic::ValueSerializer::Create(base_logic::IMPL_JSON);
+  serializer3->Serialize(dic3, &temp3);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+      serializer3);
+  LOG(INFO) << temp3;
+  LOG(INFO) << "----------------";
+
+  DicValue dic4;
+  std::string temp4;
+  data_share_mgr_->QuerySkillShare(0, 10, &dic4);
+  base_logic::ValueSerializer* serializer4 =
+  base_logic::ValueSerializer::Create(base_logic::IMPL_JSON);
+  serializer4->Serialize(dic4, &temp4);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+      serializer4);
+  LOG(INFO) << temp4;
+  LOG(INFO) << "----------------";
+
+  DicValue dic5;
+  std::string temp5;
+  data_share_mgr_->QuerySkillShare(15, 10, &dic5);
+  base_logic::ValueSerializer* serializer5 =
+  base_logic::ValueSerializer::Create(base_logic::IMPL_JSON);
+  serializer5->Serialize(dic5, &temp5);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+      serializer5);
+  LOG(INFO) << temp5;
+  LOG(INFO) << "----------------";
+
+  return;
+
+  WXOrder wx_order;
+  wx_order.set_spbill_create_ip("127.0.0.1");
+  wx_order.set_body("V领队-高级服务");
+  wx_order.set_out_trade_no("1");
+  wx_order.set_total_fee(100);
+  std::string wx_result = wx_order.PlaceOrder();
+  LOG(INFO)<< "test::" << wx_result;
+  base_logic::ValueSerializer* deserializer =
+  base_logic::ValueSerializer::Create(base_logic::IMPL_XML, &wx_result);
+  std::string err_str;
+  int32 err = 0;
+  DicValue* dic = (DicValue*) deserializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      std::string return_code;
+      dic->GetString(L"return_code", &return_code);
+      LOG(INFO)<< "return_code:" << return_code;
+      //下单成功
+      if (return_code.find("SUCCESS") != std::string::npos) {
+        std::string result_code;
+        dic->GetString(L"result_code", &result_code);
+        LOG(INFO)<< "result_code:" << result_code;
+        //业务逻辑成功
+        if (result_code.find("SUCCESS") != std::string::npos) {
+          std::string prepay_id;
+          dic->GetString(L"prepay_id", &prepay_id);
+          LOG(INFO)<< "prepay_id:" << prepay_id;
+          int npos1 = prepay_id.find("<![CDATA[");
+          int npos2 = prepay_id.find("]]>");
+          prepay_id = prepay_id.substr(npos1 + 9, npos2 - npos1 - 9);
+          LOG(INFO)<< "prepay_id:" << prepay_id;
+        } else {
+
+        }
+      } else {
+
+      }
+    }
+  }while (0);
+}
+
+int32 UserInterface::WXPlaceOrder(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    WxPlaceOrderRecv recv(*packet);
+    err = recv.Deserialize();
+    //记录订单信息
+    DicValue recharge_dic;
+    err = user_mysql_->RechargeInfoInsertAndSelect(recv.uid(), recv.price(),
+                                                   &recharge_dic);
+    if (err < 0)
+      break;
+    std::string recharge_id;
+    recharge_dic.GetString(L"recharge_id_", &recharge_id);
+    std::string ip;
+    int port;
+    //访问微信下单接口
+    WXOrder wx_order;
+    if (util::GetIPAddress(socket, &ip, &port))
+      wx_order.set_spbill_create_ip(ip);
+    wx_order.set_body(recv.title());
+    wx_order.set_out_trade_no(recharge_id);
+    wx_order.set_total_fee(recv.price());
+    std::string wx_result = wx_order.PlaceOrder();
+    base_logic::ValueSerializer* deserializer =
+        base_logic::ValueSerializer::Create(base_logic::IMPL_XML, &wx_result);
+    std::string err_str;
+    int32 err = 0;
+    DicValue* dic = (DicValue*) deserializer->Deserialize(&err, &err_str);
+    do {
+      if (dic != NULL) {
+        std::string return_code;
+        dic->GetString(L"return_code", &return_code);
+        LOG(INFO)<< "return_code:" << return_code;
+        //下单成功
+        if (return_code.find("SUCCESS") != std::string::npos) {
+          std::string result_code;
+          dic->GetString(L"result_code", &result_code);
+          LOG(INFO)<< "result_code:" << result_code;
+          //业务逻辑成功
+          if (result_code.find("SUCCESS") != std::string::npos) {
+            std::string prepay_id;
+            dic->GetString(L"prepay_id", &prepay_id);
+            LOG(INFO)<< "prepay_id:" << prepay_id;
+            int npos1 = prepay_id.find("<![CDATA[");
+            int npos2 = prepay_id.find("]]>");
+            prepay_id = prepay_id.substr(npos1 + 9, npos2 - npos1 - 9);
+            wx_order.set_prepayid(prepay_id);
+            wx_order.PreSign();
+            wx_order.PreSerialize(&recharge_dic);
+            SendMsg(socket, packet, &recharge_dic, WX_PLACE_ORDER_RLY);
+            // todo 下单成功 ，记录微信订单信息
+
+          } else {
+
+          }
+        } else {
+
+        }
+      }
+    } while (0);
+    base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_XML,
+                                                  deserializer);
+
+  } while (0);
+  if (err < 0) {
+    SendError(socket, packet, err, WX_PLACE_ORDER_RLY);
+  }
+  return err;
+}
+
+int32 UserInterface::WXPayClientResponse(const int32 socket,
+                                         PacketHead* packet) {
+  int32 err = 0;
+  do {
+    WXPayClientRecv recv(*packet);
+    err = recv.Deserialize();
+    if (err < 0)
+      break;
+    DicValue dic;
+    err = user_mysql_->ChangeRechargeStatusAndSelect(recv.uid(),
+                                                     recv.recharge_id(),
+                                                     recv.pay_result(), &dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, WXPAY_CLIENT_RLY);
+    //todo 测试用 主动调起服务端支付成功通知
+    if (recv.pay_result() == 1) {
+      user_mysql_->ChangeRechargeStatusAndSelect(recv.uid(), recv.recharge_id(),
+                                                 3, &dic);
+      SendMsg(socket, packet, &dic, WXPAY_SERVER_RLY);
+    }
+  } while (0);
+  if (err < 0) {
+    SendError(socket, packet, err, WXPAY_CLIENT_RLY);
+  }
+  return err;
+}
+
+// todo
+int32 UserInterface::WXPayServerResponse(const int32 socket,
+                                         PacketHead* packet) {
+  int32 err = 0;
+//  err = user_mysql_->ChangeRechargeStatusAndSelect(recv.uid(),
+//                                                   recv.recharge_id(),
+//                                                   recv.pay_result(), &dic);
+  return err;
+}
+
+int32 UserInterface::IdentityPicInfo(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    IdentityPicRecv recv(*packet);
+    err = recv.Deserialize();
+    if (err < 0)
+      break;
+    DicValue dic;
+    err = user_mysql_->IdentityInfoInsertAndSelect(recv.uid(), recv.front_pic(),
+                                                   recv.back_pic(), &dic);
+    SendMsg(socket, packet, &dic, IDENTITY_PIC_RLY);
+  } while (0);
+  if (err < 0) {
+    SendError(socket, packet, err, IDENTITY_PIC_RLY);
+  }
+  return err;
+}
+
+int32 UserInterface::IdentityReviewStatus(const int32 socket,
+                                          PacketHead* packet) {
+  int32 err = 0;
+  do {
+    IdentityStatusRecv recv(*packet);
+    err = recv.Deserialize();
+    if (err < 0)
+      break;
+    DicValue dic;
+    err = user_mysql_->IdentityReviewStatusSelect(recv.uid(), &dic);
+    SendMsg(socket, packet, &dic, IDENTITY_STATUS_RLY);
+  } while (0);
+  if (err < 0) {
+    SendError(socket, packet, err, IDENTITY_STATUS_RLY);
   }
   return err;
 }
@@ -386,6 +1005,70 @@ int32 UserInterface::GuideDetail(const int32 socket, PacketHead* packet) {
   } while (0);
   if (err < 0) {
     SendError(socket, packet, err, GUIDE_DETAIL_RLY);
+  }
+  return err;
+}
+
+int32 UserInterface::GuideServiceList(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    GuideDetailRecv rev(*packet);
+    err = rev.Deserialize();
+    if (err < 0)
+      break;
+    DicValue dic;
+    err = user_mysql_->GuideServiceSelect(rev.uid(), &dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, GUIDE_SERVICE_LIST_RLY);
+  } while (0);
+  if (err < 0) {
+    SendError(socket, packet, err, GUIDE_SERVICE_LIST_RLY);
+  }
+  return err;
+}
+
+int32 UserInterface::ChangeGuideService(const int32 socket,
+                                        PacketHead* packet) {
+  int32 err = 0;
+  do {
+    ChangeGuideServiceRecv recv(*packet);
+    err = recv.Deserialize();
+    if (err < 0)
+      break;
+    if (time(NULL) - recv.timestamp() > 15 * 60) {
+      err = VERIFY_CODE_OVERDUE;
+      break;
+    }
+    std::stringstream ss;
+    ss << SMS_KEY << recv.timestamp() << recv.verify_code();
+    base::MD5Sum md5(ss.str());
+    if (md5.GetHash() != recv.token()) {
+      err = VERIFY_CODE_ERR;
+      break;
+    }
+    std::list<ServiceData*> list = recv.service_list();
+    std::list<std::string> sql_list;
+    std::list<ServiceData*>::iterator it = list.begin();
+    for (; it != list.end(); ++it) {
+      ServiceData* data = *it;
+      if (data != NULL) {
+        std::stringstream ss;
+        ss << "call proc_GuideServerUpdate(" << recv.uid() << ","
+           << data->service_id_ << "," << data->change_type_ << ","
+           << data->service_type_ << ",'" << data->service_name_ << "','"
+           << data->service_time_ << "'," << data->service_price_ << ")";
+        sql_list.push_back(ss.str());
+      }
+    }
+    DicValue dic;
+    err = user_mysql_->GuideServerUpdateAndSelect(recv.uid(), sql_list, &dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, CHANGE_GUIDE_SERVICE_RLY);
+  } while (0);
+  if (err < 0) {
+    SendError(socket, packet, err, CHANGE_GUIDE_SERVICE_RLY);
   }
   return err;
 }
@@ -511,11 +1194,13 @@ bool UserInterface::UserIsLogin(std::string u) {
 void UserInterface::AddUser(int32 fd, DicValue* v, int64 type,
                             std::string pwd) {
   UserInfo* user = NULL;
-  //游客
+//游客
   if (type == 1)
     user = new Visitor();
-  else
+  else if (type == 2)
     user = new Guide();
+  else
+    user = new Coordinator();
   user->Serialization(v);
   user->set_user_type(type);
   user->set_is_login(true);

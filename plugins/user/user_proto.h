@@ -23,6 +23,23 @@ class LoginRecv:public PacketHead {
   int64 user_type_;
 };
 
+class SMSCodeLoginRecv : public PacketHead {
+ public:
+  SMSCodeLoginRecv(PacketHead packet);
+  int32 Deserialize();
+  inline int64 timestamp() { return timestamp_; }
+  inline int64 verify_code() { return verify_code_; }
+  inline std::string phone_num() { return phone_num_; }
+  inline std::string token() { return token_; }
+  inline int64 user_type() { return user_type_; }
+ private:
+  int64 timestamp_;
+  int64 verify_code_;
+  int64 user_type_;
+  std::string phone_num_;
+  std::string token_;
+};
+
 class Heartbeat:public PacketHead {
  public:
   Heartbeat(PacketHead packet);
@@ -153,9 +170,9 @@ class ServiceDetailsRecv : public PacketHead {
   ServiceDetailsRecv(PacketHead packet);
   int32 Deserialize();
 
-  inline std::string sid_str() { return sid_str_; }
+  inline std::string oid_str() { return oid_str_; }
  private:
-  std::string sid_str_; // "1,2,3,4"
+  std::string oid_str_; // "1,2,3,4"
 };
 
 class DrawBillRecv : public PacketHead {
@@ -163,7 +180,8 @@ class DrawBillRecv : public PacketHead {
   DrawBillRecv(PacketHead packet);
   int32 Deserialize();
 
-  inline int64 order_id() { return order_id_; }
+  inline int64 uid() { return uid_; }
+  inline std::string oid_str() { return oid_str_; }
   inline std::string title() { return title_; }
   inline std::string taxpayer_num() { return taxpayer_num_; }
   inline std::string company_addr() { return company_addr_; }
@@ -174,7 +192,8 @@ class DrawBillRecv : public PacketHead {
   inline std::string addr_detail() { return addr_detail_; }
   inline std::string remarks() { return remarks_; }
  private:
-  int64 order_id_; // 订单号
+  int64 uid_;
+  std::string oid_str_; // 订单号集合"1,2,3,4"
   std::string title_; //发票抬头
   std::string taxpayer_num_; //纳税号
   std::string company_addr_; // 注册地址
@@ -191,8 +210,21 @@ class BillRecordRecv : public PacketHead {
   BillRecordRecv(PacketHead packet);
   int32 Deserialize();
   inline int64 uid() { return uid_; }
+  inline int64 count() { return count_; }
+  inline int64 last_invoice_id() { return last_invoice_id_; }
  private:
   int64 uid_;
+  int64 count_;
+  int64 last_invoice_id_;
+};
+
+class InvoiceDetailRecv : public PacketHead {
+ public:
+  InvoiceDetailRecv(PacketHead packet);
+  int32 Deserialize();
+  inline int64 invoice_id() { return invoice_id_; }
+ private:
+  int64 invoice_id_;
 };
 
 class DeviceTokenRecv : public PacketHead {
@@ -227,8 +259,204 @@ class BlackcardConsumRecordRecv : public PacketHead {
   int64 uid_;
 };
 
-typedef Heartbeat GuideDetailRecv;
+class NewAppointmentRecv : public PacketHead {
+ public:
+  NewAppointmentRecv(PacketHead packet);
+  int32 Deserialize();
+  inline int64 uid() { return uid_; }
+  inline int64 city_code() { return city_code_; }
+  inline int64 start_time() { return start_time_; }
+  inline int64 end_time() { return end_time_; }
+  inline std::string skills() { return skills_; }
+  inline int64 is_other() { return is_other_; }
+  inline std::string other_name() { return other_name_; }
+  int64 other_gender() { return other_gender_; }
+  inline std::string ohter_phone() { return other_phone_; }
+ private:
+  int64 uid_;
+  int64 city_code_;
+  int64 start_time_;
+  int64 end_time_;
+  std::string skills_;
+  int64 is_other_;
+  std::string other_name_;
+  int64 other_gender_;
+  std::string other_phone_;
+};
+
+class WxPlaceOrderRecv : public PacketHead {
+ public:
+  WxPlaceOrderRecv(PacketHead packet);
+  int32 Deserialize();
+  inline int64 uid() { return uid_; }
+  inline int64 price() { return price_; }
+  inline std::string title() { return title_; }
+ private:
+  int64 uid_;
+  std::string title_; //应用名-商品名 eg.V领队-高级服务
+  int64 price_; // 订单总价  单位 分
+};
+
+class WXPayClientRecv : public PacketHead {
+ public:
+  WXPayClientRecv(PacketHead packet);
+  int32 Deserialize();
+  inline int64 uid() { return uid_; }
+  inline int64 recharge_id() { return recharge_id_; }
+  inline int64 pay_result() { return pay_result_; }
+ private:
+  int64 uid_;
+  int64 recharge_id_;
+  int64 pay_result_; //1-成功 2-取消
+};
+
+class IdentityPicRecv : public PacketHead {
+ public:
+  IdentityPicRecv(PacketHead packet);
+  int32 Deserialize();
+
+  inline int64 uid() { return uid_; }
+  inline std::string front_pic() { return front_pic_; }
+  inline std::string back_pic() { return back_pic_; }
+ private:
+  int64 uid_;
+  std::string front_pic_;
+  std::string back_pic_;
+};
+
+class GuideDetailRecv : public PacketHead {
+ public:
+  GuideDetailRecv(PacketHead packet);
+  int32 Deserialize();
+
+  inline int64 uid() { return uid_; }
+ private:
+  int64 uid_;
+};
+
+class IdentityStatusRecv : public PacketHead {
+ public:
+  IdentityStatusRecv(PacketHead packet);
+  int32 Deserialize();
+
+  inline int64 uid() { return uid_; }
+ private:
+  int64 uid_;
+};
+
+class PaggingRecv : public PacketHead {
+ public:
+  PaggingRecv(PacketHead packet);
+  int32 Deserialize();
+
+  inline int64 last_id() { return last_id_; }
+  inline int64 count() { return count_; }
+  inline int64 page_type() { return page_type_; }
+ private:
+  int64 last_id_;
+  int64 count_;
+  int64 page_type_;
+};
+
+class ShareTourismDetailRecv : public PacketHead {
+ public:
+  ShareTourismDetailRecv(PacketHead packet);
+  int32 Deserialize();
+
+  inline int64 share_id() { return share_id_; }
+ private:
+  int64 share_id_;
+};
+
+class ShareSkillDetailRecv : public PacketHead {
+ public:
+  ShareSkillDetailRecv(PacketHead packet);
+  int32 Deserialize();
+
+  inline int64 share_id() { return share_id_; }
+ private:
+  int64 share_id_;
+};
+
+class ShareSkillDiscussRecv : public PacketHead {
+ public:
+  ShareSkillDiscussRecv(PacketHead packet);
+  int32 Deserialize();
+
+  inline int64 share_id() { return share_id_; }
+  inline int64 last_id() { return last_id_; }
+  inline int64 count() { return count_; }
+ private:
+  int64 share_id_;
+  int64 last_id_;
+  int64 count_;
+};
+
+class EntryShareSkillRecv : public PacketHead {
+ public:
+  EntryShareSkillRecv(PacketHead packet);
+  int32 Deserialize();
+
+  inline int64 share_id() { return share_id_; }
+  inline int64 uid() { return uid_; }
+ private:
+  int64 share_id_;
+  int64 uid_;
+};
+
+class UserCashRecv : public PacketHead {
+ public:
+  UserCashRecv(PacketHead packet);
+  int32 Deserialize();
+
+  inline int64 uid() { return uid_; }
+ private:
+  int64 uid_;
+};
 //send
+
+class AppointmentRecordRecv : public PacketHead {
+ public:
+  AppointmentRecordRecv(PacketHead packet);
+  int32 Deserialize();
+
+  inline int64 uid() { return uid_; }
+  inline int64 last_id() { return last_id_; }
+  inline int64 count() { return count_; }
+ private:
+  int64 uid_;
+  int64 last_id_;
+  int64 count_;
+};
+
+struct ServiceData {
+  int64 service_id_;
+  std::string service_name_;
+  int64 service_price_;
+  std::string service_time_;
+  int64 service_type_;
+  int64 change_type_;
+};
+
+class ChangeGuideServiceRecv : public PacketHead {
+ public:
+
+  ChangeGuideServiceRecv(PacketHead packet);
+  int32 Deserialize();
+  virtual ~ChangeGuideServiceRecv();
+
+  inline int64 uid() { return uid_; }
+  inline int64 timestamp() { return timestamp_; }
+  inline int64 verify_code() { return verify_code_; }
+  inline std::string token() { return token_; }
+  inline std::list<ServiceData*> service_list() { return service_list_; }
+ private:
+  std::list<ServiceData*> service_list_;
+  int64 timestamp_;
+  int64 verify_code_;
+  std::string token_;
+  int64 uid_;
+};
 
 }  // namespace user
 

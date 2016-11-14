@@ -44,8 +44,13 @@ void UserInfo::Serialization(DicValue* dic) {
   dic->GetString(L"address_", &data_->usual_addr_);
   dic->GetReal(L"longitude_", &data_->usual_lon_);
   dic->GetReal(L"latitude_", &data_->usual_lat_);
+  dic->GetBigInteger(L"gender_",&data_->gender_);
 }
 
 Guide::Guide() {
   data_ = new GuideData();
+}
+
+Coordinator::Coordinator() {
+  data_ = new CoordinatorData();
 }

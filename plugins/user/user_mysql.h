@@ -21,33 +21,35 @@ class UserMysql {
 
  public:
   int32 UserLoginSelect(std::string phone, std::string pass, int32 type,
-                      int64 time, DicValue* dic);
+                        int64 time, DicValue* dic);
 
   int32 NearGuideSelect(double* point, DicValue* dic);
   int32 GuideDetailSelect(int64 uid, DicValue* dic);
+  int32 GuideServiceSelect(int64 uid, DicValue* dic);
   int32 UserDetailSelect(std::string uids, DicValue* dic);
   int32 ServiceCitySelect(DicValue* dic);
   int32 RecommendGuideSelect(int64 city, int64 type, DicValue* dic);
-  int32 RegisterInsertAndSelect(std::string phone, std::string pass,
-                                int64 type, DicValue* dic);
+  int32 RegisterInsertAndSelect(std::string phone, std::string pass, int64 type,
+                                DicValue* dic);
   int32 ChangePwdUpdate(int64 uid, std::string pwd);
   int32 ImproveUserUpdate(int64 uid, int64 sex, std::string nickname,
                           std::string headurl, std::string addr, double lon,
                           double lat);
 
   int32 TripRecordSelect(int64 uid, int64 oid, int64 count, DicValue* dic);
-  int32 ServiceInfoSelect(std::string sid_str, DicValue* dic);
-  int32 InvoiceInfoInsert(int64 oid, std::string title, std::string num,
-                          std::string comp, int64 type, std::string name,
-                          std::string phone, std::string area, std::string addr,
-                          std::string remarks, DicValue* dic);
+  int32 ServiceInfoSelect(std::string oid_str, DicValue* dic);
+  int32 InvoiceInfoInsert(int64 uid, std::string oids, std::string title,
+                          std::string num, std::string comp, int64 type,
+                          std::string name, std::string phone, std::string area,
+                          std::string addr, std::string remarks, DicValue* dic);
 
-  int32 InvoiceRecordSelect(int64 uid, DicValue* dic);
+  int32 InvoiceRecordSelect(int64 uid, int64 count, int64 iid, DicValue* dic);
+
+  int32 InvoiceDetailSelect(int64 iid, DicValue* dic);
 
   int32 DeviceTokenUpdate(int64 uid, std::string dt);
   int32 BlackcardPrivilegeSelect(DicValue* dic);
   int32 BlackcardInfoSelect(int64 uid, DicValue* dic);
-
 
   //@brief 查询用户uid黑卡消费记录
   //@author paco
@@ -56,6 +58,51 @@ class UserMysql {
   //@return 返回mysql查询状态 正常返回0，异常返回负数 ，详情见pub/comm/comm_head.h
   //@warning
   int32 BlackcardConsumeRecordSelect(int64 uid, DicValue* dic);
+
+  //@brief 查询服务技能
+  //@author paco
+  //@param[in]
+  //@param[out] dic 技能结果集
+  //@return 返回mysql查询状态 正常返回0，异常返回负数 ，详情见pub/comm/comm_head.h
+  //@warning
+  int32 SkillsInfoSelect(DicValue* dic);
+
+  int32 NewAppointmentInsert(int64 uid, int64 city, int64 start, int64 end,
+                             std::string skill, int64 other, std::string name,
+                             int64 gender, std::string phone);
+
+  int32 AppointmentRecordSelect(int64 uid, int64 lastid, int64 count,
+                                DicValue* dic);
+
+  int32 ImgTokenSelect(DicValue* dic);
+
+  int32 RechargeInfoInsertAndSelect(int64 uid, int64 price, DicValue* dic);
+
+  int32 ChangeRechargeStatusAndSelect(int64 uid, int64 rid, int64 result,
+                                      DicValue* dic);
+
+  int32 IdentityInfoInsertAndSelect(int64 uid, std::string front,
+                                    std::string back, DicValue* dic);
+
+  int32 IdentityReviewStatusSelect(int64 uid, DicValue* dic);
+
+  //读取旅游分享信息
+  int32 ShareTourismDetailsSelect(DicValue* dic);
+  //技能分享信息
+  int32 ShareSkillDetailsSelect(DicValue* dic);
+  int32 ShareTourismTypeSelect(DicValue* dic);
+
+  int32 ShareSkillEntrySelect(int64 share_id, DicValue* dic);
+
+  int32 ShareSkillDiscussSelect(int64 share_id, int64 lastid, int64 count,
+                                DicValue* dic);
+
+  int32 EntryShareSkillInsert(int64 share_id, int64 uid, DicValue* dic);
+
+  int32 GuideServerUpdateAndSelect(int64 uid, std::list<std::string> sqls,
+                                   DicValue* dic);
+
+  int32 UserCashSelect(int64 uid, DicValue* dic);
 
   static void CallUserLoginSelect(void* param, Value* value);
   static void CallUserDetailSelect(void* param, Value* value);
@@ -67,17 +114,31 @@ class UserMysql {
   static void CallRegisterInsertAndSelect(void* param, Value* value);
   static void CallTripRecordSelect(void* param, Value* value);
   static void CallServiceInfoSelect(void* param, Value* value);
+  static void CallOrderStatusSelect(void* param, Value* value);
   static void CallInvoiceInfoInsert(void* param, Value* value);
   static void CallInvoiceRecordSelect(void* param, Value* value);
+  static void CallInvoiceDetailSelect(void* param, Value* value);
   static void CallBlackcardPrivilegeSelect(void* param, Value* value);
   static void CallBlackcardInfoSelect(void* param, Value* value);
   static void CallBlackcardConsumeRecordSelect(void* param, Value* value);
+  static void CallSkillsInfoSelect(void* param, Value* value);
+  static void CallImgTokenSelect(void* param, Value* value);
+  static void CallRechargeInfoInsertAndSelect(void* param, Value* value);
+  static void CallChangeRechargeStatusAndSelect(void* param, Value* value);
+  static void CallIdentityInfoInsertAndSelect(void* param, Value* value);
+  static void CallIdentityReviewStatusSelect(void* param, Value* value);
+  static void CallShareTourismDetailsSelect(void* param, Value* value);
+  static void CallShareTourismTypeSelect(void* param, Value* value);
+  static void CallShareSkillDetailsSelect(void* param, Value* value);
+  static void CallUserCashSelect(void* param, Value* value);
+  static void CallAppointmentRecordSelect(void* param, Value* value);
+  static void CallShareSkillEntrySelect(void* param, Value* value);
+  static void CallShareSkillDiscussSelect(void* param, Value* value);
+  static void CallEntryShareSkillInsert(void* param, Value* value);
  private:
   base_logic::DataEngine* mysql_engine_;
 };
 
 }  // namespace user
-
-
 
 #endif  // PLUGINS_USER_USER_MYSQL_H_

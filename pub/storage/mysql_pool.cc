@@ -38,7 +38,7 @@ void MYSQL_Pool::DBConnectionPush(base_storage::DBStorageEngine* engine){
 }
 
 base_storage::DBStorageEngine* MYSQL_Pool::DBConnectionPop(){
-	if(db_conn_pool_.size()<=0) {
+	if(db_conn_pool_.empty()) {
 		return NULL;
 	}
 	base_storage::DBStorageEngine* engine = NULL;
@@ -67,7 +67,7 @@ base_storage::DBStorageEngine* MYSQL_Pool::DBConnectionPop(){
 
 void MYSQL_Pool::Dest(){
 	base_logic::WLockGd lk(db_pool_lock_);
-	while(db_conn_pool_.size()>0){
+	while(!db_conn_pool_.empty()){
 		base_storage::DBStorageEngine* engine = db_conn_pool_.front();
 		db_conn_pool_.pop_front();
 		if(engine){

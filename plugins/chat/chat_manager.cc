@@ -64,6 +64,18 @@ int32 ChatManager::AssignPacket(const int32 socket, PacketHead* packet) {
       interface->EvaluateTrip(socket, packet);
       break;
     }
+    case ORDER_EVALUATE_INFO_REQ: {
+      interface->EvaluateInfo(socket, packet);
+      break;
+    }
+    case FREE_COORDINATOR_REQ: {
+      interface->FreeCoordinator(socket, packet);
+      break;
+    }
+    case SPENT_CASH_REQ: {
+      interface->SpentCash(socket, packet);
+      break;
+    }
   }
   return err;
 }
