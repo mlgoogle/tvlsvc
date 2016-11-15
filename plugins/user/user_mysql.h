@@ -29,6 +29,7 @@ class UserMysql {
   int32 UserDetailSelect(std::string uids, DicValue* dic);
   int32 ServiceCitySelect(DicValue* dic);
   int32 RecommendGuideSelect(int64 city, int64 type, DicValue* dic);
+  int32 GuidesInfoSelect(std::string uids, DicValue* dic);
   int32 RegisterInsertAndSelect(std::string phone, std::string pass, int64 type,
                                 DicValue* dic);
   int32 ChangePwdUpdate(int64 uid, std::string pwd);
@@ -69,7 +70,7 @@ class UserMysql {
 
   int32 NewAppointmentInsert(int64 uid, int64 city, int64 start, int64 end,
                              std::string skill, int64 other, std::string name,
-                             int64 gender, std::string phone);
+                             int64 gender, std::string phone, DicValue* dic);
 
   int32 AppointmentRecordSelect(int64 uid, int64 lastid, int64 count,
                                 DicValue* dic);
@@ -104,6 +105,8 @@ class UserMysql {
 
   int32 UserCashSelect(int64 uid, DicValue* dic);
 
+  int32 OrderDetailsSelect(int64 oid, int64 type, DicValue* dic);
+
   static void CallUserLoginSelect(void* param, Value* value);
   static void CallUserDetailSelect(void* param, Value* value);
   static void CallNearGuideSelect(void* param, Value* value);
@@ -114,6 +117,7 @@ class UserMysql {
   static void CallRegisterInsertAndSelect(void* param, Value* value);
   static void CallTripRecordSelect(void* param, Value* value);
   static void CallServiceInfoSelect(void* param, Value* value);
+  static void CallBlackServiceInfoSelect(void* param, Value* value);
   static void CallOrderStatusSelect(void* param, Value* value);
   static void CallInvoiceInfoInsert(void* param, Value* value);
   static void CallInvoiceRecordSelect(void* param, Value* value);
@@ -135,6 +139,8 @@ class UserMysql {
   static void CallShareSkillEntrySelect(void* param, Value* value);
   static void CallShareSkillDiscussSelect(void* param, Value* value);
   static void CallEntryShareSkillInsert(void* param, Value* value);
+  static void CallNewAppointmentInsert(void* param, Value* value);
+  static void CallOrderDetailsSelect(void* param, Value* value);
  private:
   base_logic::DataEngine* mysql_engine_;
 };

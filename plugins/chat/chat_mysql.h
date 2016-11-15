@@ -24,9 +24,12 @@ class ChatMysql {
 
   int32 ChatRecordQuery(int64 from, int64 to, int64 count, int64 id,
                         DicValue* dic);
-  //生成订单信息同时返回
-  int32 NewOrderInsertAndSelect(int64 from, int64 to, int64 sid,
-                                   DicValue* dic);
+  //生成邀约订单信息同时返回
+  int32 NewOrderInsertAndSelect(int64 from, int64 to, int64 sid, int64 day,
+                                DicValue* dic);
+  //生成预约订单信息同时返回
+  int32 NewAppointmentOrderInsertAndSelect(int64 from, int64 to, int64 sid,
+                                           int64 aid, DicValue* dic);
 
   int32 EvaluateTripInsert(int64 oid, int64 s_score, int64 u_score,
                            std::string remarks, int64 from, int64 to);
@@ -39,18 +42,20 @@ class ChatMysql {
 
   int32 OrderStatusUpdate(int64 oid, int64 o_status);
 
+  //订单支付
+  int32 SpentCashUpdate(int64 uid, int64 oid, std::string pwd, DicValue* dic);
+
   static void CallNewOrderInsertAndSelect(void* param, Value* value);
   static void CallChatRecordQuery(void* param, Value* value);
   static void CallDeviceTokenSelect(void* param, Value* value);
   static void CallUserNickSelect(void* param, Value* value);
   static void CallEvaluateInfoSelect(void* param, Value* value);
+  static void CallSpentCashUpdate(void* param, Value* value);
 
  private:
   base_logic::DataEngine* mysql_engine_;
 };
 
 }  // namespace chat
-
-
 
 #endif  // PLUGINS_CHAT_CHAT_MYSQL_H_

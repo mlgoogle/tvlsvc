@@ -458,6 +458,18 @@ class ChangeGuideServiceRecv : public PacketHead {
   int64 uid_;
 };
 
+class OrderDetailRecv : public PacketHead {
+ public:
+  OrderDetailRecv(PacketHead packet);
+  int32 Deserialize();
+
+  inline int64 order_id() { return order_id_; }
+  inline int64 order_type() { return order_type_; }
+ private:
+  int64 order_id_;
+  int64 order_type_;//0-邀约 1-预约
+};
+
 }  // namespace user
 
 
