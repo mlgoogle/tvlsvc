@@ -674,7 +674,7 @@ int32 UserMysql::OrderDetailsSelect(int64 oid, int64 type, DicValue* dic) {
   bool r = false;
   do {
     std::stringstream ss;
-    ss << "call proc_OrderDetailsSelect(" << oid << ")";
+    ss << "call proc_OrderDetailsSelect(" << oid << "," << type << ")";
     LOG(INFO)<< "sql:" << ss.str();
     dic->SetBigInteger(L"order_type_", type);
     r = mysql_engine_->ReadData(ss.str(), dic, CallOrderDetailsSelect);
@@ -1688,7 +1688,7 @@ void UserMysql::CallOrderDetailsSelect(void* param, Value* value) {
       if (rows[10] != NULL)
         dict->SetBigInteger(L"end_", atoll(rows[10]));
       if (rows[11] != NULL) {
-        if (type == 0)
+        if (type == 1)
           dict->SetString(L"skills_", rows[11]);
         else
           dict->SetBigInteger(L"days_", atoll(rows[11]));
@@ -1734,7 +1734,7 @@ void UserMysql::CallAppointmentRecordSelect(void* param, Value* value) {
       if (rows[11] != NULL)
         dict->SetString(L"service_name_", rows[11]);
       if (rows[12] != NULL)
-        dict->SetBigInteger(L"service_price_", atoll(rows[12]));
+        dict->SetBigInteger(L"order_price_", atoll(rows[12]));
       if (rows[13] != NULL)
         dict->SetString(L"service_time_", rows[13]);
       if (rows[14] != NULL)
@@ -1745,6 +1745,8 @@ void UserMysql::CallAppointmentRecordSelect(void* param, Value* value) {
         dict->SetString(L"to_name_", rows[16]);
       if (rows[17] != NULL)
         dict->SetString(L"to_head_", rows[17]);
+      if (rows[18] != NULL)
+        dict->SetBigInteger(L"order_id_", atoll(rows[18]));
       list->Append(dict);
     }
     info->Set(L"data_list", list);

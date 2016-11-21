@@ -193,7 +193,7 @@ int32 ChatInterface::AppointMentGuide(const int32 socket, PacketHead* packet) {
     chat_mysql_->OrderStatusUpdate(oid, 3);
     //============================
     if (u == NULL || !u->is_login()) {
-      LOG(INFO)<< "invitate to user is not login";
+      LOG(INFO)<< "appointment to user is not login";
       // 回复被邀请者
       PushGtMsg(rev.from_uid(), rev.to_uid(), rev.body_str(), " 邀你同游",
                 APPOINTMENT_GUIDE_RLY);
@@ -403,7 +403,7 @@ int32 ChatInterface::EvaluateInfo(const int32 socket, PacketHead* packet) {
   return err;
 }
 
-int32 ChatInterface::PushGtMsg(int64 from, int64 to, std::string body,
+int32 ChatInterface::PushGtMsg(int64 from, int64 to, std::string category,
                                std::string content, int64 type) {
   int32 err = 0;
   LOG(INFO)<< "ChatInterface::PushAskMsg";
@@ -418,7 +418,7 @@ int32 ChatInterface::PushGtMsg(int64 from, int64 to, std::string body,
       err = DEVICE_TOKEN_ERR;
       break;
     }
-    std::string lockey;
+
     std::string nick = data_share_mgr_->GetNick(from);
     if (nick == "") {
       DicValue dic;
@@ -428,14 +428,12 @@ int32 ChatInterface::PushGtMsg(int64 from, int64 to, std::string body,
       nick = dic.GetString(L"nickname", &nick);
       data_share_mgr_->AddNick(from, nick);
     }
-    lockey = nick + ":" + content;
-    LOG(INFO)<< "lockey::" << lockey;
     LOG(INFO)<< "token::" << token;
-    LOG(INFO)<< "content::" << body;
+    LOG(INFO)<< "content::" << category;
     util::PushApnChatMsg((char*) token.c_str(),
                          data_share_mgr_->AddUnReadCount(to),
-                         (char*) lockey.c_str(),
-                         (char*) SpliceGtPushBody(body, type).c_str());
+                         (char*) nick.c_str(), (char*)content.c_str(),
+                         (char*) SpliceGtPushBody(category, type).c_str());
   } while (0);
   return err;
 }
@@ -454,7 +452,6 @@ int32 ChatInterface::PushAskMsg(AskInvitationRecv rev) {
       err = DEVICE_TOKEN_ERR;
       break;
     }
-    std::string lockey;
     std::string nick = data_share_mgr_->GetNick(rev.from_uid());
     if (nick == "") {
       DicValue dic;
@@ -464,13 +461,11 @@ int32 ChatInterface::PushAskMsg(AskInvitationRecv rev) {
       nick = dic.GetString(L"nickname", &nick);
       data_share_mgr_->AddNick(rev.from_uid(), nick);
     }
-    lockey = nick + " 邀你同游！";
-    LOG(INFO)<< "lockey::" << lockey;
     LOG(INFO)<< "token::" << token;
-    LOG(INFO)<< "content::" << rev.body_str();
+    LOG(INFO)<< "category::" << rev.body_str();
     util::PushApnChatMsg((char*) token.c_str(),
                          data_share_mgr_->AddUnReadCount(rev.to_uid()),
-                         (char*) lockey.c_str(),
+                         (char*) nick.c_str(), " 邀你同游！",
                          (char*) SpliceGtPushBody(rev.body_str(), 2).c_str());
   } while (0);
   return err;
@@ -490,7 +485,6 @@ int32 ChatInterface::PushChatMsg(ChatPacket rev) {
       err = DEVICE_TOKEN_ERR;
       break;
     }
-    std::string lockey;
     std::string nick = data_share_mgr_->GetNick(rev.from_uid());
     if (nick == "") {
       DicValue dic;
@@ -500,13 +494,11 @@ int32 ChatInterface::PushChatMsg(ChatPacket rev) {
       nick = dic.GetString(L"nickname", &nick);
       data_share_mgr_->AddNick(rev.from_uid(), nick);
     }
-    lockey = nick + ":" + rev.content();
-    LOG(INFO)<< "lockey::" << lockey;
     LOG(INFO)<< "token::" << token;
     LOG(INFO)<< "content::" << rev.body_str();
     util::PushApnChatMsg((char*) token.c_str(),
                          data_share_mgr_->AddUnReadCount(rev.to_uid()),
-                         (char*) lockey.c_str(),
+                         (char*) nick.c_str(),(char*)rev.content().c_str(),
                          (char*) SpliceGtPushBody(rev.body_str(), 1).c_str());
   } while (0);
   return err;
@@ -547,7 +539,8 @@ void ChatInterface::SendPacket(const int socket, PacketHead* packet) {
   int total = util::SendFull(socket, s, packet->packet_length());
   delete[] s;
   s = NULL;
-  LOG_IF(ERROR, total != packet->packet_length()) << "send packet wrong";
+  LOG_IF(ERROR, total != packet->packet_length()) << "send packet wrong:opcode[]"
+      << packet->operate_code();
 }
 
 void ChatInterface::SendError(const int socket, PacketHead* packet, int32 err,

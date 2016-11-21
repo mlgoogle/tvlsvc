@@ -27,9 +27,11 @@ int Random(int min, int max);
 
 //dt device token 用户苹果设备标识
 //unreadcount 未读消息数量
-//locKey 通知栏显示内容
-//body 具体消息实体 json格式
-int PushApnChatMsg(char* dt, int unreadcount, char* locKey, char* body);
+//title 通知栏显示内容第一排
+//body 通知栏显示内容第二1排
+//category 具体消息实体 json格式
+int PushApnChatMsg(char* dt, int unreadcount, char* title, char* body,
+                   char* category);
 
 bool GetIPAddress(const int socket, std::string* ip, int* port);
 
