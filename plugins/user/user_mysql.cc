@@ -451,6 +451,22 @@ int32 UserMysql::BlackcardConsumeRecordSelect(int64 uid, DicValue* dic) {
   return err;
 }
 
+int32 UserMysql::BlackcardPriceInfoSelect(DicValue* dic) {
+  int32 err = 0;
+  bool r = false;
+  do {
+    std::stringstream ss;
+    ss << "call proc_BlackcardPriceInfoSelect()";
+    LOG(INFO)<< "sql:" << ss.str();
+    r = mysql_engine_->ReadData(ss.str(), dic, CallBlackcardPriceInfoSelect);
+    if (!r) {
+      err = SQL_EXEC_ERROR;
+      break;
+    }
+  } while (0);
+  return err;
+}
+
 int32 UserMysql::SkillsInfoSelect(DicValue* dic) {
   int32 err = 0;
   bool r = false;
@@ -924,6 +940,8 @@ void UserMysql::CallUserLoginSelect(void* param, Value* value) {
         dict->SetBigInteger(L"register_status_", atoll(rows[10]));
       if (rows[11] != NULL)
         dict->SetBigInteger(L"gender_", atoll(rows[11]));
+      if (rows[12] != NULL)
+        dict->SetBigInteger(L"has_recharged_", atoll(rows[12]));
     }
   } else {
     LOG(WARNING)<< "CallUserLoginSelect count < 0";
@@ -1278,6 +1296,10 @@ void UserMysql::CallBlackcardInfoSelect(void* param, Value* value) {
         dict->SetBigInteger(L"end_time_", atoll(rows[2]));
       if (rows[3] != NULL)
         dict->SetBigInteger(L"blackcard_lv_", atoll(rows[3]));
+      if (rows[4] != NULL)
+        dict->SetBigInteger(L"blackcard_id_", atoll(rows[4]));
+      if (rows[5] != NULL)
+        dict->SetString(L"name_", rows[5]);
 
     }
   } else {
@@ -1654,7 +1676,28 @@ void UserMysql::CallNewAppointmentInsert(void* param, Value* value) {
   }
 }
 
-//todo
+void UserMysql::CallBlackcardPriceInfoSelect(void* param, Value* value) {
+  base_storage::DBStorageEngine* engine =
+      (base_storage::DBStorageEngine*) (param);
+  MYSQL_ROW rows;
+  int32 num = engine->RecordCount();
+  DicValue* info = reinterpret_cast<DicValue*>(value);
+  if (num > 0) {
+    ListValue* list = new ListValue();
+    while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
+      DicValue* dict = new DicValue();
+      if (rows[0] != NULL)
+        dict->SetBigInteger(L"blackcard_lv_", atoll(rows[0]));
+      if (rows[1] != NULL)
+        dict->SetBigInteger(L"blackcard_price_", atoll(rows[1]));
+      list->Append(dict);
+    }
+    info->Set(L"data_list", list);
+  } else {
+    LOG(WARNING)<<"CallBlackcardPriceInfoSelect count < 0";
+  }
+}
+
 void UserMysql::CallOrderDetailsSelect(void* param, Value* value) {
   base_storage::DBStorageEngine* engine =
       (base_storage::DBStorageEngine*) (param);

@@ -69,6 +69,8 @@ class UserInterface {
 
   int32 BlackcardConsumeRecord(const int32 socket, PacketHead* packet);
 
+  int32 BlackcardPriceInfo(const int32 socket, PacketHead* packet);
+
   int32 SkillsInfo(const int32 socket, PacketHead* packet);
 
 

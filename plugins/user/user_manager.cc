@@ -129,6 +129,10 @@ int32 UserManager::AssignPacket(const int32 socket, PacketHead* packet) {
       interface->BlackcardConsumeRecord(socket, packet);
       break;
     }
+    case BLACKCARD_PRICE_INFO: {
+      interface->BlackcardPriceInfo(socket, packet);
+      break;
+    }
     case SKILL_INFO_REQ: {
       interface->SkillsInfo(socket, packet);
       break;

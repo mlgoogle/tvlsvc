@@ -60,6 +60,9 @@ class UserMysql {
   //@warning
   int32 BlackcardConsumeRecordSelect(int64 uid, DicValue* dic);
 
+  int32 BlackcardPriceInfoSelect(DicValue* dic);
+
+
   //@brief 查询服务技能
   //@author paco
   //@param[in]
@@ -141,6 +144,7 @@ class UserMysql {
   static void CallEntryShareSkillInsert(void* param, Value* value);
   static void CallNewAppointmentInsert(void* param, Value* value);
   static void CallOrderDetailsSelect(void* param, Value* value);
+  static void CallBlackcardPriceInfoSelect(void* param, Value* value);
  private:
   base_logic::DataEngine* mysql_engine_;
 };

@@ -601,6 +601,22 @@ int32 UserInterface::BlackcardConsumeRecord(const int32 socket,
   return err;
 }
 
+int32 UserInterface::BlackcardPriceInfo(const int32 socket,
+                                            PacketHead* packet) {
+  int32 err = 0;
+  do {
+    DicValue dic;
+    err = user_mysql_->BlackcardPriceInfoSelect(&dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, BLACKCARD_PRICE_INFO);
+  } while (0);
+  if (err < 0) {
+    SendError(socket, packet, err, BLACKCARD_PRICE_INFO);
+  }
+  return err;
+}
+
 int32 UserInterface::SkillsInfo(const int32 socket, PacketHead* packet) {
   int32 err = 0;
   do {
