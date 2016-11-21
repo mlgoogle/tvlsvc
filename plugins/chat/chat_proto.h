@@ -14,24 +14,67 @@ class AskInvitationRecv : public PacketHead {
   AskInvitationRecv(PacketHead packet);
   int32 Deserialize();
 
-  inline int64 from_uid() { return from_uid_; }
-  inline int64 to_uid() { return to_uid_; }
-  inline int64 service_id() { return service_id_; }
+  inline int64 from_uid() {
+    return from_uid_;
+  }
+  inline int64 to_uid() {
+    return to_uid_;
+  }
+  inline int64 service_id() {
+    return service_id_;
+  }
+  inline int64 day_count() {
+    return day_count_;
+  }
  private:
   int64 from_uid_;
   int64 to_uid_;
   int64 service_id_;
+  int64 day_count_;
+};
+
+class AppointMentGuideRecv : public PacketHead {
+ public:
+  AppointMentGuideRecv(PacketHead packet);
+  int32 Deserialize();
+
+  inline int64 from_uid() {
+    return from_uid_;
+  }
+  inline int64 to_uid() {
+    return to_uid_;
+  }
+  inline int64 service_id() {
+    return service_id_;
+  }
+  inline int64 appointment_id() {
+    return appointment_id_;
+  }
+ private:
+  int64 from_uid_;
+  int64 to_uid_;
+  int64 service_id_;
+  int64 appointment_id_;
 };
 
 class AnswerInvitationRecv : public PacketHead {
  public:
   AnswerInvitationRecv(PacketHead packet);
+
   int32 Deserialize();
 
-  inline int64 from_uid() { return from_uid_; }
-  inline int64 to_uid() { return to_uid_; }
-  inline int64 order_id() { return order_id_; }
-  inline int64 order_status() { return order_status_; }
+  inline int64 from_uid() {
+    return from_uid_;
+  }
+  inline int64 to_uid() {
+    return to_uid_;
+  }
+  inline int64 order_id() {
+    return order_id_;
+  }
+  inline int64 order_status() {
+    return order_status_;
+  }
  private:
   int64 from_uid_;
   int64 to_uid_;
@@ -44,10 +87,18 @@ class ChatPacket : public PacketHead {
   ChatPacket(PacketHead packet);
   int32 Deserialize();
 
-  inline int64 from_uid() { return from_uid_; }
-  inline int64 to_uid() { return to_uid_; }
-  inline int64 msg_time() { return msg_time_; }
-  inline std::string content() { return content_; }
+  inline int64 from_uid() {
+    return from_uid_;
+  }
+  inline int64 to_uid() {
+    return to_uid_;
+  }
+  inline int64 msg_time() {
+    return msg_time_;
+  }
+  inline std::string content() {
+    return content_;
+  }
  private:
   int64 from_uid_;
   int64 to_uid_;
@@ -60,10 +111,18 @@ class ChatRecordRecv : public PacketHead {
   ChatRecordRecv(PacketHead packet);
   int32 Deserialize();
 
-  inline int64 from_uid() { return from_uid_; }
-  inline int64 to_uid() { return to_uid_; }
-  inline int64 count() { return count_; }
-  inline int64 last_chat_id() { return last_chat_id_; }
+  inline int64 from_uid() {
+    return from_uid_;
+  }
+  inline int64 to_uid() {
+    return to_uid_;
+  }
+  inline int64 count() {
+    return count_;
+  }
+  inline int64 last_chat_id() {
+    return last_chat_id_;
+  }
  private:
   int64 from_uid_;
   int64 to_uid_;
@@ -75,8 +134,12 @@ class PushMsgReadRecv : public PacketHead {
  public:
   PushMsgReadRecv(PacketHead packet);
   int32 Deserialize();
-  inline int64 uid() { return uid_; }
-  inline int64 count() { return count_; }
+  inline int64 uid() {
+    return uid_;
+  }
+  inline int64 count() {
+    return count_;
+  }
  private:
   int64 uid_;
   int64 count_;
@@ -87,14 +150,26 @@ class EvaluateTripRecv : public PacketHead {
   EvaluateTripRecv(PacketHead packet);
   int32 Deserialize();
 
-  inline int64 from_uid() { return from_uid_; }
-  inline int64 to_uid() { return to_uid_; }
-  inline int64 order_id() { return order_id_; }
-  inline int64 service_score() { return service_score_; }
-  inline int64 user_score() { return user_score_; }
-  inline std::string remarks() { return remarks_; }
+  inline int64 from_uid() {
+    return from_uid_;
+  }
+  inline int64 to_uid() {
+    return to_uid_;
+  }
+  inline int64 order_id() {
+    return order_id_;
+  }
+  inline int64 service_score() {
+    return service_score_;
+  }
+  inline int64 user_score() {
+    return user_score_;
+  }
+  inline std::string remarks() {
+    return remarks_;
+  }
  private:
-  int64 from_uid_; //游客id
+  int64 from_uid_;  //游客id
   int64 to_uid_;  //导游id
   int64 order_id_;  //订单id
   int64 service_score_;   //服务评价
@@ -107,22 +182,61 @@ class EvaluateInfoRecv : public PacketHead {
   EvaluateInfoRecv(PacketHead packet);
   int32 Deserialize();
 
-  inline int64 order_id() { return order_id_; }
+  inline int64 order_id() {
+    return order_id_;
+  }
  private:
   int64 order_id_;
 };
 
 class SpentCashRecv : public PacketHead {
  public:
+  SpentCashRecv(PacketHead packet);
+  int32 Deserialize();
 
+  inline int64 uid() {
+    return uid_;
+  }
+  inline int64 order_id() {
+    return order_id_;
+  }
+  std::string passwd() {
+    return passwd_;
+  }
  private:
   int64 uid_;
-  int64 oid_;
-  int64 cash_type_;
+  int64 order_id_;
+  std::string passwd_;
+};
+
+class GtPushCommRecv : public PacketHead {
+ public:
+  GtPushCommRecv(PacketHead packet);
+  int32 Deserialize();
+
+  inline int64 from_uid() {
+    return from_uid_;
+  }
+  inline int64 to_uid() {
+    return to_uid_;
+  }
+  inline int64 msg_type() {
+    return msg_type_;
+  }
+  inline std::string msg_body() {
+    return msg_body_;
+  }
+  inline std::string content() {
+    return content_;
+  }
+ private:
+  int64 from_uid_;
+  int64 to_uid_;
+  int64 msg_type_;  //需要推送消息对应协议操作码
+  std::string msg_body_;
+  std::string content_;
 };
 
 }  // namespace chat
-
-
 
 #endif  // PLUGINS_CHAT_CHAT_PROTO_H_

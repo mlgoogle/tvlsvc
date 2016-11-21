@@ -110,6 +110,10 @@ class UserInterface {
 
   int32 UserCashInfo(const int32 socket, PacketHead* packet);
 
+  int32 GuidesInfo(const int32 socket, PacketHead* packet);
+
+  int32 OrderDetails(const int32 socket, PacketHead* packet);
+
   int32 AuthorUser(std::string phone, std::string passwd, int32 type,
                    DicValue* v);
 

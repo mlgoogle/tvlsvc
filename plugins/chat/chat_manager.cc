@@ -44,6 +44,10 @@ int32 ChatManager::AssignPacket(const int32 socket, PacketHead* packet) {
       interface->AskInvitation(socket, packet);
       break;
     }
+    case APPOINTMENT_GUIDE_REQ : {
+      interface->AppointMentGuide(socket, packet);
+      break;
+    }
     case ANSWER_INVITATION_REQ: {
       interface->AnswerInvitation(socket, packet);
       break;
@@ -74,6 +78,10 @@ int32 ChatManager::AssignPacket(const int32 socket, PacketHead* packet) {
     }
     case SPENT_CASH_REQ: {
       interface->SpentCash(socket, packet);
+      break;
+    }
+    case COMM_GEPUSH_REQ: {
+      interface->GtPushComm(socket, packet);
       break;
     }
   }

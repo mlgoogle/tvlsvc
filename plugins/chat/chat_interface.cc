@@ -97,7 +97,8 @@ int32 ChatInterface::AnswerInvitation(const int32 socket, PacketHead* packet) {
         content = " 愿与你同游";
       else
         content = " 残忍拒绝";
-      PushGtMsg(rev.to_uid(), rev.from_uid(), rev.body_str(), content, 3);
+      PushGtMsg(rev.to_uid(), rev.from_uid(), rev.body_str(), content,
+      ANSWER_INVITATION_RLY);
       break;
     } else {
       SendPacket(u->socket_fd(), &rev);
@@ -119,7 +120,8 @@ int32 ChatInterface::AskInvitation(const int32 socket, PacketHead* packet) {
     //发起邀请，记录订单信息
     DicValue dic;
     err = chat_mysql_->NewOrderInsertAndSelect(rev.from_uid(), rev.to_uid(),
-                                               rev.service_id(), &dic);
+                                               rev.service_id(),
+                                               rev.day_count(), &dic);
     if (err < 0)
       break;
     int64 result = 0;
@@ -130,10 +132,19 @@ int32 ChatInterface::AskInvitation(const int32 socket, PacketHead* packet) {
     if (result == 1)
       break;
     // 通知被邀约者
+    //========================================
+    // todo 测试用 默认服务者同意
+    int64 oid;
+    int64 oid_status;
+    dic.GetBigInteger(L"order_id_", &oid);
+    LOG(INFO)<< "change order status oid:" << oid;
+    chat_mysql_->OrderStatusUpdate(oid, 3);
+    //============================
     if (u == NULL || !u->is_login()) {
       LOG(INFO)<< "invitate to user is not login";
       // 回复被邀请者
-      PushGtMsg(rev.from_uid(), rev.to_uid(), rev.body_str(), " 邀你同游", 2);
+      PushGtMsg(rev.from_uid(), rev.to_uid(), rev.body_str(), " 邀你同游",
+          ASK_INVITATION_RLY);
       LOG(INFO) << "PushGtMsg";
       break;
     } else {
@@ -141,10 +152,62 @@ int32 ChatInterface::AskInvitation(const int32 socket, PacketHead* packet) {
       // 回复被邀请者
       SendMsg(u->socket_fd(), packet, &dic, ASK_INVITATION_RLY);
     }
-
-  }while (0);
+    //
+  } while (0);
   if (err < 0)
     SendError(socket, packet, err, ASK_INVITATION_RLY);
+  return err;
+}
+
+int32 ChatInterface::AppointMentGuide(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    AppointMentGuideRecv rev(*packet);
+    err = rev.Deserialize();
+    if (err < 0)
+      break;
+    UserInfo* u = data_share_mgr_->GetUser(rev.to_uid());
+    //发起邀请，记录订单信息
+    DicValue dic;
+    err = chat_mysql_->NewAppointmentOrderInsertAndSelect(rev.from_uid(),
+                                                          rev.to_uid(),
+                                                          rev.service_id(),
+                                                          rev.appointment_id(),
+                                                          &dic);
+    if (err < 0)
+      break;
+    int64 result = 0;
+    // result 0-成功预约  result=1已经预约过
+    dic.GetBigInteger(L"is_asked_", &result);
+    // 回复发起者
+    SendMsg(socket, packet, &dic, APPOINTMENT_GUIDE_RLY);
+    if (result == 1)
+      break;
+    // 通知被邀约者
+    //========================================
+    // todo 测试用 默认服务者同意
+    int64 oid;
+    int64 oid_status;
+    dic.GetBigInteger(L"order_id_", &oid);
+    LOG(INFO)<< "change order status oid:" << oid;
+    chat_mysql_->OrderStatusUpdate(oid, 3);
+    //============================
+    if (u == NULL || !u->is_login()) {
+      LOG(INFO)<< "appointment to user is not login";
+      // 回复被邀请者
+      PushGtMsg(rev.from_uid(), rev.to_uid(), rev.body_str(), " 邀你同游",
+                APPOINTMENT_GUIDE_RLY);
+      LOG(INFO) << "PushGtMsg";
+      break;
+    } else {
+      //     rev.set_operate_code(ASK_INVITATION_RLY);
+      // 回复被邀请者
+      SendMsg(u->socket_fd(), packet, &dic, APPOINTMENT_GUIDE_RLY);
+    }
+    //
+  } while (0);
+  if (err < 0)
+    SendError(socket, packet, err, APPOINTMENT_GUIDE_RLY);
   return err;
 }
 
@@ -169,7 +232,8 @@ int32 ChatInterface::ChatMessage(const int32 socket, PacketHead* packet) {
         break;
       }
       //     PushChatMsg(rev);
-      PushGtMsg(rev.from_uid(), rev.to_uid(), rev.body_str(), rev.content(), 1);
+      PushGtMsg(rev.from_uid(), rev.to_uid(), rev.body_str(), rev.content(),
+          CHAT_MESSAGE_RLY);
     } else {
       rev.set_operate_code(CHAT_MESSAGE_RLY);
       SendPacket(u->socket_fd(), &rev);
@@ -261,8 +325,38 @@ int32 ChatInterface::FreeCoordinator(const int32 socket, PacketHead* packet) {
 int32 ChatInterface::SpentCash(const int32 socket, PacketHead* packet) {
   int32 err = 0;
   do {
-
+    SpentCashRecv recv(*packet);
+    err = recv.Deserialize();
+    if (err < 0)
+      break;
+    DicValue dic;
+    err = chat_mysql_->SpentCashUpdate(recv.uid(), recv.order_id(),
+                                       recv.passwd(), &dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, SPENT_CASH_RLY);
   } while (0);
+  if (err < 0) {
+    SendError(socket, packet, err, SPENT_CASH_RLY);
+  }
+  return err;
+}
+
+int32 ChatInterface::GtPushComm(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    GtPushCommRecv recv(*packet);
+    err = recv.Deserialize();
+    if (err < 0)
+      break;
+    //推送消息
+    PushGtMsg(recv.from_uid(), recv.to_uid(), recv.body_str(), recv.content(),
+              recv.msg_type());
+    SendMsg(socket, packet, NULL, COMM_GEPUSH_RLY);
+  } while (0);
+  if (err < 0) {
+    SendError(socket, packet, err, COMM_GEPUSH_RLY);
+  }
   return err;
 }
 
@@ -309,7 +403,7 @@ int32 ChatInterface::EvaluateInfo(const int32 socket, PacketHead* packet) {
   return err;
 }
 
-int32 ChatInterface::PushGtMsg(int64 from, int64 to, std::string body,
+int32 ChatInterface::PushGtMsg(int64 from, int64 to, std::string category,
                                std::string content, int64 type) {
   int32 err = 0;
   LOG(INFO)<< "ChatInterface::PushAskMsg";
@@ -324,7 +418,7 @@ int32 ChatInterface::PushGtMsg(int64 from, int64 to, std::string body,
       err = DEVICE_TOKEN_ERR;
       break;
     }
-    std::string lockey;
+
     std::string nick = data_share_mgr_->GetNick(from);
     if (nick == "") {
       DicValue dic;
@@ -334,17 +428,12 @@ int32 ChatInterface::PushGtMsg(int64 from, int64 to, std::string body,
       nick = dic.GetString(L"nickname", &nick);
       data_share_mgr_->AddNick(from, nick);
     }
-    if (type == 1)
-      lockey = nick + ":" + content;
-    else
-      lockey = nick + content;
-    LOG(INFO)<< "lockey::" << lockey;
     LOG(INFO)<< "token::" << token;
-    LOG(INFO)<< "content::" << body;
+    LOG(INFO)<< "content::" << category;
     util::PushApnChatMsg((char*) token.c_str(),
                          data_share_mgr_->AddUnReadCount(to),
-                         (char*) lockey.c_str(),
-                         (char*) SpliceGtPushBody(body, type).c_str());
+                         (char*) nick.c_str(), (char*)content.c_str(),
+                         (char*) SpliceGtPushBody(category, type).c_str());
   } while (0);
   return err;
 }
@@ -363,7 +452,6 @@ int32 ChatInterface::PushAskMsg(AskInvitationRecv rev) {
       err = DEVICE_TOKEN_ERR;
       break;
     }
-    std::string lockey;
     std::string nick = data_share_mgr_->GetNick(rev.from_uid());
     if (nick == "") {
       DicValue dic;
@@ -373,18 +461,16 @@ int32 ChatInterface::PushAskMsg(AskInvitationRecv rev) {
       nick = dic.GetString(L"nickname", &nick);
       data_share_mgr_->AddNick(rev.from_uid(), nick);
     }
-    lockey = nick + " 邀你同游！";
-    LOG(INFO)<< "lockey::" << lockey;
     LOG(INFO)<< "token::" << token;
-    LOG(INFO)<< "content::" << rev.body_str();
+    LOG(INFO)<< "category::" << rev.body_str();
     util::PushApnChatMsg((char*) token.c_str(),
                          data_share_mgr_->AddUnReadCount(rev.to_uid()),
-                         (char*) lockey.c_str(),
+                         (char*) nick.c_str(), " 邀你同游！",
                          (char*) SpliceGtPushBody(rev.body_str(), 2).c_str());
   } while (0);
   return err;
 }
-
+//废弃的
 int32 ChatInterface::PushChatMsg(ChatPacket rev) {
   int32 err = 0;
   LOG(INFO)<< "ChatInterface::PushChatMsg";
@@ -399,7 +485,6 @@ int32 ChatInterface::PushChatMsg(ChatPacket rev) {
       err = DEVICE_TOKEN_ERR;
       break;
     }
-    std::string lockey;
     std::string nick = data_share_mgr_->GetNick(rev.from_uid());
     if (nick == "") {
       DicValue dic;
@@ -409,13 +494,11 @@ int32 ChatInterface::PushChatMsg(ChatPacket rev) {
       nick = dic.GetString(L"nickname", &nick);
       data_share_mgr_->AddNick(rev.from_uid(), nick);
     }
-    lockey = nick + ":" + rev.content();
-    LOG(INFO)<< "lockey::" << lockey;
     LOG(INFO)<< "token::" << token;
     LOG(INFO)<< "content::" << rev.body_str();
     util::PushApnChatMsg((char*) token.c_str(),
                          data_share_mgr_->AddUnReadCount(rev.to_uid()),
-                         (char*) lockey.c_str(),
+                         (char*) nick.c_str(),(char*)rev.content().c_str(),
                          (char*) SpliceGtPushBody(rev.body_str(), 1).c_str());
   } while (0);
   return err;
@@ -425,7 +508,7 @@ std::string ChatInterface::SpliceGtPushBody(std::string json, int64 type) {
   int32 err = 0;
   std::string str;
   base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
-      base_logic::IMPL_JSON, &json);
+      base_logic::IMPL_JSON, &json, false);
   std::string err_str;
   DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
   if (dic != NULL) {
@@ -456,7 +539,8 @@ void ChatInterface::SendPacket(const int socket, PacketHead* packet) {
   int total = util::SendFull(socket, s, packet->packet_length());
   delete[] s;
   s = NULL;
-  LOG_IF(ERROR, total != packet->packet_length()) << "send packet wrong";
+  LOG_IF(ERROR, total != packet->packet_length()) << "send packet wrong:opcode[]"
+      << packet->operate_code();
 }
 
 void ChatInterface::SendError(const int socket, PacketHead* packet, int32 err,

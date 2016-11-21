@@ -23,7 +23,7 @@ LoginRecv::LoginRecv(PacketHead packet) {
 int32 LoginRecv::Deserialize() {
   bool r = false;
   base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
-      base_logic::IMPL_JSON, &body_str_);
+      base_logic::IMPL_JSON, &body_str_, false);
   std::string err_str;
   int32 err = 0;
   Value* v = serializer->Deserialize(&err, &err_str);
@@ -74,7 +74,7 @@ int32 SMSCodeLoginRecv::Deserialize() {
   int32 err = 0;
   bool r = false;
   base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
-      base_logic::IMPL_JSON, &body_str_);
+      base_logic::IMPL_JSON, &body_str_, false);
   std::string err_str;
   DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
   do {
@@ -112,7 +112,7 @@ int32 ObtainGuideRecv::Deserialize() {
   int32 err = 0;
   bool r = false;
   base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
-      base_logic::IMPL_JSON, &body_str_);
+      base_logic::IMPL_JSON, &body_str_, false);
   std::string err_str;
   DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
   do {
@@ -144,7 +144,7 @@ int32 Heartbeat::Deserialize() {
   int32 err = 0;
   bool r = false;
   base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
-      base_logic::IMPL_JSON, &body_str_);
+      base_logic::IMPL_JSON, &body_str_, false);
   std::string err_str;
   DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
   do {
@@ -173,7 +173,7 @@ int32 RecommendGuideRecv::Deserialize() {
   int32 err = 0;
   bool r = false;
   base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
-      base_logic::IMPL_JSON, &body_str_);
+      base_logic::IMPL_JSON, &body_str_, false);
   std::string err_str;
   DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
   do {
@@ -203,7 +203,7 @@ int32 ChangePasswdRecv::Deserialize() {
   int32 err = 0;
   bool r = false;
   base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
-      base_logic::IMPL_JSON, &body_str_);
+      base_logic::IMPL_JSON, &body_str_, false);
   std::string err_str;
   DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
   do {
@@ -235,7 +235,7 @@ int32 ObtainVerifyCodeRecv::Deserialize() {
   int32 err = 0;
   bool r = false;
   base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
-      base_logic::IMPL_JSON, &body_str_);
+      base_logic::IMPL_JSON, &body_str_, false);
   std::string err_str;
   DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
   do {
@@ -267,7 +267,7 @@ int32 RegisterAccountRecv::Deserialize() {
   int32 err = 0;
   bool r = false;
   base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
-      base_logic::IMPL_JSON, &body_str_);
+      base_logic::IMPL_JSON, &body_str_, false);
   std::string err_str;
   DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
   do {
@@ -308,7 +308,7 @@ int32 ImproveDataRecv::Deserialize() {
   int32 err = 0;
   bool r = false;
   base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
-      base_logic::IMPL_JSON, &body_str_);
+      base_logic::IMPL_JSON, &body_str_, false);
   std::string err_str;
   DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
   do {
@@ -347,7 +347,7 @@ int32 UserDetailRecv::Deserialize() {
   int32 err = 0;
   bool r = false;
   base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
-      base_logic::IMPL_JSON, &body_str_);
+      base_logic::IMPL_JSON, &body_str_, false);
   std::string err_str;
   DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
   do {
@@ -357,7 +357,7 @@ int32 UserDetailRecv::Deserialize() {
 
     } else {
       LOG(ERROR)<< "UserDetailRecv Deserialize error";
-      err = IMPROVE_DATA_JSON_ERR;
+      err = REQUEST_JSON_ERR;
       break;
     }
   }while (0);
@@ -378,7 +378,7 @@ int32 ObtainTripRecv::Deserialize() {
   int32 err = 0;
   bool r = false;
   base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
-      base_logic::IMPL_JSON, &body_str_);
+      base_logic::IMPL_JSON, &body_str_, false);
   std::string err_str;
   DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
   do {
@@ -409,7 +409,7 @@ int32 ServiceDetailsRecv::Deserialize() {
   int32 err = 0;
   bool r = false;
   base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
-      base_logic::IMPL_JSON, &body_str_);
+      base_logic::IMPL_JSON, &body_str_, false);
   std::string err_str;
   DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
   do {
@@ -439,7 +439,7 @@ int32 DrawBillRecv::Deserialize() {
   int32 err = 0;
   bool r = false;
   base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
-      base_logic::IMPL_JSON, &body_str_);
+      base_logic::IMPL_JSON, &body_str_, false);
   std::string err_str;
   DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
   do {
@@ -487,7 +487,7 @@ int32 BillRecordRecv::Deserialize() {
   int32 err = 0;
   bool r = false;
   base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
-      base_logic::IMPL_JSON, &body_str_);
+      base_logic::IMPL_JSON, &body_str_, false);
   std::string err_str;
   DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
   do {
@@ -521,7 +521,7 @@ int32 InvoiceDetailRecv::Deserialize() {
   int32 err = 0;
   bool r = false;
   base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
-      base_logic::IMPL_JSON, &body_str_);
+      base_logic::IMPL_JSON, &body_str_, false);
   std::string err_str;
   DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
   do {
@@ -549,7 +549,7 @@ int32 DeviceTokenRecv::Deserialize() {
   int32 err = 0;
   bool r = false;
   base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
-      base_logic::IMPL_JSON, &body_str_);
+      base_logic::IMPL_JSON, &body_str_, false);
   std::string err_str;
   DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
   do {
@@ -579,7 +579,7 @@ int32 BlackcardInfoRecv::Deserialize() {
   int32 err = 0;
   bool r = false;
   base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
-      base_logic::IMPL_JSON, &body_str_);
+      base_logic::IMPL_JSON, &body_str_, false);
   std::string err_str;
   DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
   do {
@@ -607,7 +607,7 @@ int32 BlackcardConsumRecordRecv::Deserialize() {
   int32 err = 0;
   bool r = false;
   base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
-      base_logic::IMPL_JSON, &body_str_);
+      base_logic::IMPL_JSON, &body_str_, false);
   std::string err_str;
   DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
   do {
@@ -641,7 +641,7 @@ int32 NewAppointmentRecv::Deserialize() {
   int32 err = 0;
   bool r = false;
   base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
-      base_logic::IMPL_JSON, &body_str_);
+      base_logic::IMPL_JSON, &body_str_, false);
   std::string err_str;
   DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
   do {
@@ -692,7 +692,7 @@ int32 WxPlaceOrderRecv::Deserialize() {
   int32 err = 0;
   bool r = false;
   base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
-      base_logic::IMPL_JSON, &body_str_);
+      base_logic::IMPL_JSON, &body_str_, false);
   std::string err_str;
   DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
   do {
@@ -726,7 +726,7 @@ int32 WXPayClientRecv::Deserialize() {
   int32 err = 0;
   bool r = false;
   base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
-      base_logic::IMPL_JSON, &body_str_);
+      base_logic::IMPL_JSON, &body_str_, false);
   std::string err_str;
   DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
   do {
@@ -758,7 +758,7 @@ int32 IdentityPicRecv::Deserialize() {
   int32 err = 0;
   bool r = false;
   base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
-      base_logic::IMPL_JSON, &body_str_);
+      base_logic::IMPL_JSON, &body_str_, false);
   std::string err_str;
   DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
   do {
@@ -790,7 +790,7 @@ int32 GuideDetailRecv::Deserialize() {
   int32 err = 0;
   bool r = false;
   base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
-      base_logic::IMPL_JSON, &body_str_);
+      base_logic::IMPL_JSON, &body_str_, false);
   std::string err_str;
   DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
   do {
@@ -819,7 +819,7 @@ int32 IdentityStatusRecv::Deserialize() {
   int32 err = 0;
   bool r = false;
   base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
-      base_logic::IMPL_JSON, &body_str_);
+      base_logic::IMPL_JSON, &body_str_, false);
   std::string err_str;
   DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
   do {
@@ -849,7 +849,7 @@ int32 PaggingRecv::Deserialize() {
   int32 err = 0;
   bool r = false;
   base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
-      base_logic::IMPL_JSON, &body_str_);
+      base_logic::IMPL_JSON, &body_str_, false);
   std::string err_str;
   DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
   do {
@@ -883,7 +883,7 @@ int32 ShareTourismDetailRecv::Deserialize() {
   int32 err = 0;
   bool r = false;
   base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
-      base_logic::IMPL_JSON, &body_str_);
+      base_logic::IMPL_JSON, &body_str_, false);
   std::string err_str;
   DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
   do {
@@ -911,7 +911,7 @@ int32 ShareSkillDetailRecv::Deserialize() {
   int32 err = 0;
   bool r = false;
   base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
-      base_logic::IMPL_JSON, &body_str_);
+      base_logic::IMPL_JSON, &body_str_, false);
   std::string err_str;
   DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
   do {
@@ -941,7 +941,7 @@ int32 ShareSkillDiscussRecv::Deserialize() {
   int32 err = 0;
   bool r = false;
   base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
-      base_logic::IMPL_JSON, &body_str_);
+      base_logic::IMPL_JSON, &body_str_, false);
   std::string err_str;
   DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
   do {
@@ -976,7 +976,7 @@ int32 EntryShareSkillRecv::Deserialize() {
   int32 err = 0;
   bool r = false;
   base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
-      base_logic::IMPL_JSON, &body_str_);
+      base_logic::IMPL_JSON, &body_str_, false);
   std::string err_str;
   DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
   do {
@@ -1006,7 +1006,7 @@ int32 UserCashRecv::Deserialize() {
   int32 err = 0;
   bool r = false;
   base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
-      base_logic::IMPL_JSON, &body_str_);
+      base_logic::IMPL_JSON, &body_str_, false);
   std::string err_str;
   DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
   do {
@@ -1036,7 +1036,7 @@ int32 AppointmentRecordRecv::Deserialize() {
   int32 err = 0;
   bool r = false;
   base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
-      base_logic::IMPL_JSON, &body_str_);
+      base_logic::IMPL_JSON, &body_str_, false);
   std::string err_str;
   DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
   do {
@@ -1084,7 +1084,7 @@ int32 ChangeGuideServiceRecv::Deserialize() {
   int32 err = 0;
   bool r = false;
   base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
-      base_logic::IMPL_JSON, &body_str_);
+      base_logic::IMPL_JSON, &body_str_, false);
   std::string err_str;
   DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
   do {
@@ -1128,6 +1128,37 @@ int32 ChangeGuideServiceRecv::Deserialize() {
                                                 serializer);
   return err;
 }
+
+OrderDetailRecv::OrderDetailRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  order_id_ = 0;
+}
+
+int32 OrderDetailRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+      base_logic::IMPL_JSON, &body_str_, false);
+  std::string err_str;
+  DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetBigInteger(L"order_id_", &order_id_);
+      LOG_IF(ERROR, !r) << "OrderDetailRecv::order_id_ parse error";
+      r = dic->GetBigInteger(L"order_type_", &order_type_);
+      LOG_IF(ERROR, !r) << "OrderDetailRecv::order_type_ parse error";
+    } else {
+      LOG(ERROR)<< "OrderDetailRecv Deserialize error";
+      err = REQUEST_JSON_ERR;
+      break;
+    }
+  }while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                                serializer);
+  return err;
+}
+
 
 }  // namespace user
 

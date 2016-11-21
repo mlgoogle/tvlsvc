@@ -25,7 +25,13 @@ void BonderOfCoordinate(double lon, double lat, double dis, double* out);
 
 int Random(int min, int max);
 
-int PushApnChatMsg(char* dt, int unreadcount, char* locKey, char* body);
+//dt device token 用户苹果设备标识
+//unreadcount 未读消息数量
+//title 通知栏显示内容第一排
+//body 通知栏显示内容第二1排
+//category 具体消息实体 json格式
+int PushApnChatMsg(char* dt, int unreadcount, char* title, char* body,
+                   char* category);
 
 bool GetIPAddress(const int socket, std::string* ip, int* port);
 
@@ -33,8 +39,6 @@ bool GetIPAddress(const int socket, std::string* ip, int* port);
 //length 要获取字符串的长度 不含 '/0'
 std::string RandomString(int length);
 
-} // namespace util
-
-
+}  // namespace util
 
 #endif  // PUB_UTIL_UTIL_H_

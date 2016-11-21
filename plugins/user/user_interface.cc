@@ -324,6 +324,43 @@ int32 UserInterface::UserCashInfo(const int32 socket, PacketHead* packet) {
   return err;
 }
 
+int32 UserInterface::OrderDetails(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    OrderDetailRecv recv(*packet);
+    err = recv.Deserialize();
+    if (err < 0)
+      break;
+    DicValue dic;
+    err = user_mysql_->OrderDetailsSelect(recv.order_id(), recv.order_type(), &dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, ORDER_DETAILS_RLY);
+  } while (0);
+  if (err < 0)
+    SendError(socket, packet, err, ORDER_DETAILS_RLY);
+  return err;
+}
+
+
+int32 UserInterface::GuidesInfo(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    UserDetailRecv recv(*packet);
+    err = recv.Deserialize();
+    if (err < 0)
+      break;
+    DicValue dic;
+    err = user_mysql_->GuidesInfoSelect(recv.uid_str(), &dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, GUIDE_INFO_RLY);
+  } while (0);
+  if (err < 0)
+    SendError(socket, packet, err, GUIDE_INFO_RLY);
+  return err;
+}
+
 int32 UserInterface::CloseSocket(const int fd) {
   data_share_mgr_->UserOffline(fd);
   return 0;
@@ -586,15 +623,16 @@ int32 UserInterface::NewAppointment(const int32 socket, PacketHead* packet) {
     err = recv.Deserialize();
     if (err < 0)
       break;
+    DicValue dic;
     err = user_mysql_->NewAppointmentInsert(recv.uid(), recv.city_code(),
                                             recv.start_time(), recv.end_time(),
                                             recv.skills(), recv.is_other(),
                                             recv.other_name(),
                                             recv.other_gender(),
-                                            recv.ohter_phone());
+                                            recv.ohter_phone(), &dic);
     if (err < 0)
       break;
-    SendMsg(socket, packet, NULL, NEW_APPOINTMENT_RLY);
+    SendMsg(socket, packet, &dic, NEW_APPOINTMENT_RLY);
   } while (0);
   if (err < 0) {
     SendError(socket, packet, err, NEW_APPOINTMENT_RLY);
@@ -1232,7 +1270,8 @@ void UserInterface::SendPacket(const int socket, PacketHead* packet) {
   int total = util::SendFull(socket, s, packet->packet_length());
   delete[] s;
   s = NULL;
-  LOG_IF(ERROR, total != packet->packet_length()) << "send packet wrong";
+  LOG_IF(ERROR, total != packet->packet_length()) << "send packet wrong:opcode[]"
+      << packet->operate_code();
 }
 
 void UserInterface::SendError(const int socket, PacketHead* packet, int32 err,
