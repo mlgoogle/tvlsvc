@@ -625,6 +625,37 @@ int32 BlackcardConsumRecordRecv::Deserialize() {
   return err;
 }
 
+BlackcardPlaceOrderRecv::BlackcardPlaceOrderRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  uid_ = 0;
+  wanted_lv_ = 0;
+}
+
+int32 BlackcardPlaceOrderRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+      base_logic::IMPL_JSON, &body_str_, false);
+  std::string err_str;
+  DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetBigInteger(L"uid_", &uid_);
+      LOG_IF(ERROR, !r) << "BlackcardPlaceOrderRecv::uid_ parse error";
+      r = dic->GetBigInteger(L"wanted_lv_", &wanted_lv_);
+      LOG_IF(ERROR, !r) << "BlackcardPlaceOrderRecv::wanted_lv_ parse error";
+    } else {
+      LOG(ERROR)<< "BlackcardConsumRecordRecv Deserialize error";
+      err = REQUEST_JSON_ERR;
+      break;
+    }
+  }while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                                serializer);
+  return err;
+}
+
 NewAppointmentRecv::NewAppointmentRecv(PacketHead packet) {
   head_ = packet.head();
   body_str_ = packet.body_str();
@@ -656,6 +687,8 @@ int32 NewAppointmentRecv::Deserialize() {
       LOG_IF(ERROR, !r) << "NewAppointmentRecv::end_time_ parse error";
       r = dic->GetString(L"skills_", &skills_);
       LOG_IF(ERROR, !r) << "NewAppointmentRecv::skills_ parse error";
+      r = dic->GetString(L"remarks_", &remarks_);
+      LOG_IF(ERROR, !r) << "NewAppointmentRecv::remarks_ parse error";
       r = dic->GetBigInteger(L"is_other_", &is_other_);
       LOG_IF(ERROR, !r) << "NewAppointmentRecv::is_other_ parse error";
       if (is_other_ == 1) {

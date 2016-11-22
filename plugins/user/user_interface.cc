@@ -332,7 +332,8 @@ int32 UserInterface::OrderDetails(const int32 socket, PacketHead* packet) {
     if (err < 0)
       break;
     DicValue dic;
-    err = user_mysql_->OrderDetailsSelect(recv.order_id(), recv.order_type(), &dic);
+    err = user_mysql_->OrderDetailsSelect(recv.order_id(), recv.order_type(),
+                                          &dic);
     if (err < 0)
       break;
     SendMsg(socket, packet, &dic, ORDER_DETAILS_RLY);
@@ -341,7 +342,6 @@ int32 UserInterface::OrderDetails(const int32 socket, PacketHead* packet) {
     SendError(socket, packet, err, ORDER_DETAILS_RLY);
   return err;
 }
-
 
 int32 UserInterface::GuidesInfo(const int32 socket, PacketHead* packet) {
   int32 err = 0;
@@ -602,17 +602,41 @@ int32 UserInterface::BlackcardConsumeRecord(const int32 socket,
 }
 
 int32 UserInterface::BlackcardPriceInfo(const int32 socket,
-                                            PacketHead* packet) {
+                                        PacketHead* packet) {
   int32 err = 0;
   do {
     DicValue dic;
     err = user_mysql_->BlackcardPriceInfoSelect(&dic);
     if (err < 0)
       break;
-    SendMsg(socket, packet, &dic, BLACKCARD_PRICE_INFO);
+    SendMsg(socket, packet, &dic, BLACKCARD_PRICE_INFO_RLY);
   } while (0);
   if (err < 0) {
-    SendError(socket, packet, err, BLACKCARD_PRICE_INFO);
+    SendError(socket, packet, err, BLACKCARD_PRICE_INFO_RLY);
+  }
+  return err;
+}
+
+int32 UserInterface::BlackcardPlaceOrder(const int32 socket,
+                                         PacketHead* packet) {
+  int32 err = 0;
+  do {
+    BlackcardPlaceOrderRecv recv(*packet);
+    err = recv.Deserialize();
+    if (err < 0)
+      break;
+    DicValue dic;
+    err = user_mysql_->BlackcardPlaceOrderInsertAndSelect(recv.uid(),
+                                                          recv.wanted_lv(),
+                                                          &dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, PLACE_BLACKCARD_ORDER_RLY);
+    if (err < 0)
+      break;
+  } while (0);
+  if (err < 0) {
+    SendError(socket, packet, err, PLACE_BLACKCARD_ORDER_RLY);
   }
   return err;
 }
@@ -645,7 +669,8 @@ int32 UserInterface::NewAppointment(const int32 socket, PacketHead* packet) {
                                             recv.skills(), recv.is_other(),
                                             recv.other_name(),
                                             recv.other_gender(),
-                                            recv.ohter_phone(), &dic);
+                                            recv.ohter_phone(), recv.remarks(),
+                                            &dic);
     if (err < 0)
       break;
     SendMsg(socket, packet, &dic, NEW_APPOINTMENT_RLY);
@@ -1286,8 +1311,8 @@ void UserInterface::SendPacket(const int socket, PacketHead* packet) {
   int total = util::SendFull(socket, s, packet->packet_length());
   delete[] s;
   s = NULL;
-  LOG_IF(ERROR, total != packet->packet_length()) << "send packet wrong:opcode[]"
-      << packet->operate_code();
+  LOG_IF(ERROR, total != packet->packet_length())
+      << "send packet wrong:opcode[]" << packet->operate_code();
 }
 
 void UserInterface::SendError(const int socket, PacketHead* packet, int32 err,

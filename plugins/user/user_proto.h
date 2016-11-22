@@ -259,6 +259,18 @@ class BlackcardConsumRecordRecv : public PacketHead {
   int64 uid_;
 };
 
+class BlackcardPlaceOrderRecv : public PacketHead {
+ public:
+  BlackcardPlaceOrderRecv(PacketHead packet);
+  int32 Deserialize();
+
+  inline int64 uid() { return uid_; }
+  inline int64 wanted_lv() { return wanted_lv_; }
+ private:
+  int64 uid_;
+  int64 wanted_lv_;
+};
+
 class NewAppointmentRecv : public PacketHead {
  public:
   NewAppointmentRecv(PacketHead packet);
@@ -272,6 +284,7 @@ class NewAppointmentRecv : public PacketHead {
   inline std::string other_name() { return other_name_; }
   int64 other_gender() { return other_gender_; }
   inline std::string ohter_phone() { return other_phone_; }
+  inline std::string remarks() { return remarks_; }
  private:
   int64 uid_;
   int64 city_code_;
@@ -282,6 +295,7 @@ class NewAppointmentRecv : public PacketHead {
   std::string other_name_;
   int64 other_gender_;
   std::string other_phone_;
+  std::string remarks_;
 };
 
 class WxPlaceOrderRecv : public PacketHead {

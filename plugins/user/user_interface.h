@@ -71,6 +71,8 @@ class UserInterface {
 
   int32 BlackcardPriceInfo(const int32 socket, PacketHead* packet);
 
+  int32 BlackcardPlaceOrder(const int32 socket, PacketHead* packet);
+
   int32 SkillsInfo(const int32 socket, PacketHead* packet);
 
 

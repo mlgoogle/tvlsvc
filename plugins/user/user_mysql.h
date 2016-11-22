@@ -62,6 +62,7 @@ class UserMysql {
 
   int32 BlackcardPriceInfoSelect(DicValue* dic);
 
+  int32 BlackcardPlaceOrderInsertAndSelect(int64 uid, int64 lv, DicValue* dic);
 
   //@brief 查询服务技能
   //@author paco
@@ -73,7 +74,8 @@ class UserMysql {
 
   int32 NewAppointmentInsert(int64 uid, int64 city, int64 start, int64 end,
                              std::string skill, int64 other, std::string name,
-                             int64 gender, std::string phone, DicValue* dic);
+                             int64 gender, std::string phone,
+                             std::string remark, DicValue* dic);
 
   int32 AppointmentRecordSelect(int64 uid, int64 lastid, int64 count,
                                 DicValue* dic);
@@ -145,6 +147,7 @@ class UserMysql {
   static void CallNewAppointmentInsert(void* param, Value* value);
   static void CallOrderDetailsSelect(void* param, Value* value);
   static void CallBlackcardPriceInfoSelect(void* param, Value* value);
+  static void CallBlackcardPlaceOrderInsertAndSelect(void* param, Value* value);
  private:
   base_logic::DataEngine* mysql_engine_;
 };

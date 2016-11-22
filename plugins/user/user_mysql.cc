@@ -119,8 +119,9 @@ int32 UserMysql::GuideServiceSelect(int64 uid, DicValue* dic) {
   return err;
 }
 
-int32 UserMysql::GuideServerUpdateAndSelect(int64 uid, std::list<std::string> sqls,
-                                 DicValue* dic) {
+int32 UserMysql::GuideServerUpdateAndSelect(int64 uid,
+                                            std::list<std::string> sqls,
+                                            DicValue* dic) {
   int32 err = 0;
   bool r = false;
   do {
@@ -467,6 +468,25 @@ int32 UserMysql::BlackcardPriceInfoSelect(DicValue* dic) {
   return err;
 }
 
+int32 UserMysql::BlackcardPlaceOrderInsertAndSelect(int64 uid, int64 lv,
+                                                    DicValue* dic) {
+  int32 err = 0;
+  bool r = false;
+  do {
+    std::stringstream ss;
+    ss << "call proc_BlackcardPlaceOrderInsertAndSelect(" << uid << "," << lv
+       << ")";
+    LOG(INFO)<< "sql:" << ss.str();
+    r = mysql_engine_->ReadData(ss.str(), dic,
+                                CallBlackcardPlaceOrderInsertAndSelect);
+    if (!r) {
+      err = SQL_EXEC_ERROR;
+      break;
+    }
+  } while (0);
+  return err;
+}
+
 int32 UserMysql::SkillsInfoSelect(DicValue* dic) {
   int32 err = 0;
   bool r = false;
@@ -705,14 +725,15 @@ int32 UserMysql::OrderDetailsSelect(int64 oid, int64 type, DicValue* dic) {
 int32 UserMysql::NewAppointmentInsert(int64 uid, int64 city, int64 start,
                                       int64 end, std::string skill, int64 other,
                                       std::string name, int64 gender,
-                                      std::string phone, DicValue* dic) {
+                                      std::string phone, std::string remark,
+                                      DicValue* dic) {
   int32 err = 0;
   bool r = false;
   do {
     std::stringstream ss;
     ss << "call proc_NewAppointmentInsert(" << uid << "," << city << ","
        << start << "," << end << ",'" << skill << "'," << other << ",'" << name
-       << "'," << gender << ",'" << phone << "')";
+       << "'," << gender << ",'" << phone << "','" << remark << "')";
     LOG(INFO)<< "sql:" << ss.str();
     r = mysql_engine_->ReadData(ss.str(), dic, CallNewAppointmentInsert);
     if (!r) {
@@ -1705,7 +1726,7 @@ void UserMysql::CallOrderDetailsSelect(void* param, Value* value) {
   int32 num = engine->RecordCount();
   DicValue* dict = reinterpret_cast<DicValue*>(value);
   int64 type = 0;
-  dict->GetBigInteger(L"order_type_", & type);
+  dict->GetBigInteger(L"order_type_", &type);
   if (num > 0) {
     while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
       if (rows[0] != NULL)
@@ -1736,6 +1757,34 @@ void UserMysql::CallOrderDetailsSelect(void* param, Value* value) {
         else
           dict->SetBigInteger(L"days_", atoll(rows[11]));
       }
+    }
+  } else {
+    LOG(WARNING)<<"CallNewAppointmentInsert count < 0";
+  }
+}
+
+void UserMysql::CallBlackcardPlaceOrderInsertAndSelect(void* param, Value* value) {
+  base_storage::DBStorageEngine* engine =
+      (base_storage::DBStorageEngine*) (param);
+  MYSQL_ROW rows;
+  int32 num = engine->RecordCount();
+  DicValue* dict = reinterpret_cast<DicValue*>(value);
+  int64 type = 0;
+  dict->GetBigInteger(L"order_type_", &type);
+  if (num > 0) {
+    while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
+      if (rows[0] != NULL) {
+        dict->SetBigInteger(L"result", atoll(rows[0]));
+        //生成订单失败
+        if (atoll(rows[0]) < 0)
+          break;
+      }
+      if (rows[1] != NULL)
+        dict->SetBigInteger(L"order_id_", atoll(rows[1]));
+      if (rows[2] != NULL)
+        dict->SetBigInteger(L"order_price_", atoll(rows[2]));
+      if (rows[3] != NULL)
+        dict->SetBigInteger(L"start_", atoll(rows[3]));
     }
   } else {
     LOG(WARNING)<<"CallNewAppointmentInsert count < 0";
