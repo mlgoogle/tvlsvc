@@ -425,7 +425,7 @@ int32 ChatInterface::PushGtMsg(int64 from, int64 to, std::string category,
       err = chat_mysql_->UserNickSelect(from, &dic);
       if (err < 0)
         break;
-      nick = dic.GetString(L"nickname", &nick);
+      nick = dic.GetString(L"nickname_", &nick);
       data_share_mgr_->AddNick(from, nick);
     }
     LOG(INFO)<< "token::" << token;
@@ -458,7 +458,7 @@ int32 ChatInterface::PushAskMsg(AskInvitationRecv rev) {
       err = chat_mysql_->UserNickSelect(rev.from_uid(), &dic);
       if (err < 0)
         break;
-      nick = dic.GetString(L"nickname", &nick);
+      nick = dic.GetString(L"nickname_", &nick);
       data_share_mgr_->AddNick(rev.from_uid(), nick);
     }
     LOG(INFO)<< "token::" << token;
@@ -491,7 +491,7 @@ int32 ChatInterface::PushChatMsg(ChatPacket rev) {
       err = chat_mysql_->UserNickSelect(rev.from_uid(), &dic);
       if (err < 0)
         break;
-      nick = dic.GetString(L"nickname", &nick);
+      nick = dic.GetString(L"nickname_", &nick);
       data_share_mgr_->AddNick(rev.from_uid(), nick);
     }
     LOG(INFO)<< "token::" << token;
@@ -512,7 +512,7 @@ std::string ChatInterface::SpliceGtPushBody(std::string json, int64 type) {
   std::string err_str;
   DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
   if (dic != NULL) {
-    dic->SetBigInteger(L"push_msg_type", type);
+    dic->SetBigInteger(L"push_msg_type_", type);
     serializer->Serialize(*dic, &str);
   } else {
     str = "{\"push_msg_type:\",-1}";

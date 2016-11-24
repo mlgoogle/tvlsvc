@@ -479,7 +479,7 @@ int32 DataShareMgr::QueryRecommendShare(int64 id, int64 count, int64 type,
       }
     }
   } while (0);
-  info->Set(L"data_list", list);
+  info->Set(L"data_list_", list);
   LOG(ERROR) << "DataShareMgr QueryRecommendShare unlock";
   return err;
 }
@@ -504,7 +504,7 @@ int32 DataShareMgr::QuerySkillShare(int64 id, int64 count, DicValue* info) {
           }
         }
       }
-      info->Set(L"banner_list", banner_list);
+      info->Set(L"banner_list_", banner_list);
     }
     ShareSkillMap::reverse_iterator rit;
     if (id == 0) {
@@ -527,7 +527,7 @@ int32 DataShareMgr::QuerySkillShare(int64 id, int64 count, DicValue* info) {
         count--;
       }
     }
-    info->Set(L"data_list", data_list);
+    info->Set(L"data_list_", data_list);
   } while (0);
 
   LOG(ERROR) << "DataShareMgr QuerySkillShare unlock";
@@ -552,13 +552,11 @@ int32 DataShareMgr::QueryShareSkillDetail(int64 id, DicValue* dic) {
   base_logic::RLockGd lk(lock_);
   LOG(ERROR) << "DataShareMgr QueryShareSkillDetail locked";
   int32 err = 0;
-  DicValue * in = new DicValue();
   ShareSkillMap::iterator share_it = share_skill_map_.find(id);
   if (share_it != share_skill_map_.end()) {
     ShareSkill* share = share_it->second;
-    share->SetDetailSerialization(in);
+    share->SetDetailSerialization(dic);
   }
-  dic->Set(L"detail", in);
   LOG(ERROR) << "DataShareMgr QueryShareSkillDetail unlock";
   return err;
 }

@@ -107,7 +107,7 @@ int32 UserInterface::InitShareType() {
       break;
     if (!type_dic.empty()) {
       ListValue* info;
-      type_dic.GetList(L"data_list", &info);
+      type_dic.GetList(L"data_list_", &info);
       if (info != NULL && !info->empty()) {
         data_share_mgr_->InitShareType(info);
       }
@@ -127,7 +127,7 @@ int32 UserInterface::InitShareDetails() {
       break;
     if (!detail_dic.empty()) {
       ListValue* info;
-      detail_dic.GetList(L"data_list", &info);
+      detail_dic.GetList(L"data_list_", &info);
       if (info != NULL && !info->empty()) {
         data_share_mgr_->InitTourismShare(info);
       }
@@ -144,7 +144,7 @@ int32 UserInterface::InitShareSkills() {
       break;
     if (!skill_info.empty()) {
       ListValue* info;
-      skill_info.GetList(L"data_list", &info);
+      skill_info.GetList(L"data_list_", &info);
       if (info != NULL && !info->empty()) {
         data_share_mgr_->InitSkillShare(info);
       }
@@ -182,7 +182,7 @@ int32 UserInterface::TourismShareRecommend(const int32 socket,
                                                recv.page_type(), &dic);
     if (err < 0)
       break;
-    dic.SetBigInteger(L"page_type", recv.page_type());
+    dic.SetBigInteger(L"page_type_", recv.page_type());
     SendMsg(socket, packet, &dic, SHARE_TOURISM_RECOMMEND_RLY);
   } while (0);
   if (err < 0)
@@ -203,7 +203,7 @@ int32 UserInterface::TourismShareList(const int32 socket, PacketHead* packet) {
                                                recv.page_type(), &dic);
     if (err < 0)
       break;
-    dic.SetBigInteger(L"page_type", recv.page_type());
+    dic.SetBigInteger(L"page_type_", recv.page_type());
     SendMsg(socket, packet, &dic, SHARE_TOURISM_LIST_RLY);
   } while (0);
   if (err < 0)
@@ -1210,7 +1210,7 @@ int32 UserInterface::RecommendGuide(const int32 socket, PacketHead* packet) {
                                             rev.recommend_type(), &dic);
     if (err < 0)
       break;
-    dic.SetBigInteger(L"recommend_type", rev.recommend_type());
+    dic.SetBigInteger(L"recommend_type_", rev.recommend_type());
     SendMsg(socket, packet, &dic, GUIDE_RECOMMEND_RLY);
   } while (0);
   if (err < 0) {

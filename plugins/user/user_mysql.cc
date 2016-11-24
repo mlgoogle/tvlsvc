@@ -813,7 +813,7 @@ void UserMysql::CallGuideServiceSelect(void* param, Value* value) {
         dict->SetBigInteger(L"service_type_", atoll(rows[4]));
       list->Append(dict);
     }
-    info->Set(L"service", list);
+    info->Set(L"service_list_", list);
   } else {
     LOG(WARNING)<< "CallGuideServiceSelect count < 0";
   }
@@ -877,7 +877,7 @@ void UserMysql::CallNearGuideSelect(void* param, Value* value) {
         dict->SetBigInteger(L"gender_", atoll(rows[8]));
       list->Append(dict);
     }
-    info->Set(L"result", list);
+    info->Set(L"guide_list_", list);
   } else {
     LOG(WARNING)<< "CallNearGuideSelect count < 0";
   }
@@ -923,7 +923,7 @@ void UserMysql::CallRecommendGuideSelect(void* param, Value* value) {
         dict->SetString(L"heag_bg_url_", rows[13]);
       list->Append(dict);
     }
-    info->Set(L"recommend_guide", list);
+    info->Set(L"recommend_guide_", list);
   } else {
     LOG(WARNING)<< "CallRecommendGuideSelect count < 0";
   }
@@ -1005,7 +1005,7 @@ void UserMysql::CallUserDetailSelect(void* param, Value* value) {
         dict->SetBigInteger(L"gender_", atoll(rows[11]));
       list->Append(dict);
     }
-    info->Set(L"userinfo_list", list);
+    info->Set(L"userinfo_list_", list);
   } else {
     LOG(WARNING)<< "CallUserDetailSelect count < 0";
   }
@@ -1020,7 +1020,7 @@ void UserMysql::CallRegisterInsertAndSelect(void* param, Value* value) {
   if (num > 0) {
     while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
       if (rows[0] != NULL) {
-        dict->SetBigInteger(L"result", atoll(rows[0]));
+        dict->SetBigInteger(L"result_", atoll(rows[0]));
         //用户已注册过
         if (atoi(rows[0]) == 0)
           break;
@@ -1079,7 +1079,7 @@ void UserMysql::CallTripRecordSelect(void* param, Value* value) {
         dict->SetBigInteger(L"days_", atoll(rows[16]));
       list->Append(dict);
     }
-    info->Set(L"trip_list", list);
+    info->Set(L"trip_list_", list);
   } else {
     LOG(WARNING)<< "CallTripRecordSelect count < 0";
   }
@@ -1113,7 +1113,7 @@ void UserMysql::CallServiceInfoSelect(void* param, Value* value) {
         dict->SetBigInteger(L"order_time_", atoll(rows[7]));
       list->Append(dict);
     }
-    info->Set(L"service_list", list);
+    info->Set(L"service_list_", list);
   } else {
     LOG(WARNING)<< "CallServiceInfoSelect count < 0";
   }
@@ -1143,7 +1143,7 @@ void UserMysql::CallBlackServiceInfoSelect(void* param, Value* value) {
         dict->SetBigInteger(L"order_time_", atoll(rows[5]));
       list->Append(dict);
     }
-    info->Set(L"black_list", list);
+    info->Set(L"black_list_", list);
   } else {
     LOG(WARNING)<< "CallBlackServiceInfoSelect count < 0";
   }
@@ -1175,16 +1175,16 @@ void UserMysql::CallOrderStatusSelect(void* param, Value* value) {
   if (num > 0) {
     while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
       if (rows[0] != NULL) {
-        if (atoll(rows[0]) != 4) {
-          if (atoll(rows[0]) == 6) {  //已记录开票
+        if (atoll(rows[0]) != 7) {
+          if (atoll(rows[0]) == 9 || atoll(rows[0]) == 8) {  //已记录开票
             dict->SetBigInteger(L"result_", -2);
             LOG(ERROR)<< "CallOrderStatusSelect result -2:订单已开票";
           } else {
             dict->SetBigInteger(L"result_",-3);
-            LOG(ERROR) << "CallOrderStatusSelect result -3:订单未支付";
+            LOG(ERROR) << "CallOrderStatusSelect result -3:服务未完成";
           }
           break;
-        } else {  //订单状态均为4
+        } else {  //订单状态均为7
           dict->SetBigInteger(L"result_", 1);
         }
       }
@@ -1217,7 +1217,7 @@ void UserMysql::CallInvoiceRecordSelect(void* param, Value* value) {
         dict->SetBigInteger(L"invoice_price_", atoll(rows[4]));
       list->Append(dict);
     }
-    info->Set(L"invoice_list", list);
+    info->Set(L"invoice_list_", list);
   } else {
     LOG(WARNING)<<"CallInvoiceRecordSelect count < 0";
   }
@@ -1291,7 +1291,7 @@ void UserMysql::CallBlackcardPrivilegeSelect(void* param, Value* value) {
         dict->SetString(L"privilege_pic_no_", rows[7]);
       list->Append(dict);
     }
-    info->Set(L"privilege_list", list);
+    info->Set(L"privilege_list_", list);
   } else {
     LOG(WARNING)<< "CallBlackcardPrivilegeSelect count < 0";
   }
@@ -1354,7 +1354,7 @@ void UserMysql::CallBlackcardConsumeRecordSelect(void* param, Value* value) {
         dict->SetBigInteger(L"order_status_", atoll(rows[6]));
       list->Append(dict);
     }
-    info->Set(L"blackcard_consume_record", list);
+    info->Set(L"blackcard_consume_record_", list);
   } else {
     LOG(WARNING)<<"CallBlackcardConsumeRecordSelect count < 0";
   }
@@ -1375,10 +1375,10 @@ void UserMysql::CallSkillsInfoSelect(void* param, Value* value) {
       if (rows[1] != NULL)
         dict->SetString(L"skill_name_", rows[1]);
       if (rows[2] != NULL)
-        dict->SetBigInteger(L"skill_type", atoll(rows[2]));
+        dict->SetBigInteger(L"skill_type_", atoll(rows[2]));
       list->Append(dict);
     }
-    info->Set(L"skills_list", list);
+    info->Set(L"skills_list_", list);
   } else {
     LOG(WARNING)<<"CallSkillsInfoSelect count < 0";
   }
@@ -1519,7 +1519,7 @@ void UserMysql::CallShareTourismDetailsSelect(void* param, Value* value) {
         dict->SetBigInteger(L"is_recommend_", atoll(rows[10]));
       list->Append(dict);
     }
-    info->Set(L"data_list", list);
+    info->Set(L"data_list_", list);
   } else {
     LOG(WARNING)<<"CallShareTourismDetailsSelect count < 0";
   }
@@ -1565,7 +1565,7 @@ void UserMysql::CallShareSkillDetailsSelect(void* param, Value* value) {
         dict->SetBigInteger(L"entry_num_", atoll(rows[13]));
       list->Append(dict);
     }
-    info->Set(L"data_list", list);
+    info->Set(L"data_list_", list);
   } else {
     LOG(WARNING)<<"CallShareSkillDetailsSelect count < 0";
   }
@@ -1589,7 +1589,7 @@ void UserMysql::CallShareTourismTypeSelect(void* param, Value* value) {
         dict->SetString(L"type_pic_", rows[2]);
       list->Append(dict);
     }
-    info->Set(L"data_list", list);
+    info->Set(L"data_list_", list);
   } else {
     LOG(WARNING)<<"CallShareTourismTypeSelect count < 0";
   }
@@ -1601,18 +1601,19 @@ void UserMysql::CallShareSkillEntrySelect(void* param, Value* value) {
   MYSQL_ROW rows;
   int32 num = engine->RecordCount();
   DicValue* info = reinterpret_cast<DicValue*>(value);
+  ListValue* list = new ListValue();
   if (num > 0) {
-    ListValue* list = new ListValue();
     while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
       DicValue* dict = new DicValue();
       if (rows[0] != NULL)
         dict->SetBigInteger(L"uid_", atoll(rows[0]));
       if (rows[1] != NULL)
-        dict->SetBigInteger(L"head_url_", atoll(rows[1]));
+        dict->SetString(L"head_url_", rows[1]);
       list->Append(dict);
     }
-    info->Set(L"user_list", list);
+    info->Set(L"user_list_", list);
   } else {
+    info->Set(L"user_list_", list);
     LOG(WARNING)<<"CallShareSkillEntrySelect count < 0";
   }
 }
@@ -1639,7 +1640,7 @@ void UserMysql::CallShareSkillDiscussSelect(void* param, Value* value) {
         dict->SetString(L"head_url_", rows[4]);
       list->Append(dict);
     }
-    info->Set(L"data_list", list);
+    info->Set(L"data_list_", list);
   } else {
     LOG(WARNING)<<"CallShareSkillDiscussSelect count < 0";
   }
@@ -1713,7 +1714,7 @@ void UserMysql::CallBlackcardPriceInfoSelect(void* param, Value* value) {
         dict->SetBigInteger(L"blackcard_price_", atoll(rows[1]));
       list->Append(dict);
     }
-    info->Set(L"data_list", list);
+    info->Set(L"data_list_", list);
   } else {
     LOG(WARNING)<<"CallBlackcardPriceInfoSelect count < 0";
   }
@@ -1774,7 +1775,7 @@ void UserMysql::CallBlackcardPlaceOrderInsertAndSelect(void* param, Value* value
   if (num > 0) {
     while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
       if (rows[0] != NULL) {
-        dict->SetBigInteger(L"result", atoll(rows[0]));
+        dict->SetBigInteger(L"result_", atoll(rows[0]));
         //生成订单失败
         if (atoll(rows[0]) < 0)
           break;
@@ -1841,7 +1842,7 @@ void UserMysql::CallAppointmentRecordSelect(void* param, Value* value) {
         dict->SetBigInteger(L"order_id_", atoll(rows[18]));
       list->Append(dict);
     }
-    info->Set(L"data_list", list);
+    info->Set(L"data_list_", list);
   } else {
     LOG(WARNING)<<"CallAppointmentRecordSelect count < 0";
   }
