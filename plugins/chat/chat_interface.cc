@@ -153,7 +153,7 @@ int32 ChatInterface::AskInvitation(const int32 socket, PacketHead* packet) {
       SendMsg(u->socket_fd(), packet, &dic, ASK_INVITATION_RLY);
     }
     //
-  } while (0);
+  }while (0);
   if (err < 0)
     SendError(socket, packet, err, ASK_INVITATION_RLY);
   return err;
@@ -196,7 +196,7 @@ int32 ChatInterface::AppointMentGuide(const int32 socket, PacketHead* packet) {
       LOG(INFO)<< "appointment to user is not login";
       // 回复被邀请者
       PushGtMsg(rev.from_uid(), rev.to_uid(), rev.body_str(), " 邀你同游",
-                APPOINTMENT_GUIDE_RLY);
+          APPOINTMENT_GUIDE_RLY);
       LOG(INFO) << "PushGtMsg";
       break;
     } else {
@@ -205,7 +205,7 @@ int32 ChatInterface::AppointMentGuide(const int32 socket, PacketHead* packet) {
       SendMsg(u->socket_fd(), packet, &dic, APPOINTMENT_GUIDE_RLY);
     }
     //
-  } while (0);
+  }while (0);
   if (err < 0)
     SendError(socket, packet, err, APPOINTMENT_GUIDE_RLY);
   return err;
@@ -342,6 +342,26 @@ int32 ChatInterface::SpentCash(const int32 socket, PacketHead* packet) {
   return err;
 }
 
+int32 ChatInterface::CancelOrder(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    CancelOrderRecv recv(*packet);
+    err = recv.Deserialize();
+    if (err < 0)
+      break;
+    DicValue dic;
+    err = chat_mysql_->CancelOrderPayUpdate(recv.order_id(), recv.order_type(),
+                                         &dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, SPENT_CASH_RLY);
+  } while (0);
+  if (err < 0) {
+    SendError(socket, packet, err, CANCEL_ORDER_RLY);
+  }
+  return err;
+}
+
 int32 ChatInterface::GtPushComm(const int32 socket, PacketHead* packet) {
   int32 err = 0;
   do {
@@ -432,7 +452,7 @@ int32 ChatInterface::PushGtMsg(int64 from, int64 to, std::string category,
     LOG(INFO)<< "content::" << category;
     util::PushApnChatMsg((char*) token.c_str(),
                          data_share_mgr_->AddUnReadCount(to),
-                         (char*) nick.c_str(), (char*)content.c_str(),
+                         (char*) nick.c_str(), (char*) content.c_str(),
                          (char*) SpliceGtPushBody(category, type).c_str());
   } while (0);
   return err;
@@ -498,7 +518,7 @@ int32 ChatInterface::PushChatMsg(ChatPacket rev) {
     LOG(INFO)<< "content::" << rev.body_str();
     util::PushApnChatMsg((char*) token.c_str(),
                          data_share_mgr_->AddUnReadCount(rev.to_uid()),
-                         (char*) nick.c_str(),(char*)rev.content().c_str(),
+                         (char*) nick.c_str(), (char*) rev.content().c_str(),
                          (char*) SpliceGtPushBody(rev.body_str(), 1).c_str());
   } while (0);
   return err;
@@ -539,8 +559,8 @@ void ChatInterface::SendPacket(const int socket, PacketHead* packet) {
   int total = util::SendFull(socket, s, packet->packet_length());
   delete[] s;
   s = NULL;
-  LOG_IF(ERROR, total != packet->packet_length()) << "send packet wrong:opcode[]"
-      << packet->operate_code();
+  LOG_IF(ERROR, total != packet->packet_length())
+      << "send packet wrong:opcode[]" << packet->operate_code();
 }
 
 void ChatInterface::SendError(const int socket, PacketHead* packet, int32 err,

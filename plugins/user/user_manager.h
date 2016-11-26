@@ -27,6 +27,7 @@ class UserManager {
   int32 CheckHeartLoss();
   int32 InitShareGuideData();
   int32 OnSockClose(const int fd);
+  int32 OrderStatusCheck();
 };
 
 }  // namespace user

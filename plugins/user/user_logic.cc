@@ -144,6 +144,7 @@ bool Userlogic::OnInitTimer(struct server *srv) {
   srv->add_time_task(srv, "user", CONNECT_CKECK, 10, -1);
   srv->add_time_task(srv, "user", SHARE_DATA_INIT, 1, 1);
   srv->add_time_task(srv, "user", SHARE_DATA_INIT_TEN, 10*60, 1);
+  srv->add_time_task(srv, "user", ORDER_STATUS_CHECK, 2*60, -1);
   return true;
 }
 
@@ -152,7 +153,7 @@ bool Userlogic::OnInitTimer(struct server *srv) {
 bool Userlogic::OnTimeout(struct server *srv, char *id, int opcode, int time) {
   switch (opcode) {
     case CONNECT_CKECK: {
-//      user_manager_->CheckHeartLoss();
+      user_manager_->CheckHeartLoss();
       break;
     }
     case SHARE_DATA_INIT: {
@@ -161,6 +162,10 @@ bool Userlogic::OnTimeout(struct server *srv, char *id, int opcode, int time) {
     }
     case SHARE_DATA_INIT_TEN: {
       user_manager_->InitShareGuideData();
+      break;
+    }
+    case ORDER_STATUS_CHECK: {
+      user_manager_->OrderStatusCheck();
       break;
     }
   }

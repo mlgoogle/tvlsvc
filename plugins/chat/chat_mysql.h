@@ -45,12 +45,15 @@ class ChatMysql {
   //订单支付
   int32 SpentCashUpdate(int64 uid, int64 oid, std::string pwd, DicValue* dic);
 
+  int32 CancelOrderPayUpdate(int64 oid, int64 otype, DicValue* dic);
+
   static void CallNewOrderInsertAndSelect(void* param, Value* value);
   static void CallChatRecordQuery(void* param, Value* value);
   static void CallDeviceTokenSelect(void* param, Value* value);
   static void CallUserNickSelect(void* param, Value* value);
   static void CallEvaluateInfoSelect(void* param, Value* value);
   static void CallSpentCashUpdate(void* param, Value* value);
+  static void CallCancelOrderPayUpdate(void* param, Value* value);
 
  private:
   base_logic::DataEngine* mysql_engine_;

@@ -62,6 +62,12 @@ int32 UserInterface::CheckHeartLoss() {
   return err;
 }
 
+int32 UserInterface::NopayOrderStatusCheck() {
+  int32 err = 0;
+  err = user_mysql_->CancelOrderStatusUpdate();
+  return err;
+}
+
 int32 UserInterface::InitShareGuide() {
   int err = 0;
   InitShareType();
@@ -904,18 +910,20 @@ int32 UserInterface::WXPayClientResponse(const int32 socket,
     if (err < 0)
       break;
     DicValue dic;
-    err = user_mysql_->ChangeRechargeStatusAndSelect(recv.uid(),
-                                                     recv.recharge_id(),
+    err = user_mysql_->ChangeRechargeStatusAndSelect(recv.recharge_id(),
                                                      recv.pay_result(), &dic);
     if (err < 0)
       break;
     SendMsg(socket, packet, &dic, WXPAY_CLIENT_RLY);
     //todo 测试用 主动调起服务端支付成功通知
     if (recv.pay_result() == 1) {
-      user_mysql_->ChangeRechargeStatusAndSelect(recv.uid(), recv.recharge_id(),
-                                                 3, &dic);
-      SendMsg(socket, packet, &dic, WXPAY_SERVER_RLY);
+      user_mysql_->ChangeRechargeStatusAndSelect(recv.recharge_id(),
+                                                 1, &dic);
+    } else {
+      user_mysql_->ChangeRechargeStatusAndSelect(recv.recharge_id(),
+                                                 2, &dic);
     }
+    SendMsg(socket, packet, &dic, WXPAY_SERVER_RLY);
   } while (0);
   if (err < 0) {
     SendError(socket, packet, err, WXPAY_CLIENT_RLY);
@@ -927,9 +935,32 @@ int32 UserInterface::WXPayClientResponse(const int32 socket,
 int32 UserInterface::WXPayServerResponse(const int32 socket,
                                          PacketHead* packet) {
   int32 err = 0;
-//  err = user_mysql_->ChangeRechargeStatusAndSelect(recv.uid(),
-//                                                   recv.recharge_id(),
-//                                                   recv.pay_result(), &dic);
+  do {
+    WXPayServerRecv recv(*packet);
+    err = recv.Deserialize();
+    if (err < 0)
+      break;
+    //支付成功
+    DicValue dic;
+    if (recv.appid() != APPID && recv.mch_id() != MCH_ID) {
+      LOG(ERROR) << "WXPAY SERVER RESULT appid:[" << recv.appid() << "]";
+      LOG(ERROR) << "WXPAY SERVER RESULT mch_id:[" << recv.mch_id() << "]";
+      break;
+    }
+    if (recv.pay_result() == 1) {
+      user_mysql_->ChangeRechargeStatusAndSelect(recv.recharge_id(),
+                                                       3, &dic);
+    } else {
+      user_mysql_->ChangeRechargeStatusAndSelect(recv.recharge_id(),
+                                                             4, &dic);
+    }
+    int64 user_id = 0;
+    dic.GetBigInteger(L"uid_", &user_id);
+    UserInfo* user = data_share_mgr_->GetUser(user_id);
+    if (user != NULL && user->is_login()) {
+      SendMsg(user->socket_fd(), packet, &dic, WXPAY_SERVER_RLY);
+    }
+  } while (0);
   return err;
 }
 

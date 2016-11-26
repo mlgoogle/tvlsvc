@@ -59,12 +59,22 @@ int32 UserMysql::ServiceInfoSelect(std::string oid_str, DicValue* dic) {
       err = SQL_EXEC_ERROR;
       break;
     }
-    //黑卡订单
+    //黑卡服务订单
     ss.str("");
     ss.clear();
     ss << "call proc_ServiceInfoSelect('" << oid_str << "'," << 1 << ")";
     LOG(INFO)<< "sql:" << ss.str();
     r = mysql_engine_->ReadData(ss.str(), dic, CallBlackServiceInfoSelect);
+    if (!r) {
+      err = SQL_EXEC_ERROR;
+      break;
+    }
+    //黑卡购买
+    ss.str("");
+    ss.clear();
+    ss << "call proc_ServiceInfoSelect('" << oid_str << "'," << 3 << ")";
+    LOG(INFO)<< "sql:" << ss.str();
+    r = mysql_engine_->ReadData(ss.str(), dic, CallBlackBuyInfoSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
       break;
@@ -435,10 +445,12 @@ int32 UserMysql::BlackcardInfoSelect(int64 uid, DicValue* dic) {
   return err;
 }
 
+//黑卡消费记录（黑卡服务消费+购买黑卡消费）
 int32 UserMysql::BlackcardConsumeRecordSelect(int64 uid, DicValue* dic) {
   int32 err = 0;
   bool r = false;
   do {
+    // 获取黑卡服务消费
     std::stringstream ss;
     ss << "call proc_BlackcardConsumeRecordSelect(" << uid << ")";
     LOG(INFO)<< "sql:" << ss.str();
@@ -448,6 +460,12 @@ int32 UserMysql::BlackcardConsumeRecordSelect(int64 uid, DicValue* dic) {
       err = SQL_EXEC_ERROR;
       break;
     }
+    // 获取购买黑卡记录
+    ss.str("");
+    ss.clear();
+    ss << "call proc_BlackcardBuyOrderSelect(" << uid << ")";
+    LOG(INFO)<< "sql:" << ss.str();
+    r = mysql_engine_->ReadData(ss.str(), dic, CallBlackcardBuyOrderSelect);
   } while (0);
   return err;
 }
@@ -537,14 +555,14 @@ int32 UserMysql::RechargeInfoInsertAndSelect(int64 uid, int64 price,
   return err;
 }
 
-int32 UserMysql::ChangeRechargeStatusAndSelect(int64 uid, int64 rid,
-                                               int64 result, DicValue* dic) {
+int32 UserMysql::ChangeRechargeStatusAndSelect(int64 rid, int64 result,
+                                               DicValue* dic) {
   int32 err = 0;
   bool r = false;
   do {
     std::stringstream ss;
-    ss << "call proc_ChangeRechargeStatusAndSelect(" << uid << "," << rid << ","
-       << result << ")";
+    ss << "call proc_ChangeRechargeStatusAndSelect(" << rid << "," << result
+       << ")";
     LOG(INFO)<< "sql:" << ss.str();
     r = mysql_engine_->ReadData(ss.str(), dic,
                                 CallChangeRechargeStatusAndSelect);
@@ -714,6 +732,22 @@ int32 UserMysql::OrderDetailsSelect(int64 oid, int64 type, DicValue* dic) {
     LOG(INFO)<< "sql:" << ss.str();
     dic->SetBigInteger(L"order_type_", type);
     r = mysql_engine_->ReadData(ss.str(), dic, CallOrderDetailsSelect);
+    if (!r) {
+      err = SQL_EXEC_ERROR;
+      break;
+    }
+  } while (0);
+  return err;
+}
+
+int32 UserMysql::CancelOrderStatusUpdate() {
+  int32 err = 0;
+  bool r = false;
+  do {
+    std::stringstream ss;
+    ss << "call proc_CancelOrderStatusUpdate()";
+    LOG(INFO)<< "sql:" << ss.str();
+    r = mysql_engine_->WriteData(ss.str());
     if (!r) {
       err = SQL_EXEC_ERROR;
       break;
@@ -1125,8 +1159,8 @@ void UserMysql::CallBlackServiceInfoSelect(void* param, Value* value) {
   MYSQL_ROW rows;
   int32 num = engine->RecordCount();
   DicValue* info = reinterpret_cast<DicValue*>(value);
+  ListValue* list = new ListValue();
   if (num > 0) {
-    ListValue* list = new ListValue();
     while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
       DicValue* dict = new DicValue();
       if (rows[0] != NULL)
@@ -1143,10 +1177,40 @@ void UserMysql::CallBlackServiceInfoSelect(void* param, Value* value) {
         dict->SetBigInteger(L"order_time_", atoll(rows[5]));
       list->Append(dict);
     }
-    info->Set(L"black_list_", list);
   } else {
     LOG(WARNING)<< "CallBlackServiceInfoSelect count < 0";
   }
+  info->Set(L"black_list_", list);
+}
+
+void UserMysql::CallBlackBuyInfoSelect(void* param, Value* value) {
+  base_storage::DBStorageEngine* engine =
+      (base_storage::DBStorageEngine*) (param);
+  MYSQL_ROW rows;
+  int32 num = engine->RecordCount();
+  DicValue* info = reinterpret_cast<DicValue*>(value);
+  ListValue* list = new ListValue();
+  if (num > 0) {
+    while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
+      DicValue* dict = new DicValue();
+      if (rows[0] != NULL)
+        dict->SetBigInteger(L"order_id_", atoll(rows[0]));
+      if (rows[1] != NULL)
+        dict->SetString(L"privilege_pic_", rows[1]);
+      if (rows[2] != NULL)
+        dict->SetString(L"privilege_name_", "黑卡购买");
+      if (rows[3] != NULL)
+        dict->SetBigInteger(L"privilege_price_", atoll(rows[3]));
+      if (rows[4] != NULL)
+        dict->SetBigInteger(L"privilege_lv_", atoll(rows[4]));
+      if (rows[5] != NULL)
+        dict->SetBigInteger(L"order_time_", atoll(rows[5]));
+      list->Append(dict);
+    }
+  } else {
+    LOG(WARNING)<< "CallBlackServiceInfoSelect count < 0";
+  }
+  info->Set(L"black_buy_list_", list);
 }
 
 void UserMysql::CallInvoiceInfoInsert(void* param, Value* value) {
@@ -1334,8 +1398,8 @@ void UserMysql::CallBlackcardConsumeRecordSelect(void* param, Value* value) {
   MYSQL_ROW rows;
   int32 num = engine->RecordCount();
   DicValue* info = reinterpret_cast<DicValue*>(value);
+  ListValue* list = new ListValue();
   if (num > 0) {
-    ListValue* list = new ListValue();
     while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
       DicValue* dict = new DicValue();
       if (rows[0] != NULL)
@@ -1352,9 +1416,51 @@ void UserMysql::CallBlackcardConsumeRecordSelect(void* param, Value* value) {
         dict->SetBigInteger(L"order_time_", atoll(rows[5]));
       if (rows[6] != NULL)
         dict->SetBigInteger(L"order_status_", atoll(rows[6]));
+      if (rows[7] != NULL)
+        dict->SetBigInteger(L"order_type_", atoll(rows[7]));
       list->Append(dict);
     }
-    info->Set(L"blackcard_consume_record_", list);
+  } else {
+    LOG(WARNING)<<"CallBlackcardConsumeRecordSelect count < 0";
+  }
+  info->Set(L"blackcard_consume_record_", list);
+}
+
+void UserMysql::CallBlackcardBuyOrderSelect(void* param, Value* value) {
+  base_storage::DBStorageEngine* engine =
+      (base_storage::DBStorageEngine*) (param);
+  MYSQL_ROW rows;
+  int32 num = engine->RecordCount();
+  DicValue* info = reinterpret_cast<DicValue*>(value);
+  ListValue* list = NULL;
+  info->GetList(L"blackcard_consume_record_", &list);
+  if (list == NULL)
+    return;
+  if (num > 0) {
+    while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
+      DicValue* dict = new DicValue();
+      if (rows[0] != NULL) {
+        dict->SetBigInteger(L"order_id_", atoll(rows[0]));
+      } else {
+        break;
+      }
+      if (rows[1] != NULL)
+        dict->SetString(L"privilege_pic_", rows[1]);
+      if (rows[2] != NULL) {
+        dict->SetString(L"privilege_name_", "黑卡购买");
+      }
+      if (rows[3] != NULL)
+        dict->SetBigInteger(L"privilege_price_", atoll(rows[3]));
+      if (rows[4] != NULL)
+        dict->SetBigInteger(L"privilege_lv_", atoll(rows[4]));
+      if (rows[5] != NULL)
+        dict->SetBigInteger(L"order_time_", atoll(rows[5]));
+      if (rows[6] != NULL)
+        dict->SetBigInteger(L"order_status_", atoll(rows[6]));
+      if (rows[7] != NULL)
+        dict->SetBigInteger(L"order_type_", atoll(rows[7]));
+      list->Append(dict);
+    }
   } else {
     LOG(WARNING)<<"CallBlackcardConsumeRecordSelect count < 0";
   }
@@ -1435,6 +1541,9 @@ void UserMysql::CallChangeRechargeStatusAndSelect(void* param, Value* value) {
       if (rows[1] != NULL) {
         dict->SetBigInteger(L"user_cash_", atoll(rows[1]));
       }
+      if (rows[2] != NULL) {
+        dict->SetBigInteger(L"uid_", atoll(rows[2]));
+      }
     }
   } else {
     LOG(WARNING)<<"CallChangeRechargeStatusAndSelect count < 0";
@@ -1498,7 +1607,7 @@ void UserMysql::CallShareTourismDetailsSelect(void* param, Value* value) {
       if (rows[0] != NULL)
         dict->SetBigInteger(L"share_id_", atoll(rows[0]));
       if (rows[1] != NULL)
-        dict->SetBigInteger(L"share_type_", atoll(rows[1]));
+        dict->SetString(L"share_type_", (rows[1]));
       if (rows[2] != NULL)
         dict->SetString(L"share_theme_", rows[2]);
       if (rows[3] != NULL)
@@ -1517,6 +1626,8 @@ void UserMysql::CallShareTourismDetailsSelect(void* param, Value* value) {
         dict->SetString(L"brief_pic_", rows[9]);
       if (rows[10] != NULL)
         dict->SetBigInteger(L"is_recommend_", atoll(rows[10]));
+      if (rows[11] != NULL)
+        dict->SetBigInteger(L"share_type_id_", atoll(rows[11]));
       list->Append(dict);
     }
     info->Set(L"data_list_", list);
@@ -1712,6 +1823,8 @@ void UserMysql::CallBlackcardPriceInfoSelect(void* param, Value* value) {
         dict->SetBigInteger(L"blackcard_lv_", atoll(rows[0]));
       if (rows[1] != NULL)
         dict->SetBigInteger(L"blackcard_price_", atoll(rows[1]));
+      if (rows[2] != NULL)
+        dict->SetString(L"blackcard_icon_", (rows[2]));
       list->Append(dict);
     }
     info->Set(L"data_list_", list);
@@ -1764,7 +1877,8 @@ void UserMysql::CallOrderDetailsSelect(void* param, Value* value) {
   }
 }
 
-void UserMysql::CallBlackcardPlaceOrderInsertAndSelect(void* param, Value* value) {
+void UserMysql::CallBlackcardPlaceOrderInsertAndSelect(void* param,
+                                                       Value* value) {
   base_storage::DBStorageEngine* engine =
       (base_storage::DBStorageEngine*) (param);
   MYSQL_ROW rows;

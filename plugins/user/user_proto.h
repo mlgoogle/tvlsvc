@@ -324,6 +324,26 @@ class WXPayClientRecv : public PacketHead {
   int64 pay_result_; //1-成功 2-取消
 };
 
+class WXPayServerRecv : public PacketHead {
+ public:
+  WXPayServerRecv(PacketHead packet);
+  int32 Deserialize();
+  inline int64 total_fee() { return total_fee_; }
+  inline int64 recharge_id() { return recharge_id_; }
+  inline int64 pay_result() { return pay_result_; }
+  inline std::string appid() { return appid_; }
+  inline std::string mch_id() { return mch_id_; }
+ private:
+  std::string appid_;
+  std::string mch_id_;
+  std::string xml_str_;
+  int64 recharge_id_;
+  int64 pay_result_; //1 - 支付成功
+  int64 total_fee_;
+  std::string transaction_id_;
+  std::string time_end_;
+};
+
 class IdentityPicRecv : public PacketHead {
  public:
   IdentityPicRecv(PacketHead packet);

@@ -80,6 +80,10 @@ int32 ChatManager::AssignPacket(const int32 socket, PacketHead* packet) {
       interface->SpentCash(socket, packet);
       break;
     }
+    case CANCEL_ORDER_REQ: {
+      interface->CancelOrder(socket, packet);
+      break;
+    }
     case COMM_GEPUSH_REQ: {
       interface->GtPushComm(socket, packet);
       break;

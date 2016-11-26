@@ -11,14 +11,7 @@
 #include "glog/logging.h"
 #include "pub/util/util.h"
 
-const std::string APPID = "wx9dc39aec13ee3158";
-const std::string MCH_ID = "1404391902";
-const std::string NOTIFY_URL =
-    "https://61.147.114.78/cgi-bin/paycall/alipaycall/alipaycall.fcgi";
-const std::string KEY = "241b71f361d6663c12a12e0f43208ae9";
-const std::string TRADE_TYPE = "APP";
-const std::string WX_URL = "https://api.mch.weixin.qq.com/pay/unifiedorder";
-const std::string WX_PACKAGE = "Sign=WXPay";
+
 WXOrder::WXOrder() {
   total_fee = 0;
 }

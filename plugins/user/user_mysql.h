@@ -84,7 +84,7 @@ class UserMysql {
 
   int32 RechargeInfoInsertAndSelect(int64 uid, int64 price, DicValue* dic);
 
-  int32 ChangeRechargeStatusAndSelect(int64 uid, int64 rid, int64 result,
+  int32 ChangeRechargeStatusAndSelect(int64 rid, int64 result,
                                       DicValue* dic);
 
   int32 IdentityInfoInsertAndSelect(int64 uid, std::string front,
@@ -112,6 +112,8 @@ class UserMysql {
 
   int32 OrderDetailsSelect(int64 oid, int64 type, DicValue* dic);
 
+  int32 CancelOrderStatusUpdate();
+
   static void CallUserLoginSelect(void* param, Value* value);
   static void CallUserDetailSelect(void* param, Value* value);
   static void CallNearGuideSelect(void* param, Value* value);
@@ -123,6 +125,7 @@ class UserMysql {
   static void CallTripRecordSelect(void* param, Value* value);
   static void CallServiceInfoSelect(void* param, Value* value);
   static void CallBlackServiceInfoSelect(void* param, Value* value);
+  static void CallBlackBuyInfoSelect(void* param, Value* value);
   static void CallOrderStatusSelect(void* param, Value* value);
   static void CallInvoiceInfoInsert(void* param, Value* value);
   static void CallInvoiceRecordSelect(void* param, Value* value);
@@ -130,6 +133,7 @@ class UserMysql {
   static void CallBlackcardPrivilegeSelect(void* param, Value* value);
   static void CallBlackcardInfoSelect(void* param, Value* value);
   static void CallBlackcardConsumeRecordSelect(void* param, Value* value);
+  static void CallBlackcardBuyOrderSelect(void* param, Value* value);
   static void CallSkillsInfoSelect(void* param, Value* value);
   static void CallImgTokenSelect(void* param, Value* value);
   static void CallRechargeInfoInsertAndSelect(void* param, Value* value);

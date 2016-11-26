@@ -18,14 +18,14 @@ class TourismShareData : public RefBase {
  public:
   TourismShareData()
       : share_id_(0),
-        share_type_(0),
+        share_type_id_(0),
         is_recommend_(0) {
   }
   virtual ~TourismShareData() {
   }
  public:
   int64 share_id_;
-  int64 share_type_;
+  std::string share_type_;
   std::string share_theme_;
   std::string per_cash_;
   std::string addr_region_;
@@ -35,6 +35,7 @@ class TourismShareData : public RefBase {
   std::string detail_pic_;
   std::string brief_pic_;
   int64 is_recommend_;
+  int64 share_type_id_;
 };
 
 class SkillShareData : public RefBase {
@@ -81,8 +82,11 @@ class ShareTourism {
   inline int64 share_id() {
     return data_->share_id_;
   }
-  inline int64 share_type() {
+  inline std::string share_type() {
     return data_->share_type_;
+  }
+  inline int64 share_type_id() {
+    return data_->share_type_id_;
   }
   inline std::string share_theme() {
     return data_->share_theme_;
@@ -115,7 +119,7 @@ class ShareTourism {
   inline void set_share_id(int64 id) {
     data_->share_id_ = id;
   }
-  inline void set_share_type(int64 type) {
+  inline void set_share_type(std::string type) {
     data_->share_type_ = type;
   }
   inline void set_share_theme(std::string them) {
@@ -144,6 +148,9 @@ class ShareTourism {
   }
   inline void set_is_recommend(int64 recommend) {
     data_->is_recommend_ = recommend;
+  }
+  inline void set_share_type_id(int64 type_id) {
+    data_->share_type_id_ = type_id;
   }
  private:
   TourismShareData* data_;

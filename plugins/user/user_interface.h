@@ -124,6 +124,8 @@ class UserInterface {
   int32 CheckHeartLoss();
 //更新共享数据，旅游分享和技能分享
   int32 InitShareGuide();
+  //定时监测订单状态
+  int32 NopayOrderStatusCheck();
   int32 CloseSocket(const int fd);
 
   void AddUser(int32 fd, DicValue* v, int64 type, std::string pwd);

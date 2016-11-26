@@ -193,6 +193,22 @@ int32 ChatMysql::SpentCashUpdate(int64 uid, int64 oid, std::string pwd,
   return err;
 }
 
+int32 ChatMysql::CancelOrderPayUpdate(int64 oid, int64 otype, DicValue* dic) {
+  int32 err = 0;
+  bool r = false;
+  do {
+    std::stringstream ss;
+    ss << "call proc_CancelOrderPayUpdate(" << oid << "," << otype << ")";
+    LOG(INFO)<< "sql:" << ss.str();
+    r = mysql_engine_->ReadData(ss.str(), dic, CallCancelOrderPayUpdate);
+    if (!r) {
+      err = SQL_EXEC_ERROR;
+      break;
+    }
+  } while (0);
+  return err;
+}
+
 int32 ChatMysql::NewOrderInsertAndSelect(int64 from, int64 to, int64 sid,
                                          int64 day, DicValue* dic) {
   int32 err = 0;
@@ -395,6 +411,26 @@ void ChatMysql::CallSpentCashUpdate(void* param, Value* value) {
     }
   } else {
     LOG(WARNING)<<"Call CallSpentCashUpdate count < 0";
+  }
+}
+
+void ChatMysql::CallCancelOrderPayUpdate(void* param, Value* value) {
+  base_storage::DBStorageEngine* engine =
+      (base_storage::DBStorageEngine*) (param);
+  MYSQL_ROW rows;
+  int32 num = engine->RecordCount();
+  DicValue* dict = reinterpret_cast<DicValue*>(value);
+  if (num > 0) {
+    while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
+      if (rows[0] != NULL)
+        dict->SetBigInteger(L"order_id_", atoll(rows[0]));
+      if (rows[1] != NULL)
+        dict->SetBigInteger(L"order_status_", atoll(rows[1]));
+      if (rows[2] != NULL)
+        dict->SetBigInteger(L"order_type_", atoll(rows[2]));
+    }
+  } else {
+    LOG(WARNING)<<"Call CallCancelOrderPayUpdate count < 0";
   }
 }
 

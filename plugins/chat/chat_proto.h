@@ -209,6 +209,22 @@ class SpentCashRecv : public PacketHead {
   std::string passwd_;
 };
 
+class CancelOrderRecv : public PacketHead {
+ public:
+  CancelOrderRecv(PacketHead packet);
+  int32 Deserialize();
+
+  inline int64 order_type() {
+    return order_type_;
+  }
+  inline int64 order_id() {
+    return order_id_;
+  }
+ private:
+  int64 order_type_;
+  int64 order_id_;
+};
+
 class GtPushCommRecv : public PacketHead {
  public:
   GtPushCommRecv(PacketHead packet);

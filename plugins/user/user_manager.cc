@@ -247,5 +247,11 @@ int32 UserManager::OnSockClose(const int fd) {
   return 0;
 }
 
+int32 UserManager::OrderStatusCheck() {
+  UserInterface* interface = UserInterface::GetInstance();
+  interface->NopayOrderStatusCheck();
+  return 0;
+}
+
 }  // namespace user
 
