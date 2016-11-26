@@ -62,6 +62,12 @@ int32 UserInterface::CheckHeartLoss() {
   return err;
 }
 
+int32 UserInterface::NopayOrderStatusCheck() {
+  int32 err = 0;
+  err = user_mysql_->CancelOrderStatusUpdate();
+  return err;
+}
+
 int32 UserInterface::InitShareGuide() {
   int err = 0;
   InitShareType();
@@ -107,7 +113,7 @@ int32 UserInterface::InitShareType() {
       break;
     if (!type_dic.empty()) {
       ListValue* info;
-      type_dic.GetList(L"data_list", &info);
+      type_dic.GetList(L"data_list_", &info);
       if (info != NULL && !info->empty()) {
         data_share_mgr_->InitShareType(info);
       }
@@ -127,7 +133,7 @@ int32 UserInterface::InitShareDetails() {
       break;
     if (!detail_dic.empty()) {
       ListValue* info;
-      detail_dic.GetList(L"data_list", &info);
+      detail_dic.GetList(L"data_list_", &info);
       if (info != NULL && !info->empty()) {
         data_share_mgr_->InitTourismShare(info);
       }
@@ -144,7 +150,7 @@ int32 UserInterface::InitShareSkills() {
       break;
     if (!skill_info.empty()) {
       ListValue* info;
-      skill_info.GetList(L"data_list", &info);
+      skill_info.GetList(L"data_list_", &info);
       if (info != NULL && !info->empty()) {
         data_share_mgr_->InitSkillShare(info);
       }
@@ -182,7 +188,7 @@ int32 UserInterface::TourismShareRecommend(const int32 socket,
                                                recv.page_type(), &dic);
     if (err < 0)
       break;
-    dic.SetBigInteger(L"page_type", recv.page_type());
+    dic.SetBigInteger(L"page_type_", recv.page_type());
     SendMsg(socket, packet, &dic, SHARE_TOURISM_RECOMMEND_RLY);
   } while (0);
   if (err < 0)
@@ -203,7 +209,7 @@ int32 UserInterface::TourismShareList(const int32 socket, PacketHead* packet) {
                                                recv.page_type(), &dic);
     if (err < 0)
       break;
-    dic.SetBigInteger(L"page_type", recv.page_type());
+    dic.SetBigInteger(L"page_type_", recv.page_type());
     SendMsg(socket, packet, &dic, SHARE_TOURISM_LIST_RLY);
   } while (0);
   if (err < 0)
@@ -332,7 +338,8 @@ int32 UserInterface::OrderDetails(const int32 socket, PacketHead* packet) {
     if (err < 0)
       break;
     DicValue dic;
-    err = user_mysql_->OrderDetailsSelect(recv.order_id(), recv.order_type(), &dic);
+    err = user_mysql_->OrderDetailsSelect(recv.order_id(), recv.order_type(),
+                                          &dic);
     if (err < 0)
       break;
     SendMsg(socket, packet, &dic, ORDER_DETAILS_RLY);
@@ -341,7 +348,6 @@ int32 UserInterface::OrderDetails(const int32 socket, PacketHead* packet) {
     SendError(socket, packet, err, ORDER_DETAILS_RLY);
   return err;
 }
-
 
 int32 UserInterface::GuidesInfo(const int32 socket, PacketHead* packet) {
   int32 err = 0;
@@ -601,6 +607,46 @@ int32 UserInterface::BlackcardConsumeRecord(const int32 socket,
   return err;
 }
 
+int32 UserInterface::BlackcardPriceInfo(const int32 socket,
+                                        PacketHead* packet) {
+  int32 err = 0;
+  do {
+    DicValue dic;
+    err = user_mysql_->BlackcardPriceInfoSelect(&dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, BLACKCARD_PRICE_INFO_RLY);
+  } while (0);
+  if (err < 0) {
+    SendError(socket, packet, err, BLACKCARD_PRICE_INFO_RLY);
+  }
+  return err;
+}
+
+int32 UserInterface::BlackcardPlaceOrder(const int32 socket,
+                                         PacketHead* packet) {
+  int32 err = 0;
+  do {
+    BlackcardPlaceOrderRecv recv(*packet);
+    err = recv.Deserialize();
+    if (err < 0)
+      break;
+    DicValue dic;
+    err = user_mysql_->BlackcardPlaceOrderInsertAndSelect(recv.uid(),
+                                                          recv.wanted_lv(),
+                                                          &dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, PLACE_BLACKCARD_ORDER_RLY);
+    if (err < 0)
+      break;
+  } while (0);
+  if (err < 0) {
+    SendError(socket, packet, err, PLACE_BLACKCARD_ORDER_RLY);
+  }
+  return err;
+}
+
 int32 UserInterface::SkillsInfo(const int32 socket, PacketHead* packet) {
   int32 err = 0;
   do {
@@ -629,7 +675,8 @@ int32 UserInterface::NewAppointment(const int32 socket, PacketHead* packet) {
                                             recv.skills(), recv.is_other(),
                                             recv.other_name(),
                                             recv.other_gender(),
-                                            recv.ohter_phone(), &dic);
+                                            recv.ohter_phone(), recv.remarks(),
+                                            &dic);
     if (err < 0)
       break;
     SendMsg(socket, packet, &dic, NEW_APPOINTMENT_RLY);
@@ -863,18 +910,20 @@ int32 UserInterface::WXPayClientResponse(const int32 socket,
     if (err < 0)
       break;
     DicValue dic;
-    err = user_mysql_->ChangeRechargeStatusAndSelect(recv.uid(),
-                                                     recv.recharge_id(),
+    err = user_mysql_->ChangeRechargeStatusAndSelect(recv.recharge_id(),
                                                      recv.pay_result(), &dic);
     if (err < 0)
       break;
     SendMsg(socket, packet, &dic, WXPAY_CLIENT_RLY);
     //todo 测试用 主动调起服务端支付成功通知
     if (recv.pay_result() == 1) {
-      user_mysql_->ChangeRechargeStatusAndSelect(recv.uid(), recv.recharge_id(),
-                                                 3, &dic);
-      SendMsg(socket, packet, &dic, WXPAY_SERVER_RLY);
+      user_mysql_->ChangeRechargeStatusAndSelect(recv.recharge_id(),
+                                                 1, &dic);
+    } else {
+      user_mysql_->ChangeRechargeStatusAndSelect(recv.recharge_id(),
+                                                 2, &dic);
     }
+    SendMsg(socket, packet, &dic, WXPAY_SERVER_RLY);
   } while (0);
   if (err < 0) {
     SendError(socket, packet, err, WXPAY_CLIENT_RLY);
@@ -886,9 +935,32 @@ int32 UserInterface::WXPayClientResponse(const int32 socket,
 int32 UserInterface::WXPayServerResponse(const int32 socket,
                                          PacketHead* packet) {
   int32 err = 0;
-//  err = user_mysql_->ChangeRechargeStatusAndSelect(recv.uid(),
-//                                                   recv.recharge_id(),
-//                                                   recv.pay_result(), &dic);
+  do {
+    WXPayServerRecv recv(*packet);
+    err = recv.Deserialize();
+    if (err < 0)
+      break;
+    //支付成功
+    DicValue dic;
+    if (recv.appid() != APPID && recv.mch_id() != MCH_ID) {
+      LOG(ERROR) << "WXPAY SERVER RESULT appid:[" << recv.appid() << "]";
+      LOG(ERROR) << "WXPAY SERVER RESULT mch_id:[" << recv.mch_id() << "]";
+      break;
+    }
+    if (recv.pay_result() == 1) {
+      user_mysql_->ChangeRechargeStatusAndSelect(recv.recharge_id(),
+                                                       3, &dic);
+    } else {
+      user_mysql_->ChangeRechargeStatusAndSelect(recv.recharge_id(),
+                                                             4, &dic);
+    }
+    int64 user_id = 0;
+    dic.GetBigInteger(L"uid_", &user_id);
+    UserInfo* user = data_share_mgr_->GetUser(user_id);
+    if (user != NULL && user->is_login()) {
+      SendMsg(user->socket_fd(), packet, &dic, WXPAY_SERVER_RLY);
+    }
+  } while (0);
   return err;
 }
 
@@ -1169,7 +1241,7 @@ int32 UserInterface::RecommendGuide(const int32 socket, PacketHead* packet) {
                                             rev.recommend_type(), &dic);
     if (err < 0)
       break;
-    dic.SetBigInteger(L"recommend_type", rev.recommend_type());
+    dic.SetBigInteger(L"recommend_type_", rev.recommend_type());
     SendMsg(socket, packet, &dic, GUIDE_RECOMMEND_RLY);
   } while (0);
   if (err < 0) {
@@ -1270,8 +1342,8 @@ void UserInterface::SendPacket(const int socket, PacketHead* packet) {
   int total = util::SendFull(socket, s, packet->packet_length());
   delete[] s;
   s = NULL;
-  LOG_IF(ERROR, total != packet->packet_length()) << "send packet wrong:opcode[]"
-      << packet->operate_code();
+  LOG_IF(ERROR, total != packet->packet_length())
+      << "send packet wrong:opcode[]" << packet->operate_code();
 }
 
 void UserInterface::SendError(const int socket, PacketHead* packet, int32 err,

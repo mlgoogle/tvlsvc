@@ -129,6 +129,14 @@ int32 UserManager::AssignPacket(const int32 socket, PacketHead* packet) {
       interface->BlackcardConsumeRecord(socket, packet);
       break;
     }
+    case BLACKCARD_PRICE_INFO_REQ: {
+      interface->BlackcardPriceInfo(socket, packet);
+      break;
+    }
+    case PLACE_BLACKCARD_ORDER_REQ: {
+      interface->BlackcardPlaceOrder(socket, packet);
+      break;
+    }
     case SKILL_INFO_REQ: {
       interface->SkillsInfo(socket, packet);
       break;
@@ -236,6 +244,12 @@ int32 UserManager::InitShareGuideData() {
 int32 UserManager::OnSockClose(const int fd) {
   UserInterface* interface = UserInterface::GetInstance();
   interface->CloseSocket(fd);
+  return 0;
+}
+
+int32 UserManager::OrderStatusCheck() {
+  UserInterface* interface = UserInterface::GetInstance();
+  interface->NopayOrderStatusCheck();
   return 0;
 }
 

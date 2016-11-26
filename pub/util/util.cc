@@ -212,5 +212,11 @@ std::string RandomString(int length) {
   return ran;
 }
 
+std::string GetWxpayXmlValue(std::string value) {
+  int npos1 = value.find("<![CDATA[");
+  int npos2 = value.find("]]>");
+  return value.substr(npos1 + 9, npos2 - npos1 - 9);
+}
+
 }  // namespace util
 

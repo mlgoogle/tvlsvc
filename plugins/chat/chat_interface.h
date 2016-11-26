@@ -50,6 +50,8 @@ class ChatInterface {
   int32 FreeCoordinator(const int32 socket, PacketHead* packet);
 //余额支付 邀约-黑卡
   int32 SpentCash(const int32 socket, PacketHead* packet);
+  //取消支付
+  int32 CancelOrder(const int32 socket, PacketHead* packet);
 
   int32 GtPushComm(const int32 socket, PacketHead* packet);
 

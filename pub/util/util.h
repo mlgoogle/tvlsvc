@@ -39,6 +39,8 @@ bool GetIPAddress(const int socket, std::string* ip, int* port);
 //length 要获取字符串的长度 不含 '/0'
 std::string RandomString(int length);
 
+std::string GetWxpayXmlValue(std::string value);
+
 }  // namespace util
 
 #endif  // PUB_UTIL_UTIL_H_

@@ -9,8 +9,10 @@
 
 #include "glog/logging.h"
 #include "base/logic/base_values.h"
+#include "public/basic/md5sum.h"
 
 #include "pub/comm/comm_head.h"
+#include "pub/util/util.h"
 
 namespace user {
 
@@ -42,6 +44,10 @@ int32 LoginRecv::Deserialize() {
       }
       r = dic->GetString(L"passwd_", &passwd_);
       LOG_IF(ERROR, !r) << "LoginRecv::passwd parse error";
+      if (r) {
+        base::MD5Sum md5(passwd_);
+        passwd_ = md5.GetHash();
+      }
       r = dic->GetString(L"phone_num_", &phone_num_);
       LOG_IF(ERROR, !r) << "LoginRecv::phone_num_ parse error";
       if (phone_num_.length() < 11) {
@@ -60,7 +66,6 @@ int32 LoginRecv::Deserialize() {
                                                 serializer);
   return err;
 }
-
 
 SMSCodeLoginRecv::SMSCodeLoginRecv(PacketHead packet) {
   head_ = packet.head();
@@ -211,8 +216,16 @@ int32 ChangePasswdRecv::Deserialize() {
       r = dic->GetBigInteger(L"uid_", &uid_);
       LOG_IF(ERROR, !r) << "ChangePasswdRecv::uid_ parse error";
       r = dic->GetString(L"old_passwd_", &old_passwd_);
+      if (r) {
+        base::MD5Sum md5(old_passwd_);
+        old_passwd_ = md5.GetHash();
+      }
       LOG_IF(ERROR, !r) << "ChangePasswdRecv::old_passwd_ parse error";
       r = dic->GetString(L"new_passwd_", &new_passwd_);
+      if (r) {
+        base::MD5Sum md5(new_passwd_);
+        new_passwd_ = md5.GetHash();
+      }
       LOG_IF(ERROR, !r) << "ChangePasswdRecv::new_passwd_ parse error";
     } else {
       LOG(ERROR)<< "ChangePasswdRecv Deserialize error";
@@ -281,6 +294,10 @@ int32 RegisterAccountRecv::Deserialize() {
       r = dic->GetString(L"phone_num_", &phone_num_);
       LOG_IF(ERROR, !r) << "RegisterAccountRecv::phone_num_ parse error";
       r = dic->GetString(L"passwd_", &passwd_);
+      if (r) {
+        base::MD5Sum md5(passwd_);
+        passwd_ = md5.GetHash();
+      }
       LOG_IF(ERROR, !r) << "RegisterAccountRecv::passwd_ parse error";
       r = dic->GetString(L"token_", &token_);
       LOG_IF(ERROR, !r) << "RegisterAccount::token_ parse error";
@@ -625,6 +642,37 @@ int32 BlackcardConsumRecordRecv::Deserialize() {
   return err;
 }
 
+BlackcardPlaceOrderRecv::BlackcardPlaceOrderRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  uid_ = 0;
+  wanted_lv_ = 0;
+}
+
+int32 BlackcardPlaceOrderRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+      base_logic::IMPL_JSON, &body_str_, false);
+  std::string err_str;
+  DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetBigInteger(L"uid_", &uid_);
+      LOG_IF(ERROR, !r) << "BlackcardPlaceOrderRecv::uid_ parse error";
+      r = dic->GetBigInteger(L"wanted_lv_", &wanted_lv_);
+      LOG_IF(ERROR, !r) << "BlackcardPlaceOrderRecv::wanted_lv_ parse error";
+    } else {
+      LOG(ERROR)<< "BlackcardConsumRecordRecv Deserialize error";
+      err = REQUEST_JSON_ERR;
+      break;
+    }
+  }while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                                serializer);
+  return err;
+}
+
 NewAppointmentRecv::NewAppointmentRecv(PacketHead packet) {
   head_ = packet.head();
   body_str_ = packet.body_str();
@@ -656,6 +704,8 @@ int32 NewAppointmentRecv::Deserialize() {
       LOG_IF(ERROR, !r) << "NewAppointmentRecv::end_time_ parse error";
       r = dic->GetString(L"skills_", &skills_);
       LOG_IF(ERROR, !r) << "NewAppointmentRecv::skills_ parse error";
+      r = dic->GetString(L"remarks_", &remarks_);
+      LOG_IF(ERROR, !r) << "NewAppointmentRecv::remarks_ parse error";
       r = dic->GetBigInteger(L"is_other_", &is_other_);
       LOG_IF(ERROR, !r) << "NewAppointmentRecv::is_other_ parse error";
       if (is_other_ == 1) {
@@ -740,6 +790,83 @@ int32 WXPayClientRecv::Deserialize() {
     } else {
       LOG(ERROR)<< "WxPlaceOrderRecv Deserialize error";
       err = WXPAY_CLIENT_JSON_ERR;
+      break;
+    }
+  }while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                                serializer);
+  return err;
+}
+
+WXPayServerRecv::WXPayServerRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  recharge_id_ = 0;
+  pay_result_ = 0;
+  total_fee_ = 0;
+}
+
+int32 WXPayServerRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+      base_logic::IMPL_JSON, &body_str_, false);
+  std::string err_str;
+  DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetString(L"wxpay_result_", &xml_str_);
+      LOG_IF(ERROR, !r) << "WXPayServerRecv::xml_str_ parse error";
+      LOG(INFO)<< "WXPAY SERVER RESULT***" << xml_str_ << "***";
+      if (r) {
+        base_logic::ValueSerializer* deserializer =
+            base_logic::ValueSerializer::Create(base_logic::IMPL_XML,
+                                                &xml_str_);
+        std::string err_str;
+        int32 err = 0;
+        DicValue* dic = (DicValue*) deserializer->Deserialize(&err, &err_str);
+        if (dic != NULL) {
+          dic->GetString(L"appid", &appid_);
+          dic->GetString(L"mch_id", &mch_id_);
+          appid_ = util::GetWxpayXmlValue(appid_);
+          mch_id_ = util::GetWxpayXmlValue(mch_id_);
+          std::string return_code;
+          dic->GetString(L"return_code", &return_code);
+          //通信成功标识
+          if (return_code.find("SUCCESS") != std::string::npos) {
+            std::string result_code;
+            dic->GetString(L"result_code", &result_code);
+
+            //订单总金额
+            dic->GetBigInteger(L"total_fee", &total_fee_);
+            //支付总金额
+            dic->GetString(L"transaction_id", &transaction_id_);
+            transaction_id_ = util::GetWxpayXmlValue(transaction_id_);
+            //本平台订单号
+            std::string out_trade_no;
+            dic->GetString(L"out_trade_no", &out_trade_no);
+            int npos1 = out_trade_no.find("<![CDATA[");
+            int npos2 = out_trade_no.find("]]>");
+            out_trade_no = out_trade_no.substr(npos1 + 9,
+                                               npos2 - npos1 - 9 - 6);
+            recharge_id_ = atol(out_trade_no.c_str());
+            //支付成功标识
+            if (result_code.find("SUCCESS") != std::string::npos) {
+              pay_result_ = 1;
+            } else {
+              pay_result_ = -1;
+            }
+          }
+        } else {
+          LOG(ERROR)<< "WxPlaceOrderRecv xml  Deserialize error";
+        }
+        base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_XML,
+                                                      deserializer);
+      }
+
+    } else {
+      LOG(ERROR)<< "WxPlaceOrderRecv json Deserialize error";
+      err = WXPAY_SERVER_JSON_ERR;
       break;
     }
   }while (0);
@@ -952,7 +1079,7 @@ int32 ShareSkillDiscussRecv::Deserialize() {
       LOG_IF(ERROR, !r) << "ShareSkillDiscussRecv::last_id_ parse error";
       r = dic->GetBigInteger(L"count_", &count_);
       LOG_IF(ERROR, !r) << "ShareSkillDiscussRecv::share_id_ parse error";
-      if (count_ <=0 || count_ >50)
+      if (count_ <= 0 || count_ > 50)
         count_ = 50;
     } else {
       LOG(ERROR)<< "ShareSkillDiscussRecv Deserialize error";
@@ -1105,7 +1232,7 @@ int32 ChangeGuideServiceRecv::Deserialize() {
       }
       int count = list->GetSize();
       for (int i = 0; i < count; i++) {
-        DicValue* info ;
+        DicValue* info;
         r = list->GetDictionary(i, &info);
         if (r) {
           ServiceData* data = new ServiceData;
@@ -1158,7 +1285,6 @@ int32 OrderDetailRecv::Deserialize() {
                                                 serializer);
   return err;
 }
-
 
 }  // namespace user
 

@@ -60,6 +60,10 @@ class UserMysql {
   //@warning
   int32 BlackcardConsumeRecordSelect(int64 uid, DicValue* dic);
 
+  int32 BlackcardPriceInfoSelect(DicValue* dic);
+
+  int32 BlackcardPlaceOrderInsertAndSelect(int64 uid, int64 lv, DicValue* dic);
+
   //@brief 查询服务技能
   //@author paco
   //@param[in]
@@ -70,7 +74,8 @@ class UserMysql {
 
   int32 NewAppointmentInsert(int64 uid, int64 city, int64 start, int64 end,
                              std::string skill, int64 other, std::string name,
-                             int64 gender, std::string phone, DicValue* dic);
+                             int64 gender, std::string phone,
+                             std::string remark, DicValue* dic);
 
   int32 AppointmentRecordSelect(int64 uid, int64 lastid, int64 count,
                                 DicValue* dic);
@@ -79,7 +84,7 @@ class UserMysql {
 
   int32 RechargeInfoInsertAndSelect(int64 uid, int64 price, DicValue* dic);
 
-  int32 ChangeRechargeStatusAndSelect(int64 uid, int64 rid, int64 result,
+  int32 ChangeRechargeStatusAndSelect(int64 rid, int64 result,
                                       DicValue* dic);
 
   int32 IdentityInfoInsertAndSelect(int64 uid, std::string front,
@@ -107,6 +112,8 @@ class UserMysql {
 
   int32 OrderDetailsSelect(int64 oid, int64 type, DicValue* dic);
 
+  int32 CancelOrderStatusUpdate();
+
   static void CallUserLoginSelect(void* param, Value* value);
   static void CallUserDetailSelect(void* param, Value* value);
   static void CallNearGuideSelect(void* param, Value* value);
@@ -118,6 +125,7 @@ class UserMysql {
   static void CallTripRecordSelect(void* param, Value* value);
   static void CallServiceInfoSelect(void* param, Value* value);
   static void CallBlackServiceInfoSelect(void* param, Value* value);
+  static void CallBlackBuyInfoSelect(void* param, Value* value);
   static void CallOrderStatusSelect(void* param, Value* value);
   static void CallInvoiceInfoInsert(void* param, Value* value);
   static void CallInvoiceRecordSelect(void* param, Value* value);
@@ -125,6 +133,7 @@ class UserMysql {
   static void CallBlackcardPrivilegeSelect(void* param, Value* value);
   static void CallBlackcardInfoSelect(void* param, Value* value);
   static void CallBlackcardConsumeRecordSelect(void* param, Value* value);
+  static void CallBlackcardBuyOrderSelect(void* param, Value* value);
   static void CallSkillsInfoSelect(void* param, Value* value);
   static void CallImgTokenSelect(void* param, Value* value);
   static void CallRechargeInfoInsertAndSelect(void* param, Value* value);
@@ -141,6 +150,8 @@ class UserMysql {
   static void CallEntryShareSkillInsert(void* param, Value* value);
   static void CallNewAppointmentInsert(void* param, Value* value);
   static void CallOrderDetailsSelect(void* param, Value* value);
+  static void CallBlackcardPriceInfoSelect(void* param, Value* value);
+  static void CallBlackcardPlaceOrderInsertAndSelect(void* param, Value* value);
  private:
   base_logic::DataEngine* mysql_engine_;
 };

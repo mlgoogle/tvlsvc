@@ -7,6 +7,7 @@
 #include "glog/logging.h"
 #include "base/logic/base_values.h"
 #include "public/basic/basic_util.h"
+#include "public/basic/md5sum.h"
 
 #include "pub/comm/comm_head.h"
 
@@ -321,9 +322,44 @@ int32 SpentCashRecv::Deserialize() {
       r = dic->GetBigInteger(L"uid_", &uid_);
       LOG_IF(ERROR, !r) << "SpentCashRecv::uid_ parse error";
       r = dic->GetString(L"passwd_", &passwd_);
+      if (r) {
+        base::MD5Sum md5(passwd_);
+        passwd_ = md5.GetHash();
+      }
       LOG_IF(ERROR, !r) << "SpentCashRecv::passwd_ parse error";
     } else {
       LOG(ERROR)<< "SpentCashRecv Deserialize error";
+      err = REQUEST_JSON_ERR;
+      break;
+    }
+  }while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                                serializer);
+  return err;
+}
+
+CancelOrderRecv::CancelOrderRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  order_id_ = 0;
+  order_type_ = 0;
+}
+
+int32 CancelOrderRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+      base_logic::IMPL_JSON, &body_str_, false);
+  std::string err_str;
+  DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetBigInteger(L"order_id_", &order_id_);
+      LOG_IF(ERROR, !r) << "CancelOrderRecv::order_id_ parse error";
+      r = dic->GetBigInteger(L"order_type_", &order_type_);
+      LOG_IF(ERROR, !r) << "CancelOrderRecv::order_type_ parse error";
+    } else {
+      LOG(ERROR)<< "CancelOrderRecv Deserialize error";
       err = REQUEST_JSON_ERR;
       break;
     }

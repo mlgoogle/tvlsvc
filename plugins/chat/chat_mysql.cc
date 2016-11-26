@@ -115,7 +115,7 @@ int32 ChatMysql::DeviceTokenSelect(int64 uid, std::string* token) {
       err = NO_USER_DEVICE_TOKEN;
       break;
     }
-    dic.GetString(L"device_token", token);
+    dic.GetString(L"device_token_", token);
   } while (0);
   return err;
 }
@@ -185,6 +185,22 @@ int32 ChatMysql::SpentCashUpdate(int64 uid, int64 oid, std::string pwd,
        << "')";
     LOG(INFO)<< "sql:" << ss.str();
     r = mysql_engine_->ReadData(ss.str(), dic, CallSpentCashUpdate);
+    if (!r) {
+      err = SQL_EXEC_ERROR;
+      break;
+    }
+  } while (0);
+  return err;
+}
+
+int32 ChatMysql::CancelOrderPayUpdate(int64 oid, int64 otype, DicValue* dic) {
+  int32 err = 0;
+  bool r = false;
+  do {
+    std::stringstream ss;
+    ss << "call proc_CancelOrderPayUpdate(" << oid << "," << otype << ")";
+    LOG(INFO)<< "sql:" << ss.str();
+    r = mysql_engine_->ReadData(ss.str(), dic, CallCancelOrderPayUpdate);
     if (!r) {
       err = SQL_EXEC_ERROR;
       break;
@@ -314,7 +330,7 @@ void ChatMysql::CallChatRecordQuery(void* param, Value* value) {
         dict->SetBigInteger(L"msg_time_", atoll(rows[4]));
       list->Append(dict);
     }
-    info->Set(L"chat_list", list);
+    info->Set(L"chat_list_", list);
   } else {
     LOG(WARNING)<< "Call ChatRecordQuery count < 0";
   }
@@ -329,7 +345,7 @@ void ChatMysql::CallDeviceTokenSelect(void* param, Value* value) {
   if (num > 0) {
     while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
       if (rows[0] != NULL)
-        dict->SetString(L"device_token", rows[0]);
+        dict->SetString(L"device_token_", rows[0]);
     }
   } else {
     LOG(WARNING)<< "Call DeviceTokenSelect count < 0";
@@ -345,7 +361,7 @@ void ChatMysql::CallUserNickSelect(void* param, Value* value) {
   if (num > 0) {
     while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
       if (rows[0] != NULL)
-        dict->SetString(L"nickname", rows[0]);
+        dict->SetString(L"nickname_", rows[0]);
     }
   } else {
     LOG(WARNING)<< "Call UserNickSelect count < 0";
@@ -395,6 +411,26 @@ void ChatMysql::CallSpentCashUpdate(void* param, Value* value) {
     }
   } else {
     LOG(WARNING)<<"Call CallSpentCashUpdate count < 0";
+  }
+}
+
+void ChatMysql::CallCancelOrderPayUpdate(void* param, Value* value) {
+  base_storage::DBStorageEngine* engine =
+      (base_storage::DBStorageEngine*) (param);
+  MYSQL_ROW rows;
+  int32 num = engine->RecordCount();
+  DicValue* dict = reinterpret_cast<DicValue*>(value);
+  if (num > 0) {
+    while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
+      if (rows[0] != NULL)
+        dict->SetBigInteger(L"order_id_", atoll(rows[0]));
+      if (rows[1] != NULL)
+        dict->SetBigInteger(L"order_status_", atoll(rows[1]));
+      if (rows[2] != NULL)
+        dict->SetBigInteger(L"order_type_", atoll(rows[2]));
+    }
+  } else {
+    LOG(WARNING)<<"Call CallCancelOrderPayUpdate count < 0";
   }
 }
 

@@ -35,7 +35,7 @@ ShareTourism& ShareTourism::operator=(const ShareTourism& share) {
 
 void ShareTourism::Serialization(DicValue* dict) {
   dict->GetBigInteger(L"share_id_", &data_->share_id_);
-  dict->GetBigInteger(L"share_type_", &data_->share_type_);
+  dict->GetString(L"share_type_", &data_->share_type_);
   dict->GetString(L"share_theme_", &data_->share_theme_);
   dict->GetString(L"per_cash_", &data_->per_cash_);
   dict->GetString(L"addr_region_", &data_->addr_region_);
@@ -45,11 +45,12 @@ void ShareTourism::Serialization(DicValue* dict) {
   dict->GetString(L"detail_pic_", &data_->detail_pic_);
   dict->GetString(L"brief_pic_", &data_->brief_pic_);
   dict->GetBigInteger(L"is_recommend_", &data_->is_recommend_);
+  dict->GetBigInteger(L"share_type_id_", &data_->share_type_id_);
 }
 
 void ShareTourism::SetBriefSerialization(DicValue* dict) {
   dict->SetBigInteger(L"share_id_", data_->share_id_);
-  dict->SetBigInteger(L"share_type_", data_->share_type_);
+  dict->SetString(L"share_type_", data_->share_type_);
   dict->SetString(L"share_theme_", data_->share_theme_);
   dict->SetString(L"per_cash_", data_->per_cash_);
   dict->SetString(L"addr_region_", data_->addr_region_);
@@ -63,7 +64,7 @@ void ShareTourism::SetBriefSerialization(DicValue* dict) {
 
 void ShareTourism::SetDetailSerialization(DicValue* dict) {
   dict->SetBigInteger(L"share_id_", data_->share_id_);
-  dict->SetBigInteger(L"share_type_", data_->share_type_);
+  dict->SetString(L"share_type_", data_->share_type_);
   dict->SetString(L"share_theme_", data_->share_theme_);
   dict->SetString(L"per_cash_", data_->per_cash_);
   dict->SetString(L"addr_region_", data_->addr_region_);

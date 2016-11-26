@@ -259,6 +259,18 @@ class BlackcardConsumRecordRecv : public PacketHead {
   int64 uid_;
 };
 
+class BlackcardPlaceOrderRecv : public PacketHead {
+ public:
+  BlackcardPlaceOrderRecv(PacketHead packet);
+  int32 Deserialize();
+
+  inline int64 uid() { return uid_; }
+  inline int64 wanted_lv() { return wanted_lv_; }
+ private:
+  int64 uid_;
+  int64 wanted_lv_;
+};
+
 class NewAppointmentRecv : public PacketHead {
  public:
   NewAppointmentRecv(PacketHead packet);
@@ -272,6 +284,7 @@ class NewAppointmentRecv : public PacketHead {
   inline std::string other_name() { return other_name_; }
   int64 other_gender() { return other_gender_; }
   inline std::string ohter_phone() { return other_phone_; }
+  inline std::string remarks() { return remarks_; }
  private:
   int64 uid_;
   int64 city_code_;
@@ -282,6 +295,7 @@ class NewAppointmentRecv : public PacketHead {
   std::string other_name_;
   int64 other_gender_;
   std::string other_phone_;
+  std::string remarks_;
 };
 
 class WxPlaceOrderRecv : public PacketHead {
@@ -308,6 +322,26 @@ class WXPayClientRecv : public PacketHead {
   int64 uid_;
   int64 recharge_id_;
   int64 pay_result_; //1-成功 2-取消
+};
+
+class WXPayServerRecv : public PacketHead {
+ public:
+  WXPayServerRecv(PacketHead packet);
+  int32 Deserialize();
+  inline int64 total_fee() { return total_fee_; }
+  inline int64 recharge_id() { return recharge_id_; }
+  inline int64 pay_result() { return pay_result_; }
+  inline std::string appid() { return appid_; }
+  inline std::string mch_id() { return mch_id_; }
+ private:
+  std::string appid_;
+  std::string mch_id_;
+  std::string xml_str_;
+  int64 recharge_id_;
+  int64 pay_result_; //1 - 支付成功
+  int64 total_fee_;
+  std::string transaction_id_;
+  std::string time_end_;
 };
 
 class IdentityPicRecv : public PacketHead {
