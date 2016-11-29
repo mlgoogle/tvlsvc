@@ -159,18 +159,23 @@ int32 ChatMysql::EvaluateTripInsert(int64 oid, int64 s_score, int64 u_score,
   return err;
 }
 
-int32 ChatMysql::OrderStatusUpdate(int64 oid, int64 o_status) {
+int32 ChatMysql::GuideOrderStatusUpdate(int64 oid, int64 o_status) {
   int32 err = 0;
   bool r = false;
   do {
     std::stringstream ss;
-    ss << "call proc_OrderStatusUpdate(" << oid << "," << o_status << ")";
+    ss << "call proc_GuideOrderStatusUpdate(" << oid << "," << o_status << ")";
     LOG(INFO)<< "sql:" << ss.str();
-    r = mysql_engine_->WriteData(ss.str());
+    DicValue dic;
+    r = mysql_engine_->ReadData(ss.str(), &dic, CallGuideOrderStatusUpdate);
     if (!r) {
       err = SQL_EXEC_ERROR;
       break;
     }
+    int64 result_code = 0;
+    dic.GetBigInteger(L"result_", &result_code);
+    if (result_code == -1)
+      err = ORDER_STATUS_ERR;
   } while (0);
   return err;
 }
@@ -431,6 +436,22 @@ void ChatMysql::CallCancelOrderPayUpdate(void* param, Value* value) {
     }
   } else {
     LOG(WARNING)<<"Call CallCancelOrderPayUpdate count < 0";
+  }
+}
+
+void ChatMysql::CallGuideOrderStatusUpdate(void* param, Value* value) {
+  base_storage::DBStorageEngine* engine =
+      (base_storage::DBStorageEngine*) (param);
+  MYSQL_ROW rows;
+  int32 num = engine->RecordCount();
+  DicValue* dict = reinterpret_cast<DicValue*>(value);
+  if (num > 0) {
+    while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
+      if (rows[0] != NULL)
+        dict->SetBigInteger(L"result_", atoll(rows[0]));
+    }
+  } else {
+    LOG(WARNING)<<"Call CallGuideOrderStatusUpdate count < 0";
   }
 }
 

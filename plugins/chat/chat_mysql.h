@@ -40,7 +40,7 @@ class ChatMysql {
 
   int32 UserNickSelect(int64 uid, DicValue* dic);
 
-  int32 OrderStatusUpdate(int64 oid, int64 o_status);
+  int32 GuideOrderStatusUpdate(int64 oid, int64 o_status);
 
   //订单支付
   int32 SpentCashUpdate(int64 uid, int64 oid, std::string pwd, DicValue* dic);
@@ -54,6 +54,7 @@ class ChatMysql {
   static void CallEvaluateInfoSelect(void* param, Value* value);
   static void CallSpentCashUpdate(void* param, Value* value);
   static void CallCancelOrderPayUpdate(void* param, Value* value);
+  static void CallGuideOrderStatusUpdate(void* param, Value* value);
 
  private:
   base_logic::DataEngine* mysql_engine_;

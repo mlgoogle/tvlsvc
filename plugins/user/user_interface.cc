@@ -884,10 +884,12 @@ int32 UserInterface::WXPlaceOrder(const int32 socket, PacketHead* packet) {
             // todo 下单成功 ，记录微信订单信息
 
           } else {
-
+            err = WX_PLACE_ORDER_ERR;
+            break;
           }
         } else {
-
+           err = WX_PLACE_ORDER_ERR;
+           break;
         }
       }
     } while (0);
@@ -915,7 +917,6 @@ int32 UserInterface::WXPayClientResponse(const int32 socket,
     if (err < 0)
       break;
     SendMsg(socket, packet, &dic, WXPAY_CLIENT_RLY);
-    //todo 测试用 主动调起服务端支付成功通知
     if (recv.pay_result() == 1) {
       user_mysql_->ChangeRechargeStatusAndSelect(recv.recharge_id(),
                                                  1, &dic);
@@ -931,7 +932,6 @@ int32 UserInterface::WXPayClientResponse(const int32 socket,
   return err;
 }
 
-// todo
 int32 UserInterface::WXPayServerResponse(const int32 socket,
                                          PacketHead* packet) {
   int32 err = 0;
