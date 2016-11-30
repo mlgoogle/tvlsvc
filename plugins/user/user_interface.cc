@@ -349,6 +349,82 @@ int32 UserInterface::OrderDetails(const int32 socket, PacketHead* packet) {
   return err;
 }
 
+int32 UserInterface::VerifyPasswd(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    VerifyPasswdRecv recv(*packet);
+    err = recv.Deserialize();
+    if (err < 0)
+      break;
+    DicValue dic;
+    err = user_mysql_->CheckPasswdSelect(recv.uid(), recv.passwd(),
+                                         recv.passwd_type(), &dic);
+    if (err < 0)
+      break;
+    int64 result = 0;
+    dic.GetBigInteger(L"result_", &result);
+    if (result == -1) {
+      err = VERIFY_PASSWD_ERR;
+      break;
+    }
+    SendMsg(socket, packet, NULL, VERIFY_PASSWD_RLY);
+  } while (0);
+  if (err < 0)
+    SendError(socket, packet, err, VERIFY_PASSWD_RLY);
+  return err;
+}
+
+int32 UserInterface::ChangePayPasswd(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    ChangePayPasswdRecv recv(*packet);
+    err = recv.Deserialize();
+    if (err < 0)
+      break;
+    DicValue dic;
+    err = user_mysql_->ChangePasswdSelect(recv.uid(), recv.old_passwd(),
+                                             recv.new_passwd(),
+                                             recv.change_type(),
+                                             recv.passwd_type(), &dic);
+    if (err < 0)
+      break;
+    int64 result = 0;
+    dic.GetBigInteger(L"result_", &result);
+    if (result == -1) {
+      err = HAS_SETTING_PAY_PASSWD;
+      break;
+    } else if (result == -2) {
+      err = CANNOT_SET_LOGIN_PASSWD;
+      break;
+    } else if (result == -3) {
+      err = PAY_PASSWD_ERR;
+      break;
+    }
+    SendMsg(socket, packet, NULL, CHANGE_COMM_PASSWD_RLY);
+  } while (0);
+  if (err < 0)
+    SendError(socket, packet, err, CHANGE_COMM_PASSWD_RLY);
+  return err;
+}
+
+int32 UserInterface::GuideOrderRecord(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    GuideOrderRecv recv(*packet);
+    err = recv.Deserialize();
+    if (err < 0)
+      break;
+    DicValue dic;
+    err = user_mysql_->GuideOrderSelect(recv.uid(), recv.last_id(), recv.count(), &dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, GUIDE_ORDER_RECORD_RLY);
+  } while (0);
+  if (err < 0)
+    SendError(socket, packet, err, GUIDE_ORDER_RECORD_RLY);
+  return err;
+}
+
 int32 UserInterface::GuidesInfo(const int32 socket, PacketHead* packet) {
   int32 err = 0;
   do {
@@ -884,10 +960,12 @@ int32 UserInterface::WXPlaceOrder(const int32 socket, PacketHead* packet) {
             // todo 下单成功 ，记录微信订单信息
 
           } else {
-
+            err = WX_PLACE_ORDER_ERR;
+            break;
           }
         } else {
-
+          err = WX_PLACE_ORDER_ERR;
+          break;
         }
       }
     } while (0);
@@ -915,13 +993,10 @@ int32 UserInterface::WXPayClientResponse(const int32 socket,
     if (err < 0)
       break;
     SendMsg(socket, packet, &dic, WXPAY_CLIENT_RLY);
-    //todo 测试用 主动调起服务端支付成功通知
     if (recv.pay_result() == 1) {
-      user_mysql_->ChangeRechargeStatusAndSelect(recv.recharge_id(),
-                                                 1, &dic);
+      user_mysql_->ChangeRechargeStatusAndSelect(recv.recharge_id(), 1, &dic);
     } else {
-      user_mysql_->ChangeRechargeStatusAndSelect(recv.recharge_id(),
-                                                 2, &dic);
+      user_mysql_->ChangeRechargeStatusAndSelect(recv.recharge_id(), 2, &dic);
     }
     SendMsg(socket, packet, &dic, WXPAY_SERVER_RLY);
   } while (0);
@@ -931,7 +1006,6 @@ int32 UserInterface::WXPayClientResponse(const int32 socket,
   return err;
 }
 
-// todo
 int32 UserInterface::WXPayServerResponse(const int32 socket,
                                          PacketHead* packet) {
   int32 err = 0;
@@ -943,16 +1017,14 @@ int32 UserInterface::WXPayServerResponse(const int32 socket,
     //支付成功
     DicValue dic;
     if (recv.appid() != APPID && recv.mch_id() != MCH_ID) {
-      LOG(ERROR) << "WXPAY SERVER RESULT appid:[" << recv.appid() << "]";
+      LOG(ERROR)<< "WXPAY SERVER RESULT appid:[" << recv.appid() << "]";
       LOG(ERROR) << "WXPAY SERVER RESULT mch_id:[" << recv.mch_id() << "]";
       break;
     }
     if (recv.pay_result() == 1) {
-      user_mysql_->ChangeRechargeStatusAndSelect(recv.recharge_id(),
-                                                       3, &dic);
+      user_mysql_->ChangeRechargeStatusAndSelect(recv.recharge_id(), 3, &dic);
     } else {
-      user_mysql_->ChangeRechargeStatusAndSelect(recv.recharge_id(),
-                                                             4, &dic);
+      user_mysql_->ChangeRechargeStatusAndSelect(recv.recharge_id(), 4, &dic);
     }
     int64 user_id = 0;
     dic.GetBigInteger(L"uid_", &user_id);

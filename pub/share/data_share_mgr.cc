@@ -6,6 +6,7 @@
 #include "pub/share/data_share_mgr.h"
 
 #include <sys/unistd.h>
+#include <sys/socket.h>
 #include "glog/logging.h"
 
 #include "base/logic/logic_comm.h"
@@ -27,7 +28,7 @@ DataShareMgr::~DataShareMgr() {
 }
 
 __attribute__((visibility("default")))
-      DataShareMgr* DataShareMgr::GetInstance() {
+         DataShareMgr* DataShareMgr::GetInstance() {
   if (instance_ == NULL) {
     instance_ = new DataShareMgr();
   }
@@ -52,7 +53,7 @@ UserInfo* DataShareMgr::GetFreeCoordinator() {
   DLOG(ERROR)<< "DataShareMgr GetFreeCoordinator locked";
   Coordinator* info = NULL;
   if (coordinator_map_.empty())
-    return info;
+  return info;
   CoordinatorMap::iterator it = coordinator_map_.begin();
   info = it->second;
   ++it;
@@ -179,7 +180,10 @@ void DataShareMgr::CheckHeartLoss() {
         Coordinator* p = itc->second;
         coordinator_map_.erase(itc);
       }
-      close(p->socket_fd());
+//      int err = close(p->socket_fd());
+      int err = shutdown(p->socket_fd(), 2);
+      LOG(WARNING) << "user lost connect :" << p->socket_fd() << "close socket code ["
+          << err << "]";
       delete p;
       p = NULL;
     }
@@ -201,7 +205,7 @@ void DataShareMgr::UserHeart(int64 uid) {
   DLOG(ERROR) << "DataShareMgr UserHeart unlock";
 }
 
-//只清理map,内存由user管理
+//只清理map,内存由user_mao_管理
 void DataShareMgr::DelGuide(int64 uid) {
   DLOG(ERROR)<< "DataShareMgr DelGuide lock";
   base_logic::WLockGd lk(lock_);
@@ -341,7 +345,7 @@ std::string DataShareMgr::GetNick(int64 uid) {
 }
 
 void DataShareMgr::InitShareType(ListValue* list) {
-  DLOG(ERROR) << "DataShareMgr InitShareType lock";
+  DLOG(ERROR)<< "DataShareMgr InitShareType lock";
   base_logic::WLockGd lk(lock_);
   DLOG(ERROR) << "DataShareMgr InitShareType locked";
   ShareTypeMap::iterator sit = share_type_map_.begin();
@@ -362,7 +366,7 @@ void DataShareMgr::InitShareType(ListValue* list) {
 }
 
 void DataShareMgr::ClearShareTourismMap() {
-  DLOG(ERROR) << "DataShareMgr ClearShareTourismMap lock";
+  DLOG(ERROR)<< "DataShareMgr ClearShareTourismMap lock";
   base_logic::WLockGd lk(lock_);
   DLOG(ERROR) << "DataShareMgr ClearShareTourismMap locked";
   ShareTourismMap::iterator it = share_tourism_map_.begin();
@@ -379,7 +383,7 @@ void DataShareMgr::ClearShareTourismMap() {
 }
 
 void DataShareMgr::ClearShareSkillMap() {
-  DLOG(ERROR) << "DataShareMgr ClearShareSkillMap lock";
+  DLOG(ERROR)<< "DataShareMgr ClearShareSkillMap lock";
   base_logic::WLockGd lk(lock_);
   DLOG(ERROR) << "DataShareMgr ClearShareSkillMap locked";
   ShareSkillMap::iterator it = share_skill_map_.begin();
@@ -398,9 +402,9 @@ void DataShareMgr::ClearShareSkillMap() {
 void DataShareMgr::InitTourismShare(ListValue* list) {
   //清空share_tourism_map_
   ClearShareTourismMap();
-  DLOG(ERROR) << "DataShareMgr InitTourismShare lock";
+  DLOG(ERROR)<< "DataShareMgr InitTourismShare lock";
   base_logic::WLockGd lk(lock_);
-  DLOG(ERROR) << "DataShareMgr InitTourismShare locked";
+  DLOG(ERROR)<< "DataShareMgr InitTourismShare locked";
   ListValue::iterator lit = list->begin();
   for (; lit != list->end(); ++lit) {
     DicValue* dic = (DicValue*) (*lit);
@@ -416,27 +420,27 @@ void DataShareMgr::InitTourismShare(ListValue* list) {
           ShareIdMap::value_type(share->share_id(), share->share_id()));
     }
   }
-  DLOG(ERROR) << "DataShareMgr InitTourismShare unlock";
+  DLOG(ERROR)<< "DataShareMgr InitTourismShare unlock";
 }
 
 void DataShareMgr::InitSkillShare(ListValue* list) {
   ClearShareSkillMap();
-  DLOG(ERROR) << "DataShareMgr InitSkillShare lock";
+  DLOG(ERROR)<< "DataShareMgr InitSkillShare lock";
   base_logic::WLockGd lk(lock_);
-  DLOG(ERROR) << "DataShareMgr InitSkillShare locked";
+  DLOG(ERROR)<< "DataShareMgr InitSkillShare locked";
   ListValue::iterator lit = list->begin();
-    for (; lit != list->end(); ++lit) {
-      DicValue* dic = (DicValue*) (*lit);
-      if (dic != NULL) {
-        ShareSkill* share = new ShareSkill();
-        share->Serialization(dic);
-        share_skill_map_[share->share_id()] = share;
-        if (share->is_banner()) {
-          banner_share_map_[share->share_id()] = share->share_id();
-        }
+  for (; lit != list->end(); ++lit) {
+    DicValue* dic = (DicValue*) (*lit);
+    if (dic != NULL) {
+      ShareSkill* share = new ShareSkill();
+      share->Serialization(dic);
+      share_skill_map_[share->share_id()] = share;
+      if (share->is_banner()) {
+        banner_share_map_[share->share_id()] = share->share_id();
       }
     }
-  DLOG(ERROR) << "DataShareMgr InitSkillShare unlock";
+  }
+  DLOG(ERROR)<< "DataShareMgr InitSkillShare unlock";
 }
 
 void DataShareMgr::test() {
@@ -446,16 +450,16 @@ void DataShareMgr::test() {
 //id 大的在前面   id 为上一页的最小id
 int32 DataShareMgr::QueryRecommendShare(int64 id, int64 count, int64 type,
                                         DicValue* info) {
-  DLOG(ERROR) << "DataShareMgr QueryRecommendShare lock";
+  DLOG(ERROR)<< "DataShareMgr QueryRecommendShare lock";
   base_logic::RLockGd lk(lock_);
   DLOG(ERROR) << "DataShareMgr QueryRecommendShare locked";
   int32 err = 0;
   ListValue* list = new ListValue();
   ShareIdMap tem_map;
   if (type == 0)
-    tem_map = recommend_share_map_;
+  tem_map = recommend_share_map_;
   else
-    tem_map = share_type_map_[type];
+  tem_map = share_type_map_[type];
   do {
     ShareIdMap::reverse_iterator rit;
     if (id == 0) {
@@ -464,9 +468,9 @@ int32 DataShareMgr::QueryRecommendShare(int64 id, int64 count, int64 type,
       ShareIdMap::iterator it = tem_map.find(id);
       ShareIdMap::reverse_iterator rfindit(it);
       if (it == tem_map.end())
-        rit = tem_map.rend();
+      rit = tem_map.rend();
       else
-        rit = rfindit++;
+      rit = rfindit++;
     }
     for (; rit != tem_map.rend() && count > 0; ++rit) {
       ShareTourismMap::iterator share_it = share_tourism_map_.find(rit->second);
@@ -478,14 +482,14 @@ int32 DataShareMgr::QueryRecommendShare(int64 id, int64 count, int64 type,
         count--;
       }
     }
-  } while (0);
+  }while (0);
   info->Set(L"data_list_", list);
   DLOG(ERROR) << "DataShareMgr QueryRecommendShare unlock";
   return err;
 }
 
 int32 DataShareMgr::QuerySkillShare(int64 id, int64 count, DicValue* info) {
-  DLOG(ERROR) << "DataShareMgr QuerySkillShare lock";
+  DLOG(ERROR)<< "DataShareMgr QuerySkillShare lock";
   base_logic::WLockGd lk(lock_);
   DLOG(ERROR) << "DataShareMgr QuerySkillShare locked";
   do {
@@ -513,9 +517,9 @@ int32 DataShareMgr::QuerySkillShare(int64 id, int64 count, DicValue* info) {
       ShareSkillMap::iterator it = share_skill_map_.find(id);
       ShareSkillMap::reverse_iterator rfindit(it);
       if (it == share_skill_map_.end())
-        rit = share_skill_map_.rend();
+      rit = share_skill_map_.rend();
       else
-        rit = rfindit++;
+      rit = rfindit++;
     }
     ListValue* data_list = new ListValue();
     for (; rit != share_skill_map_.rend() && count > 0; ++rit) {
@@ -528,13 +532,13 @@ int32 DataShareMgr::QuerySkillShare(int64 id, int64 count, DicValue* info) {
       }
     }
     info->Set(L"data_list_", data_list);
-  } while (0);
+  }while (0);
 
   DLOG(ERROR) << "DataShareMgr QuerySkillShare unlock";
 }
 
 int32 DataShareMgr::QueryShareTourismDetail(int64 id, DicValue* dic) {
-  DLOG(ERROR) << "DataShareMgr QueryShareTourismDetail lock";
+  DLOG(ERROR)<< "DataShareMgr QueryShareTourismDetail lock";
   base_logic::RLockGd lk(lock_);
   DLOG(ERROR) << "DataShareMgr QueryShareTourismDetail locked";
   int32 err = 0;
@@ -548,7 +552,7 @@ int32 DataShareMgr::QueryShareTourismDetail(int64 id, DicValue* dic) {
 }
 
 int32 DataShareMgr::QueryShareSkillDetail(int64 id, DicValue* dic) {
-  DLOG(ERROR) << "DataShareMgr QueryShareSkillDetail lock";
+  DLOG(ERROR)<< "DataShareMgr QueryShareSkillDetail lock";
   base_logic::RLockGd lk(lock_);
   DLOG(ERROR) << "DataShareMgr QueryShareSkillDetail locked";
   int32 err = 0;

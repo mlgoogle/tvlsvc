@@ -77,13 +77,8 @@ int32 ChatInterface::AnswerInvitation(const int32 socket, PacketHead* packet) {
     err = rev.Deserialize();
     if (err < 0)
       break;
-    if (rev.order_status() != 2 && rev.order_status() != 1) {
-      // 订单状态有误
-      err = ORDER_STATUS_ERR;
-      break;
-    }
     //更新订单状态
-    err = chat_mysql_->OrderStatusUpdate(rev.order_id(), rev.order_status());
+    err = chat_mysql_->GuideOrderStatusUpdate(rev.order_id(), rev.order_status());
     if (err < 0)
       break;
     rev.set_operate_code(ANSWER_INVITATION_RLY);
@@ -93,10 +88,14 @@ int32 ChatInterface::AnswerInvitation(const int32 socket, PacketHead* packet) {
     UserInfo* u = data_share_mgr_->GetUser(rev.from_uid());
     if (u == NULL || !u->is_login()) {
       std::string content;
-      if (rev.order_status() == 2)
+      if (rev.order_status() == 3)
         content = " 愿与你同游";
-      else
+      else if (rev.order_status() == 1)
         content = " 残忍拒绝";
+      else if (rev.order_status() == 6)
+        content = " 服务开始了";
+      else if (rev.order_status() == 7)
+        content = " 服务已完成";
       PushGtMsg(rev.to_uid(), rev.from_uid(), rev.body_str(), content,
       ANSWER_INVITATION_RLY);
       break;
@@ -132,14 +131,14 @@ int32 ChatInterface::AskInvitation(const int32 socket, PacketHead* packet) {
     if (result == 1)
       break;
     // 通知被邀约者
-    //========================================
+    /*/========================================
     // todo 测试用 默认服务者同意
     int64 oid;
     int64 oid_status;
     dic.GetBigInteger(L"order_id_", &oid);
     LOG(INFO)<< "change order status oid:" << oid;
     chat_mysql_->OrderStatusUpdate(oid, 3);
-    //============================
+    ============================*/
     if (u == NULL || !u->is_login()) {
       LOG(INFO)<< "invitate to user is not login";
       // 回复被邀请者
@@ -184,14 +183,14 @@ int32 ChatInterface::AppointMentGuide(const int32 socket, PacketHead* packet) {
     if (result == 1)
       break;
     // 通知被邀约者
-    //========================================
+    /*/========================================
     // todo 测试用 默认服务者同意
     int64 oid;
     int64 oid_status;
     dic.GetBigInteger(L"order_id_", &oid);
     LOG(INFO)<< "change order status oid:" << oid;
     chat_mysql_->OrderStatusUpdate(oid, 3);
-    //============================
+    ============================*/
     if (u == NULL || !u->is_login()) {
       LOG(INFO)<< "appointment to user is not login";
       // 回复被邀请者

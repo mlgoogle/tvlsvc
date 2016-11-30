@@ -1260,6 +1260,7 @@ OrderDetailRecv::OrderDetailRecv(PacketHead packet) {
   head_ = packet.head();
   body_str_ = packet.body_str();
   order_id_ = 0;
+  order_type_ = 0;
 }
 
 int32 OrderDetailRecv::Deserialize() {
@@ -1277,6 +1278,123 @@ int32 OrderDetailRecv::Deserialize() {
       LOG_IF(ERROR, !r) << "OrderDetailRecv::order_type_ parse error";
     } else {
       LOG(ERROR)<< "OrderDetailRecv Deserialize error";
+      err = REQUEST_JSON_ERR;
+      break;
+    }
+  }while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                                serializer);
+  return err;
+}
+
+VerifyPasswdRecv::VerifyPasswdRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  uid_ = 0;
+  passwd_type_ = 0;
+}
+
+int32 VerifyPasswdRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+      base_logic::IMPL_JSON, &body_str_, false);
+  std::string err_str;
+  DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetBigInteger(L"uid_", &uid_);
+      LOG_IF(ERROR, !r) << "VerifyPasswdRecv::uid_ parse error";
+      r = dic->GetBigInteger(L"passwd_type_", &passwd_type_);
+      LOG_IF(ERROR, !r) << "VerifyPasswdRecv::passwd_type_ parse error";
+      r = dic->GetString(L"passwd_", &passwd_);
+      if (r) {
+        base::MD5Sum md5(passwd_);
+        passwd_ = md5.GetHash();
+      }
+      LOG_IF(ERROR, !r) << "VerifyPasswdRecv::passwd_ parse error";
+    } else {
+      LOG(ERROR)<< "VerifyPasswdRecv Deserialize error";
+      err = REQUEST_JSON_ERR;
+      break;
+    }
+  }while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                                serializer);
+  return err;
+}
+
+ChangePayPasswdRecv::ChangePayPasswdRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  uid_ = 0;
+  change_type_ = 0;
+  passwd_type_ = 0;
+}
+
+int32 ChangePayPasswdRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+      base_logic::IMPL_JSON, &body_str_, false);
+  std::string err_str;
+  DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetBigInteger(L"uid_", &uid_);
+      LOG_IF(ERROR, !r) << "ChangePayPasswdRecv::uid_ parse error";
+      r = dic->GetBigInteger(L"change_type_", &change_type_);
+      LOG_IF(ERROR, !r) << "ChangePayPasswdRecv::change_type_ parse error";
+      r = dic->GetBigInteger(L"passwd_type_", &passwd_type_);
+      LOG_IF(ERROR, !r) << "ChangePayPasswdRecv::passwd_type_ parse error";
+      r = dic->GetString(L"new_passwd_", &new_passwd_);
+      if (r) {
+        base::MD5Sum md5(new_passwd_);
+        new_passwd_ = md5.GetHash();
+      }
+      LOG_IF(ERROR, !r) << "ChangePayPasswdRecv::new_passwd_ parse error";
+      r = dic->GetString(L"old_passwd_", &old_passwd_);
+      if (r) {
+        base::MD5Sum md5(old_passwd_);
+        old_passwd_ = md5.GetHash();
+      }
+      LOG_IF(ERROR, !r) << "ChangePayPasswdRecv::old_passwd_ parse error";
+    } else {
+      LOG(ERROR)<< "ChangePayPasswdRecv Deserialize error";
+      err = REQUEST_JSON_ERR;
+      break;
+    }
+  }while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                                serializer);
+  return err;
+}
+
+GuideOrderRecv::GuideOrderRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  uid_ = 0;
+  last_id_ = 0;
+  count_ = 0;
+}
+
+int32 GuideOrderRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+      base_logic::IMPL_JSON, &body_str_, false);
+  std::string err_str;
+  DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetBigInteger(L"uid_", &uid_);
+      LOG_IF(ERROR, !r) << "GuideOrderRecv::uid_ parse error";
+      r = dic->GetBigInteger(L"last_id_", &last_id_);
+      LOG_IF(ERROR, !r) << "GuideOrderRecv::last_id_ parse error";
+      r = dic->GetBigInteger(L"count_", &count_);
+      LOG_IF(ERROR, !r) << "GuideOrderRecv::count_ parse error";
+    } else {
+      LOG(ERROR)<< "GuideOrderRecv Deserialize error";
       err = REQUEST_JSON_ERR;
       break;
     }
