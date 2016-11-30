@@ -778,6 +778,75 @@ int32 UserMysql::NewAppointmentInsert(int64 uid, int64 city, int64 start,
   return err;
 }
 
+int32 UserMysql::CheckPasswdSelect(int64 uid, std::string pass, int64 type,
+                                   DicValue* dic) {
+  int32 err = 0;
+  bool r = false;
+  do {
+    std::stringstream ss;
+    ss << "call proc_CheckPasswdSelect(" << uid << ",'" << pass << "'," << type
+       << ")";
+    LOG(INFO)<< "sql:" << ss.str();
+    r = mysql_engine_->ReadData(ss.str(), dic, CallCheckPasswdSelect);
+    if (!r) {
+      err = SQL_EXEC_ERROR;
+      break;
+    }
+  } while (0);
+  return err;
+}
+
+int32 UserMysql::ChangePasswdSelect(int64 uid, std::string oldpass,
+                                    std::string newpass, int64 ctype,
+                                    int64 ptype, DicValue* dic) {
+  int32 err = 0;
+  bool r = false;
+  do {
+    std::stringstream ss;
+    ss << "call proc_ChangePasswdSelect(" << uid << ",'" << oldpass << "','"
+       << newpass << "'," << ctype << "," << ptype << ")";
+    LOG(INFO)<< "sql:" << ss.str();
+    r = mysql_engine_->ReadData(ss.str(), dic, CallChangePasswdSelect);
+    if (!r) {
+      err = SQL_EXEC_ERROR;
+      break;
+    }
+  } while (0);
+  return err;
+}
+
+int32 UserMysql::GuideOrderSelect(int64 uid, int64 lastid, int64 count,
+                                  DicValue* dic) {
+  int32 err = 0;
+  bool r = false;
+  do {
+    // 预约
+    ListValue* data_list = new ListValue();
+    dic->Set(L"data_list_", data_list);
+    std::stringstream ss;
+    ss << "call proc_GuideOrderSelect(" << uid << "," << lastid << "," << count
+       << "," << 2 << ")";
+    LOG(INFO)<< "sql:" << ss.str();
+    r = mysql_engine_->ReadData(ss.str(), dic, CallGuideOrderSelect);
+    if (!r) {
+      err = SQL_EXEC_ERROR;
+      break;
+    }
+    ss.str("");
+    ss.clear();
+    // 邀约
+    ss << "call proc_GuideOrderSelect(" << uid << "," << lastid << "," << count
+       << "," << 0 << ")";
+    LOG(INFO)<< "sql:" << ss.str();
+    r = mysql_engine_->ReadData(ss.str(), dic, CallGuideOrderSelect);
+    if (!r) {
+      err = SQL_EXEC_ERROR;
+      break;
+    }
+  } while (0);
+  return err;
+}
+
 int32 UserMysql::AppointmentRecordSelect(int64 uid, int64 lastid, int64 count,
                                          DicValue* dic) {
   int32 err = 0;
@@ -1785,10 +1854,18 @@ void UserMysql::CallUserCashSelect(void* param, Value* value) {
       if (rows[0] != NULL) {
         dict->SetBigInteger(L"user_cash_", atoll(rows[0]));
       }
+      if (rows[1] != NULL) {
+        if (strlen(rows[1]) == 0) {
+          dict->SetBigInteger(L"has_passwd_", -1);
+        } else {
+          dict->SetBigInteger(L"has_passwd_", 1);
+        }
+      }
     }
   } else {
     LOG(WARNING)<<"CallUserCashSelect count < 0";
     dict->SetBigInteger(L"user_cash_", 0);
+    dict->SetBigInteger(L"has_passwd_", -1);
   }
 }
 
@@ -1906,6 +1983,40 @@ void UserMysql::CallBlackcardPlaceOrderInsertAndSelect(void* param,
   }
 }
 
+void UserMysql::CallCheckPasswdSelect(void* param, Value* value) {
+  base_storage::DBStorageEngine* engine =
+      (base_storage::DBStorageEngine*) (param);
+  MYSQL_ROW rows;
+  int32 num = engine->RecordCount();
+  DicValue* dict = reinterpret_cast<DicValue*>(value);
+  if (num > 0) {
+    while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
+      if (rows[0] != NULL) {
+        dict->SetBigInteger(L"result_", atoll(rows[0]));
+      }
+    }
+  } else {
+    LOG(WARNING)<<"CallCheckPasswdSelect count < 0";
+  }
+}
+
+void UserMysql::CallChangePasswdSelect(void* param, Value* value) {
+  base_storage::DBStorageEngine* engine =
+      (base_storage::DBStorageEngine*) (param);
+  MYSQL_ROW rows;
+  int32 num = engine->RecordCount();
+  DicValue* dict = reinterpret_cast<DicValue*>(value);
+  if (num > 0) {
+    while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
+      if (rows[0] != NULL) {
+        dict->SetBigInteger(L"result_", atoll(rows[0]));
+      }
+    }
+  } else {
+    LOG(WARNING)<<"CallChangePasswdSelect count < 0";
+  }
+}
+
 void UserMysql::CallAppointmentRecordSelect(void* param, Value* value) {
   base_storage::DBStorageEngine* engine =
       (base_storage::DBStorageEngine*) (param);
@@ -1959,6 +2070,56 @@ void UserMysql::CallAppointmentRecordSelect(void* param, Value* value) {
     info->Set(L"data_list_", list);
   } else {
     LOG(WARNING)<<"CallAppointmentRecordSelect count < 0";
+  }
+}
+
+void UserMysql::CallGuideOrderSelect(void* param, Value* value) {
+  base_storage::DBStorageEngine* engine =
+      (base_storage::DBStorageEngine*) (param);
+  MYSQL_ROW rows;
+  int32 num = engine->RecordCount();
+  DicValue* info = reinterpret_cast<DicValue*>(value);
+  ListValue* list = NULL;
+  info->GetList(L"data_list_", &list);
+  if (num > 0) {
+    while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
+      DicValue* dict = new DicValue();
+      if (rows[0] != NULL)
+        dict->SetBigInteger(L"order_id_", atoll(rows[0]));
+      if (rows[1] != NULL)
+        dict->SetBigInteger(L"order_status_", atoll(rows[1]));
+      if (rows[2] != NULL)
+        dict->SetBigInteger(L"from_uid_", atoll(rows[2]));
+      if (rows[3] != NULL)
+        dict->SetString(L"from_url_", (rows[3]));
+      if (rows[4] != NULL)
+        dict->SetString(L"from_name_", (rows[4]));
+      if (rows[5] != NULL)
+        dict->SetString(L"service_name_", (rows[5]));
+      if (rows[6] != NULL)
+        dict->SetBigInteger(L"order_price_", atoll(rows[6]));
+      if (rows[7] != NULL)
+        dict->SetBigInteger(L"start_time_", atoll(rows[7]));
+      if (rows[8] != NULL)
+        dict->SetBigInteger(L"end_time_", atoll(rows[8]));
+      if (rows[9] != NULL) {
+        dict->SetBigInteger(L"order_type_", atoll(rows[9]));
+        if (atoll(rows[9]) == 2) {
+          if (rows[10] != NULL) {
+            dict->SetBigInteger(L"is_other_", atoll(rows[10]));
+            if (atoll(rows[10]) == 1) {
+              if (rows[11] != NULL)
+                dict->SetString(L"other_name_", (rows[11]));
+              if (rows[12] != NULL)
+                dict->SetString(L"other_phone_", (rows[12]));
+            }
+          }
+        }
+      }
+      list->Append(dict);
+    }
+  } else {
+    LOG(WARNING)<<"CallGuideOrderSelect count < 0";
   }
 }
 

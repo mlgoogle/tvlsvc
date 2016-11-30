@@ -225,6 +225,18 @@ int32 UserManager::AssignPacket(const int32 socket, PacketHead* packet) {
       interface->OrderDetails(socket, packet);
       break;
     }
+    case VERIFY_PASSWD_REQ: {
+      interface->VerifyPasswd(socket, packet);
+      break;
+    }
+    case CHANGE_COMM_PASSWD_REQ: {
+      interface->ChangePayPasswd(socket, packet);
+      break;
+    }
+    case GUIDE_ORDER_RECORD_REQ: {
+      interface->GuideOrderRecord(socket, packet);
+      break;
+    }
   }
   return err;
 }

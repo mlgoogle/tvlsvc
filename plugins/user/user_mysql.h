@@ -84,8 +84,7 @@ class UserMysql {
 
   int32 RechargeInfoInsertAndSelect(int64 uid, int64 price, DicValue* dic);
 
-  int32 ChangeRechargeStatusAndSelect(int64 rid, int64 result,
-                                      DicValue* dic);
+  int32 ChangeRechargeStatusAndSelect(int64 rid, int64 result, DicValue* dic);
 
   int32 IdentityInfoInsertAndSelect(int64 uid, std::string front,
                                     std::string back, DicValue* dic);
@@ -111,6 +110,13 @@ class UserMysql {
   int32 UserCashSelect(int64 uid, DicValue* dic);
 
   int32 OrderDetailsSelect(int64 oid, int64 type, DicValue* dic);
+
+  int32 CheckPasswdSelect(int64 uid, std::string pass, int64 type, DicValue* dic);
+
+  int32 ChangePasswdSelect(int64 uid, std::string oldpass, std::string newpass,
+                              int64 ctype, int64 ptype, DicValue* dic);
+
+  int32 GuideOrderSelect(int64 uid, int64 lastid, int64 count, DicValue* dic);
 
   int32 CancelOrderStatusUpdate();
 
@@ -152,6 +158,9 @@ class UserMysql {
   static void CallOrderDetailsSelect(void* param, Value* value);
   static void CallBlackcardPriceInfoSelect(void* param, Value* value);
   static void CallBlackcardPlaceOrderInsertAndSelect(void* param, Value* value);
+  static void CallCheckPasswdSelect(void* param, Value* value);
+  static void CallChangePasswdSelect(void* param, Value* value);
+  static void CallGuideOrderSelect(void* param, Value* value);
  private:
   base_logic::DataEngine* mysql_engine_;
 };

@@ -499,9 +499,56 @@ class OrderDetailRecv : public PacketHead {
 
   inline int64 order_id() { return order_id_; }
   inline int64 order_type() { return order_type_; }
+
  private:
   int64 order_id_;
   int64 order_type_;//0-邀约 1-预约
+};
+
+class VerifyPasswdRecv : public PacketHead {
+ public:
+  VerifyPasswdRecv (PacketHead packet);
+  int32 Deserialize();
+
+  inline int64 uid() { return uid_; }
+  inline std::string passwd() { return passwd_; }
+  inline int64 passwd_type() { return passwd_type_; }
+ private:
+  int64 uid_;
+  std::string passwd_;
+  int64 passwd_type_;// 1-支付密码 2-登录密码
+};
+
+class ChangePayPasswdRecv : public PacketHead {
+ public:
+  ChangePayPasswdRecv(PacketHead packet);
+  int32 Deserialize();
+
+  inline int64 uid() { return uid_; }
+  inline std::string new_passwd() { return new_passwd_; }
+  inline std::string old_passwd() { return old_passwd_; }
+  inline int64 change_type() { return change_type_; }
+  inline int64 passwd_type() { return passwd_type_; }
+ private:
+  int64 uid_;
+  std::string new_passwd_;
+  std::string old_passwd_;
+  int64 change_type_; // 0-初次设置密码 1-修改密码
+  int64 passwd_type_; // 1-支付 2-登陆
+};
+
+class GuideOrderRecv : public PacketHead {
+ public:
+  GuideOrderRecv(PacketHead packet);
+  int32 Deserialize();
+
+  inline int64 uid() { return uid_; }
+  inline int64 last_id() { return last_id_; }
+  inline int64 count() { return count_; }
+ private:
+  int64 uid_;
+  int64 last_id_; //上一次最小订单号 第一次取0
+  int64 count_; //请求条数
 };
 
 }  // namespace user
