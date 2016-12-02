@@ -349,6 +349,38 @@ int32 UserInterface::OrderDetails(const int32 socket, PacketHead* packet) {
   return err;
 }
 
+int32 UserInterface::CheckSMSCode(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    CheckSMSCodeRecv rev(*packet);
+    err = rev.Deserialize();
+    if (err < 0)
+      break;
+    if (time(NULL) - rev.timestamp() > 15 * 60) {
+      err = VERIFY_CODE_OVERDUE;
+      break;
+    }
+    std::stringstream ss;
+    ss << SMS_KEY << rev.timestamp() << rev.verify_code() << rev.phone_num();
+    base::MD5Sum md5(ss.str());
+    if (md5.GetHash() != rev.token()) {
+      err = VERIFY_CODE_ERR;
+      break;
+    }
+    ss.str("");
+    ss.clear();
+    ss << rev.phone_num() << ":" << rev.verify_type();
+    if (!data_share_mgr_->CheckSMSToken(ss.str(), rev.token())) {
+      err = VERIFY_CODE_NOT_NEW;
+      break;
+    }
+    SendMsg(socket, packet, NULL, CHECK_SMS_CODE_RLY);
+  } while (0);
+  if (err < 0)
+    SendError(socket, packet, err, CHECK_SMS_CODE_RLY);
+  return err;
+}
+
 int32 UserInterface::VerifyPasswd(const int32 socket, PacketHead* packet) {
   int32 err = 0;
   do {
@@ -383,9 +415,8 @@ int32 UserInterface::ChangePayPasswd(const int32 socket, PacketHead* packet) {
       break;
     DicValue dic;
     err = user_mysql_->ChangePasswdSelect(recv.uid(), recv.old_passwd(),
-                                             recv.new_passwd(),
-                                             recv.change_type(),
-                                             recv.passwd_type(), &dic);
+                                          recv.new_passwd(), recv.change_type(),
+                                          recv.passwd_type(), &dic);
     if (err < 0)
       break;
     int64 result = 0;
@@ -415,13 +446,51 @@ int32 UserInterface::GuideOrderRecord(const int32 socket, PacketHead* packet) {
     if (err < 0)
       break;
     DicValue dic;
-    err = user_mysql_->GuideOrderSelect(recv.uid(), recv.last_id(), recv.count(), &dic);
+    err = user_mysql_->GuideOrderSelect(recv.uid(), recv.last_id(),
+                                        recv.count(), &dic);
     if (err < 0)
       break;
     SendMsg(socket, packet, &dic, GUIDE_ORDER_RECORD_RLY);
   } while (0);
   if (err < 0)
     SendError(socket, packet, err, GUIDE_ORDER_RECORD_RLY);
+  return err;
+}
+
+int32 UserInterface::GuideOrderDetail(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    GuideOrderDetailRecv recv(*packet);
+    err = recv.Deserialize();
+    if (err < 0)
+      break;
+    DicValue dic;
+    err = user_mysql_->GuideOrderDetailSelect(recv.order_id(), &dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, GUIDE_ORDER_DETAIL_RLY);
+  } while (0);
+  if (err < 0)
+    SendError(socket, packet, err, GUIDE_ORDER_DETAIL_RLY);
+  return err;
+}
+int32 UserInterface::DefineGuideSkills(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    DefineGuideSkillsRecv recv(*packet);
+    err = recv.Deserialize();
+    if (err < 0)
+      break;
+    DicValue dic;
+    err = user_mysql_->DefineGuideSkillsUpdateSelect(recv.uid(),
+                                                     recv.change_type(),
+                                                     recv.skills(), &dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, DEFINE_GUIDE_SKILL_RLY);
+  } while (0);
+  if (err < 0)
+    SendError(socket, packet, err, DEFINE_GUIDE_SKILL_RLY);
   return err;
 }
 
@@ -811,100 +880,122 @@ int32 UserInterface::UpImgToken(const int32 socket, PacketHead* packet) {
 
 void UserInterface::test() {
   LOG(INFO)<< "UserInterface::test()";
-  DicValue dic1;
-  std::string temp;
-  data_share_mgr_->QueryRecommendShare(0, 10, 0, &dic1);
-  base_logic::ValueSerializer* serializer =
-  base_logic::ValueSerializer::Create(base_logic::IMPL_JSON);
-  serializer->Serialize(dic1, &temp);
-  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
-      serializer);
-  LOG(INFO) << temp;
-  LOG(INFO) << "----------------";
-  DicValue dic2;
-  std::string temp2;
-  data_share_mgr_->QueryRecommendShare(126, 10, 1, &dic2);
-  base_logic::ValueSerializer* serializer2 =
-  base_logic::ValueSerializer::Create(base_logic::IMPL_JSON);
-  serializer2->Serialize(dic2, &temp2);
-  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
-      serializer2);
-  LOG(INFO) << temp2;
-  LOG(INFO) << "----------------";
-  DicValue dic3;
-  std::string temp3;
-  data_share_mgr_->QueryRecommendShare(4, 10, 2, &dic3);
-  base_logic::ValueSerializer* serializer3 =
-  base_logic::ValueSerializer::Create(base_logic::IMPL_JSON);
-  serializer3->Serialize(dic3, &temp3);
-  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
-      serializer3);
-  LOG(INFO) << temp3;
-  LOG(INFO) << "----------------";
 
-  DicValue dic4;
-  std::string temp4;
-  data_share_mgr_->QuerySkillShare(0, 10, &dic4);
-  base_logic::ValueSerializer* serializer4 =
-  base_logic::ValueSerializer::Create(base_logic::IMPL_JSON);
-  serializer4->Serialize(dic4, &temp4);
-  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
-      serializer4);
-  LOG(INFO) << temp4;
-  LOG(INFO) << "----------------";
+////  DicValue dic;
+////  std::string temp;
+////  user_mysql_->GuideOrderSelect(16, 0, 10, &dic);
+////  if (dic.empty())
+////    LOG(INFO) << "dic empty";
+////  base_logic::ValueSerializer* serializer =
+////  base_logic::ValueSerializer::Create(base_logic::IMPL_JSON);
+////  serializer->Serialize(dic, &temp);
+////  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+////      serializer);
+////  LOG(INFO) << temp;
+//  LOG(INFO) << "----------------";
+//
+//  DicValue dic;
+//  user_mysql_->GuideOrderSelect(16, 0, 10, &dic);
+//  PacketHead packet;
+//  SendMsg(1, &packet, &dic, GUIDE_ORDER_RECORD_RLY);
+//  return ;
 
-  DicValue dic5;
-  std::string temp5;
-  data_share_mgr_->QuerySkillShare(15, 10, &dic5);
-  base_logic::ValueSerializer* serializer5 =
-  base_logic::ValueSerializer::Create(base_logic::IMPL_JSON);
-  serializer5->Serialize(dic5, &temp5);
-  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
-      serializer5);
-  LOG(INFO) << temp5;
-  LOG(INFO) << "----------------";
+  /*
 
-  return;
+   DicValue dic1;
+   std::string temp;
+   data_share_mgr_->QueryRecommendShare(0, 10, 0, &dic1);
+   base_logic::ValueSerializer* serializer =
+   base_logic::ValueSerializer::Create(base_logic::IMPL_JSON);
+   serializer->Serialize(dic1, &temp);
+   base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+   serializer);
+   LOG(INFO) << temp;
+   LOG(INFO) << "----------------";
+   DicValue dic2;
+   std::string temp2;
+   data_share_mgr_->QueryRecommendShare(126, 10, 1, &dic2);
+   base_logic::ValueSerializer* serializer2 =
+   base_logic::ValueSerializer::Create(base_logic::IMPL_JSON);
+   serializer2->Serialize(dic2, &temp2);
+   base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+   serializer2);
+   LOG(INFO) << temp2;
+   LOG(INFO) << "----------------";
+   DicValue dic3;
+   std::string temp3;
+   data_share_mgr_->QueryRecommendShare(4, 10, 2, &dic3);
+   base_logic::ValueSerializer* serializer3 =
+   base_logic::ValueSerializer::Create(base_logic::IMPL_JSON);
+   serializer3->Serialize(dic3, &temp3);
+   base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+   serializer3);
+   LOG(INFO) << temp3;
+   LOG(INFO) << "----------------";
 
-  WXOrder wx_order;
-  wx_order.set_spbill_create_ip("127.0.0.1");
-  wx_order.set_body("V领队-高级服务");
-  wx_order.set_out_trade_no("1");
-  wx_order.set_total_fee(100);
-  std::string wx_result = wx_order.PlaceOrder();
-  LOG(INFO)<< "test::" << wx_result;
-  base_logic::ValueSerializer* deserializer =
-  base_logic::ValueSerializer::Create(base_logic::IMPL_XML, &wx_result);
-  std::string err_str;
-  int32 err = 0;
-  DicValue* dic = (DicValue*) deserializer->Deserialize(&err, &err_str);
-  do {
-    if (dic != NULL) {
-      std::string return_code;
-      dic->GetString(L"return_code", &return_code);
-      LOG(INFO)<< "return_code:" << return_code;
-      //下单成功
-      if (return_code.find("SUCCESS") != std::string::npos) {
-        std::string result_code;
-        dic->GetString(L"result_code", &result_code);
-        LOG(INFO)<< "result_code:" << result_code;
-        //业务逻辑成功
-        if (result_code.find("SUCCESS") != std::string::npos) {
-          std::string prepay_id;
-          dic->GetString(L"prepay_id", &prepay_id);
-          LOG(INFO)<< "prepay_id:" << prepay_id;
-          int npos1 = prepay_id.find("<![CDATA[");
-          int npos2 = prepay_id.find("]]>");
-          prepay_id = prepay_id.substr(npos1 + 9, npos2 - npos1 - 9);
-          LOG(INFO)<< "prepay_id:" << prepay_id;
-        } else {
+   DicValue dic4;
+   std::string temp4;
+   data_share_mgr_->QuerySkillShare(0, 10, &dic4);
+   base_logic::ValueSerializer* serializer4 =
+   base_logic::ValueSerializer::Create(base_logic::IMPL_JSON);
+   serializer4->Serialize(dic4, &temp4);
+   base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+   serializer4);
+   LOG(INFO) << temp4;
+   LOG(INFO) << "----------------";
 
-        }
-      } else {
+   DicValue dic5;
+   std::string temp5;
+   data_share_mgr_->QuerySkillShare(15, 10, &dic5);
+   base_logic::ValueSerializer* serializer5 =
+   base_logic::ValueSerializer::Create(base_logic::IMPL_JSON);
+   serializer5->Serialize(dic5, &temp5);
+   base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+   serializer5);
+   LOG(INFO) << temp5;
+   LOG(INFO) << "----------------";
 
-      }
-    }
-  }while (0);
+   return;
+
+   WXOrder wx_order;
+   wx_order.set_spbill_create_ip("127.0.0.1");
+   wx_order.set_body("V领队-高级服务");
+   wx_order.set_out_trade_no("1");
+   wx_order.set_total_fee(100);
+   std::string wx_result = wx_order.PlaceOrder();
+   LOG(INFO)<< "test::" << wx_result;
+   base_logic::ValueSerializer* deserializer =
+   base_logic::ValueSerializer::Create(base_logic::IMPL_XML, &wx_result);
+   std::string err_str;
+   int32 err = 0;
+   DicValue* dic = (DicValue*) deserializer->Deserialize(&err, &err_str);
+   do {
+   if (dic != NULL) {
+   std::string return_code;
+   dic->GetString(L"return_code", &return_code);
+   LOG(INFO)<< "return_code:" << return_code;
+   //下单成功
+   if (return_code.find("SUCCESS") != std::string::npos) {
+   std::string result_code;
+   dic->GetString(L"result_code", &result_code);
+   LOG(INFO)<< "result_code:" << result_code;
+   //业务逻辑成功
+   if (result_code.find("SUCCESS") != std::string::npos) {
+   std::string prepay_id;
+   dic->GetString(L"prepay_id", &prepay_id);
+   LOG(INFO)<< "prepay_id:" << prepay_id;
+   int npos1 = prepay_id.find("<![CDATA[");
+   int npos2 = prepay_id.find("]]>");
+   prepay_id = prepay_id.substr(npos1 + 9, npos2 - npos1 - 9);
+   LOG(INFO)<< "prepay_id:" << prepay_id;
+   } else {
+
+   }
+   } else {
+
+   }
+   }
+   }while (0);*/
 }
 
 int32 UserInterface::WXPlaceOrder(const int32 socket, PacketHead* packet) {
@@ -1084,7 +1175,7 @@ int32 UserInterface::RegisterAccount(const int32 socket, PacketHead* packet) {
       break;
     }
     std::stringstream ss;
-    ss << SMS_KEY << rev.timestamp() << rev.verify_code();
+    ss << SMS_KEY << rev.timestamp() << rev.verify_code() << rev.phone_num();
     base::MD5Sum md5(ss.str());
     if (md5.GetHash() != rev.token()) {
       err = VERIFY_CODE_ERR;
@@ -1117,11 +1208,15 @@ int32 UserInterface::ObtainVerifyCode(const int32 socket, PacketHead* packet) {
     DicValue dic;
     dic.SetBigInteger(L"timestamp_", timestamp_);
 
-    ss << SMS_KEY << timestamp_ << rand_code_;
+    ss << SMS_KEY << timestamp_ << rand_code_ << rev.phone_num();
     base::MD5Sum md5(ss.str());
     dic.SetString(L"token_", md5.GetHash().c_str());
     LOG(INFO)<< "token:" << ss.str();
     LOG(INFO)<< "md5 token:" << md5.GetHash();
+    ss.str("");
+    ss.clear();
+    ss << rev.phone_num() << ":" << rev.verify_type();
+    data_share_mgr_->UpdateSMSToken(ss.str(), md5.GetHash());
     SendMsg(socket, packet, &dic, QUERY_VERIFY_CODE_RLY);
 
     ss.str("");
@@ -1218,17 +1313,18 @@ int32 UserInterface::ChangeGuideService(const int32 socket,
     err = recv.Deserialize();
     if (err < 0)
       break;
-    if (time(NULL) - recv.timestamp() > 15 * 60) {
-      err = VERIFY_CODE_OVERDUE;
-      break;
-    }
-    std::stringstream ss;
-    ss << SMS_KEY << recv.timestamp() << recv.verify_code();
-    base::MD5Sum md5(ss.str());
-    if (md5.GetHash() != recv.token()) {
-      err = VERIFY_CODE_ERR;
-      break;
-    }
+//    if (time(NULL) - recv.timestamp() > 15 * 60) {
+//      err = VERIFY_CODE_OVERDUE;
+//      break;
+//    }
+//    std::stringstream ss_token;
+//    ss_token << SMS_KEY << recv.timestamp() << recv.verify_code()
+//             << recv.phone_num();
+//    base::MD5Sum md5(ss_token.str());
+//    if (md5.GetHash() != recv.token()) {
+//      err = VERIFY_CODE_ERR;
+//      break;
+//    }
     std::list<ServiceData*> list = recv.service_list();
     std::list<std::string> sql_list;
     std::list<ServiceData*>::iterator it = list.begin();
@@ -1238,8 +1334,9 @@ int32 UserInterface::ChangeGuideService(const int32 socket,
         std::stringstream ss;
         ss << "call proc_GuideServerUpdate(" << recv.uid() << ","
            << data->service_id_ << "," << data->change_type_ << ","
-           << data->service_type_ << ",'" << data->service_name_ << "','"
-           << data->service_time_ << "'," << data->service_price_ << ")";
+           << data->service_type_ << ",'" << data->service_name_ << "',"
+           << data->service_start_ << "," << data->service_end_ << ","
+           << data->service_price_ << ")";
         sql_list.push_back(ss.str());
       }
     }

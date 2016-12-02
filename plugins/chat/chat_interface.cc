@@ -74,11 +74,14 @@ int32 ChatInterface::AnswerInvitation(const int32 socket, PacketHead* packet) {
   int32 err = 0;
   do {
     AnswerInvitationRecv rev(*packet);
+    LOG(INFO) << "AnswerInvitation";
     err = rev.Deserialize();
     if (err < 0)
       break;
     //更新订单状态
+    LOG(INFO) << "before GuideOrderStatusUpdate";
     err = chat_mysql_->GuideOrderStatusUpdate(rev.order_id(), rev.order_status());
+    LOG(INFO) << "after GuideOrderStatusUpdate";
     if (err < 0)
       break;
     rev.set_operate_code(ANSWER_INVITATION_RLY);
@@ -227,7 +230,7 @@ int32 ChatInterface::ChatMessage(const int32 socket, PacketHead* packet) {
       if (rev.to_uid() == -1) {
         LOG(INFO)<< "chat to user -1";
         err = chat_mysql_->ChatRecordInsert(rev.from_uid(), rev.to_uid(),
-            rev.content(), rev.msg_time());
+            rev.content(), rev.msg_time(), 1);
         break;
       }
       //     PushChatMsg(rev);
@@ -241,7 +244,7 @@ int32 ChatInterface::ChatMessage(const int32 socket, PacketHead* packet) {
   //保存消息
   std::stringstream ss;
   ss << "call proc_ChatRecordInsert(" << rev.from_uid() << "," << rev.to_uid()
-     << ",'" << rev.content() << "'," << rev.msg_time() << ")";
+     << ",'" << rev.content() << "'," << rev.msg_time() << "," << 0 << ")";
   msg_list_.push_back(ss.str());
   if (msg_list_.size() > 10) {
     LOG(INFO)<< "msg_list > 10";
@@ -378,6 +381,26 @@ int32 ChatInterface::GtPushComm(const int32 socket, PacketHead* packet) {
   }
   return err;
 }
+
+int32 ChatInterface::UnreadPushmsgRecord(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    PulledPushmsgRecv recv(*packet);
+    err = recv.Deserialize();
+    if (err < 0)
+      break;
+    DicValue dic;
+    err = chat_mysql_->PullPushMsgSelect(recv.uid(), &dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, UNREAD_PUSH_MSG_RECORD_RLY);
+  } while (0);
+  if (err < 0) {
+    SendError(socket, packet, err, UNREAD_PUSH_MSG_RECORD_RLY);
+  }
+  return err;
+}
+
 
 int32 ChatInterface::EvaluateTrip(const int32 socket, PacketHead* packet) {
   int32 err = 0;

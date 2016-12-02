@@ -88,6 +88,10 @@ int32 ChatManager::AssignPacket(const int32 socket, PacketHead* packet) {
       interface->GtPushComm(socket, packet);
       break;
     }
+    case UNREAD_PUSH_MSG_RECORD_REQ: {
+      interface->UnreadPushmsgRecord(socket, packet);
+      break;
+    }
   }
   return err;
 }

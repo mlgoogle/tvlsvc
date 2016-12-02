@@ -26,13 +26,13 @@ ChatMysql::~ChatMysql() {
 }
 
 int32 ChatMysql::ChatRecordInsert(int64 from, int64 to, std::string msg,
-                                  int64 time) {
+                                  int64 time, int64 is_push) {
   int32 err = 0;
   bool r = false;
   do {
     std::stringstream ss;
     ss << "call proc_ChatRecordInsert(" << from << "," << to << ",'" << msg
-       << "'," << time << ");";
+       << "'," << time << "," << is_push << ");";
     LOG(INFO)<< "sql:" << ss.str();
     r = mysql_engine_->WriteData(ss.str());
     if (!r) {
@@ -135,6 +135,22 @@ int32 ChatMysql::EvaluateInfoSelect(int64 oid, DicValue* dic) {
     }
     if (dic->empty()) {
       err = NO_EVALUTE_INFO;
+      break;
+    }
+  } while (0);
+  return err;
+}
+
+int32 ChatMysql::PullPushMsgSelect(int64 uid, DicValue* dic) {
+  int32 err = 0;
+  bool r = false;
+  do {
+    std::stringstream ss;
+    ss << "call proc_PullPushMsgSelect(" << uid << ")";
+    LOG(INFO)<< "sql:" << ss.str();
+    r = mysql_engine_->ReadData(ss.str(), dic, CallPullPushMsgSelect);
+    if (!r) {
+      err = SQL_EXEC_ERROR;
       break;
     }
   } while (0);
@@ -277,36 +293,8 @@ void ChatMysql::CallNewOrderInsertAndSelect(void* param, Value* value) {
         dict->SetBigInteger(L"order_id_", atoll(rows[0]));
       if (rows[1] != NULL)
         dict->SetBigInteger(L"status_", atoi(rows[1]));
-      if (rows[2] != NULL)
-        dict->SetString(L"service_name_", rows[2]);
       if (rows[3] != NULL)
-        dict->SetString(L"service_time_", rows[3]);
-      if (rows[4] != NULL)
-        dict->SetBigInteger(L"order_price_", atoll(rows[4]));
-      if (rows[5] != NULL)
-        dict->SetBigInteger(L"from_uid_", atoll(rows[5]));
-      if (rows[6] != NULL)
-        dict->SetString(L"from_name_", rows[6]);
-      if (rows[7] != NULL)
-        dict->SetString(L"from_head_", rows[7]);
-      if (rows[8] != NULL)
-        dict->SetBigInteger(L"to_uid_", atoll(rows[8]));
-      if (rows[9] != NULL)
-        dict->SetString(L"to_name_", rows[9]);
-      if (rows[10] != NULL)
-        dict->SetString(L"to_head_", rows[10]);
-      if (rows[11] != NULL)
-        dict->SetBigInteger(L"service_id_", atoll(rows[11]));
-      if (rows[12] != NULL)
-        dict->SetBigInteger(L"start_", atoll(rows[12]));
-      if (rows[13] != NULL)
-        dict->SetBigInteger(L"end_", atoll(rows[13]));
-      if (rows[14] != NULL)
-        dict->SetBigInteger(L"service_type_", atoll(rows[14]));
-      if (rows[15] != NULL)
-        dict->SetBigInteger(L"is_asked_", atoll(rows[15]));
-      if (rows[16] != NULL)
-        dict->SetBigInteger(L"days_", atoll(rows[16]));
+        dict->SetBigInteger(L"is_asked_", atoll(rows[3]));
     }
   } else {
     LOG(WARNING)<< "Call NewOrderInsertAndSelect count < 0";
@@ -453,6 +441,32 @@ void ChatMysql::CallGuideOrderStatusUpdate(void* param, Value* value) {
   } else {
     LOG(WARNING)<<"Call CallGuideOrderStatusUpdate count < 0";
   }
+}
+
+void ChatMysql::CallPullPushMsgSelect(void* param, Value* value) {
+  base_storage::DBStorageEngine* engine =
+      (base_storage::DBStorageEngine*) (param);
+  MYSQL_ROW rows;
+  int32 num = engine->RecordCount();
+  DicValue* info = reinterpret_cast<DicValue*>(value);
+  ListValue* list = new ListValue();
+  if (num > 0) {
+    while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
+      DicValue* dict = new DicValue();
+      if (rows[0] != NULL)
+        dict->SetBigInteger(L"from_uid_", atoll(rows[0]));
+      if (rows[1] != NULL)
+        dict->SetBigInteger(L"to_uid_", atoll(rows[1]));
+      if (rows[2] != NULL)
+        dict->SetBigInteger(L"msg_time_", atoll(rows[2]));
+      if (rows[3] != NULL)
+        dict->SetString(L"content_", (rows[3]));
+      list->Append(dict);
+    }
+  } else {
+    LOG(WARNING)<<"Call CallPullPushMsgSelect count < 0";
+  }
+  info->Set(L"msg_list_", list);
 }
 
 }

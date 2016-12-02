@@ -24,6 +24,7 @@ typedef std::map<int64, UserInfo*> UserMap;
 typedef std::map<int64, std::string> DeviceTokenMap;
 typedef std::map<int64, int32> UnReadMap;
 typedef std::map<int64, std::string> NickMap;
+typedef std::map<std::string, std::string> SMSTokenMap;
 typedef std::map<int64, ShareTourism*> ShareTourismMap;
 typedef std::map<int64, ShareSkill*> ShareSkillMap;
 typedef std::map<int64, int64> ShareIdMap;

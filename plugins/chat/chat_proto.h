@@ -253,6 +253,18 @@ class GtPushCommRecv : public PacketHead {
   std::string content_;
 };
 
+class PulledPushmsgRecv : public PacketHead {
+ public:
+  PulledPushmsgRecv(PacketHead packet);
+  int32 Deserialize();
+
+  inline int64 uid() {
+    return uid_;
+  }
+ private:
+  int64 uid_;
+};
+
 }  // namespace chat
 
 #endif  // PLUGINS_CHAT_CHAT_PROTO_H_

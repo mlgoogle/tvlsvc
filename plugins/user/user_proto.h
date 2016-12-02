@@ -467,9 +467,10 @@ struct ServiceData {
   int64 service_id_;
   std::string service_name_;
   int64 service_price_;
-  std::string service_time_;
+  int64 service_start_;
   int64 service_type_;
   int64 change_type_;
+  int64 service_end_;
 };
 
 class ChangeGuideServiceRecv : public PacketHead {
@@ -483,12 +484,14 @@ class ChangeGuideServiceRecv : public PacketHead {
   inline int64 timestamp() { return timestamp_; }
   inline int64 verify_code() { return verify_code_; }
   inline std::string token() { return token_; }
+  inline std::string phone_num() { return phone_num_; }
   inline std::list<ServiceData*> service_list() { return service_list_; }
  private:
   std::list<ServiceData*> service_list_;
   int64 timestamp_;
   int64 verify_code_;
   std::string token_;
+  std::string phone_num_;
   int64 uid_;
 };
 
@@ -517,6 +520,24 @@ class VerifyPasswdRecv : public PacketHead {
   int64 uid_;
   std::string passwd_;
   int64 passwd_type_;// 1-支付密码 2-登录密码
+};
+
+class CheckSMSCodeRecv : public PacketHead {
+ public:
+  CheckSMSCodeRecv (PacketHead packet);
+  int32 Deserialize();
+
+  inline int64 verify_code() { return verify_code_; }
+  inline int64 verify_type() { return verify_type_; }
+  inline int64 timestamp() { return timestamp_; }
+  inline std::string phone_num() { return phone_num_; }
+  inline std::string token() { return token_; }
+ private:
+  int64 verify_code_;
+  int64 verify_type_; //0-注册 1-登录 2-更新服务
+  int64 timestamp_; //时间戳
+  std::string phone_num_;
+  std::string token_;
 };
 
 class ChangePayPasswdRecv : public PacketHead {
@@ -549,6 +570,30 @@ class GuideOrderRecv : public PacketHead {
   int64 uid_;
   int64 last_id_; //上一次最小订单号 第一次取0
   int64 count_; //请求条数
+};
+
+class GuideOrderDetailRecv : public PacketHead {
+ public:
+  GuideOrderDetailRecv(PacketHead packet);
+  int32 Deserialize();
+
+  inline int64 order_id() { return order_id_; }
+ private:
+  int64 order_id_;
+};
+
+class DefineGuideSkillsRecv : public PacketHead {
+ public:
+  DefineGuideSkillsRecv(PacketHead packet);
+  int32 Deserialize();
+
+  inline int64 uid() { return uid_; }
+  inline int64 change_type() { return change_type_; }
+  inline std::string skills() { return skills_; }
+ private:
+  int64 uid_;
+  std::string skills_; //"1,2,3,4"
+  int64 change_type_; // 0-拉取 1-修改
 };
 
 }  // namespace user

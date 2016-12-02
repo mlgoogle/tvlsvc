@@ -51,7 +51,9 @@ int32 UserMysql::ServiceInfoSelect(std::string oid_str, DicValue* dic) {
   bool r = false;
   do {
     std::stringstream ss;
-    //普通订单
+    //邀约
+    ListValue* list = new ListValue();
+    dic->Set(L"service_list_", list);
     ss << "call proc_ServiceInfoSelect('" << oid_str << "'," << 0 << ")";
     LOG(INFO)<< "sql:" << ss.str();
     r = mysql_engine_->ReadData(ss.str(), dic, CallServiceInfoSelect);
@@ -65,6 +67,16 @@ int32 UserMysql::ServiceInfoSelect(std::string oid_str, DicValue* dic) {
     ss << "call proc_ServiceInfoSelect('" << oid_str << "'," << 1 << ")";
     LOG(INFO)<< "sql:" << ss.str();
     r = mysql_engine_->ReadData(ss.str(), dic, CallBlackServiceInfoSelect);
+    if (!r) {
+      err = SQL_EXEC_ERROR;
+      break;
+    }
+    // 预约
+    ss.str("");
+    ss.clear();
+    ss << "call proc_ServiceInfoSelect('" << oid_str << "'," << 2 << ")";
+    LOG(INFO)<< "sql:" << ss.str();
+    r = mysql_engine_->ReadData(ss.str(), dic, CallServiceInfoSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
       break;
@@ -815,6 +827,42 @@ int32 UserMysql::ChangePasswdSelect(int64 uid, std::string oldpass,
   return err;
 }
 
+int32 UserMysql::GuideOrderDetailSelect(int64 oid, DicValue* dic) {
+  int32 err = 0;
+  bool r = false;
+  do {
+    std::stringstream ss;
+    ss << "call proc_GuideOrderDetailSelect(" << oid << ")";
+    LOG(INFO)<< "sql:" << ss.str();
+    r = mysql_engine_->ReadData(ss.str(), dic, CallGuideOrderDetailSelect);
+    if (!r) {
+      err = SQL_EXEC_ERROR;
+      break;
+    }
+  } while (0);
+  return err;
+}
+
+int32 UserMysql::DefineGuideSkillsUpdateSelect(int64 uid, int64 type,
+                                               std::string skills,
+                                               DicValue* dic) {
+  int32 err = 0;
+  bool r = false;
+  do {
+    std::stringstream ss;
+    ss << "call proc_DefineGuideSkillsUpdateSelect(" << uid << "," << type
+       << ",'" << skills << "')";
+    LOG(INFO)<< "sql:" << ss.str();
+    r = mysql_engine_->ReadData(ss.str(), dic,
+                                CallDefineGuideSkillsUpdateSelect);
+    if (!r) {
+      err = SQL_EXEC_ERROR;
+      break;
+    }
+  } while (0);
+  return err;
+}
+
 int32 UserMysql::GuideOrderSelect(int64 uid, int64 lastid, int64 count,
                                   DicValue* dic) {
   int32 err = 0;
@@ -909,11 +957,13 @@ void UserMysql::CallGuideServiceSelect(void* param, Value* value) {
       if (rows[1] != NULL)
         dict->SetString(L"service_name_", rows[1]);
       if (rows[2] != NULL)
-        dict->SetString(L"service_time_", rows[2]);
+        dict->SetBigInteger(L"service_start_", atoll(rows[2]));
       if (rows[3] != NULL)
         dict->SetBigInteger(L"service_price_", atoll(rows[3]));
       if (rows[4] != NULL)
         dict->SetBigInteger(L"service_type_", atoll(rows[4]));
+      if (rows[5] != NULL)
+        dict->SetBigInteger(L"service_end_", atoll(rows[4]));
       list->Append(dict);
     }
     info->Set(L"service_list_", list);
@@ -935,15 +985,9 @@ void UserMysql::CallGuideDetailSelect(void* param, Value* value) {
       if (rows[1] != NULL)
         dict->SetBigInteger(L"is_certification_", atoi(rows[1]));
       if (rows[2] != NULL)
-        dict->SetBigInteger(L"business_lv_", atoi(rows[2]));
+        dict->SetString(L"traval_tag_", rows[2]);
       if (rows[3] != NULL)
-        dict->SetString(L"business_tag_", rows[3]);
-      if (rows[4] != NULL)
-        dict->SetString(L"traval_tag_", rows[4]);
-      if (rows[5] != NULL)
-        dict->SetString(L"heag_bg_url_", rows[5]);
-      if (rows[6] != NULL)
-        dict->SetString(L"photo_list_", rows[6]);
+        dict->SetString(L"heag_bg_url_", rows[3]);
     }
   } else {
     LOG(WARNING)<< "CallUserLoginSelect count < 0";
@@ -1019,11 +1063,9 @@ void UserMysql::CallRecommendGuideSelect(void* param, Value* value) {
       if (rows[10] != NULL)
         dict->SetBigInteger(L"is_certification_", atoi(rows[10]));
       if (rows[11] != NULL)
-        dict->SetString(L"business_tag_", rows[11]);
+        dict->SetString(L"traval_tag_", rows[11]);
       if (rows[12] != NULL)
-        dict->SetString(L"traval_tag_", rows[12]);
-      if (rows[13] != NULL)
-        dict->SetString(L"heag_bg_url_", rows[13]);
+        dict->SetString(L"heag_bg_url_", rows[12]);
       list->Append(dict);
     }
     info->Set(L"recommend_guide_", list);
@@ -1173,13 +1215,11 @@ void UserMysql::CallTripRecordSelect(void* param, Value* value) {
       if (rows[12] != NULL)
         dict->SetBigInteger(L"order_price_", atoll(rows[12]));
       if (rows[13] != NULL)
-        dict->SetString(L"service_time_", rows[13]);
+        dict->SetBigInteger(L"service_type_", atoll(rows[13]));
       if (rows[14] != NULL)
-        dict->SetBigInteger(L"service_type_", atoll(rows[14]));
+        dict->SetString(L"order_addr", rows[14]);
       if (rows[15] != NULL)
-        dict->SetString(L"order_addr", rows[15]);
-      if (rows[16] != NULL)
-        dict->SetBigInteger(L"days_", atoll(rows[16]));
+        dict->SetBigInteger(L"days_", atoll(rows[15]));
       list->Append(dict);
     }
     info->Set(L"trip_list_", list);
@@ -1194,8 +1234,13 @@ void UserMysql::CallServiceInfoSelect(void* param, Value* value) {
   MYSQL_ROW rows;
   int32 num = engine->RecordCount();
   DicValue* info = reinterpret_cast<DicValue*>(value);
+  ListValue* list = NULL;
+  info->GetList(L"service_list_", &list);
+  if (list == NULL) {
+    LOG(ERROR)<< "CallServiceInfoSelect service_list_ NULL";
+    return;
+  }
   if (num > 0) {
-    ListValue* list = new ListValue();
     while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
       DicValue* dict = new DicValue();
       if (rows[0] != NULL)
@@ -1207,16 +1252,13 @@ void UserMysql::CallServiceInfoSelect(void* param, Value* value) {
       if (rows[3] != NULL)
         dict->SetString(L"service_name_", rows[3]);
       if (rows[4] != NULL)
-        dict->SetString(L"service_time_", rows[4]);
+        dict->SetBigInteger(L"order_time_", atoll(rows[4]));
       if (rows[5] != NULL)
         dict->SetBigInteger(L"service_price_", atoll(rows[5]));
       if (rows[6] != NULL)
         dict->SetBigInteger(L"service_type_", atoll(rows[6]));
-      if (rows[7] != NULL)
-        dict->SetBigInteger(L"order_time_", atoll(rows[7]));
       list->Append(dict);
     }
-    info->Set(L"service_list_", list);
   } else {
     LOG(WARNING)<< "CallServiceInfoSelect count < 0";
   }
@@ -2017,6 +2059,87 @@ void UserMysql::CallChangePasswdSelect(void* param, Value* value) {
   }
 }
 
+void UserMysql::CallGuideOrderDetailSelect(void* param, Value* value) {
+  base_storage::DBStorageEngine* engine =
+      (base_storage::DBStorageEngine*) (param);
+  MYSQL_ROW rows;
+  int32 num = engine->RecordCount();
+  DicValue* dict = reinterpret_cast<DicValue*>(value);
+  if (num > 0) {
+    while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
+      if (rows[0] != NULL)
+        dict->SetBigInteger(L"order_id_", atoll(rows[0]));
+      if (rows[1] != NULL)
+        dict->SetBigInteger(L"order_status_", atoll(rows[1]));
+      if (rows[2] != NULL)
+        dict->SetBigInteger(L"order_type_", atoll(rows[2]));
+      if (rows[3] != NULL)
+        dict->SetBigInteger(L"from_uid_", atoll(rows[3]));
+      if (rows[4] != NULL)
+        dict->SetString(L"from_name_", (rows[4]));
+      if (rows[5] != NULL)
+        dict->SetString(L"from_head_", (rows[5]));
+      if (rows[6] != NULL)
+        dict->SetString(L"order_addr_", (rows[6]));
+      if (rows[7] != NULL)
+        dict->SetString(L"service_name_", (rows[7]));
+
+      //8 service_start 9-service_end 10 starttime 11邀约天数，预约为结束时间
+      if (rows[8] != NULL && rows[9] != NULL && rows[10] != NULL
+          && rows[11] != NULL && rows[2] != NULL) {
+        int64 service_start = atoll(rows[8]);
+        int64 service_end = atoll(rows[9]);
+        int64 start = atoll(rows[10]);
+        int64 preend = atoll(rows[11]);  // y
+        // 获取0点时间戳
+        start = start - (start + 8 * 3600) % 86400;
+        start += service_start * 60;
+        int64 end = 0;
+        if (atoll(rows[2]) == 0) {  //邀约
+          end = start + (preend - 1) * 24 * 60 * 60 + service_end * 60;
+        } else {
+          end = end - (end + 8 * 3600) % 86400;
+          end += service_end * 60;
+        }
+        dict->SetBigInteger(L"start_", start);
+        dict->SetBigInteger(L"end_", end);
+      }
+      if (rows[12] != NULL) {
+        dict->SetBigInteger(L"has_evaluate_", atoll(rows[12]));
+        if (atoll(rows[12]) == 1) {
+          if (rows[13] != NULL)
+            dict->SetBigInteger(L"service_score_", atoll(rows[13]));
+          if (rows[14] != NULL)
+            dict->SetBigInteger(L"user_score_", atoll(rows[14]));
+          if (rows[15] != NULL)
+            dict->SetString(L"evaluate__remarks_", (rows[15]));
+        }
+      }
+      if (rows[2] != NULL) {
+        if (atoll(rows[2]) == 2) {
+          if (rows[16] != NULL) {
+            dict->SetBigInteger(L"is_other_", atoll(rows[16]));
+            if (atoll(rows[16]) == 1) {
+              if (rows[17] != NULL)
+                dict->SetString(L"other_name_", (rows[17]));
+              if (rows[18] != NULL)
+                dict->SetBigInteger(L"other_gender", atoll(rows[18]));
+              if (rows[19] != NULL)
+                dict->SetString(L"other_phone_", (rows[19]));
+            }
+            if (rows[20] != NULL)
+              dict->SetString(L"skills_", (rows[20]));
+            if (rows[21] != NULL)
+              dict->SetString(L"appointment_remarks_", (rows[21]));
+          }
+        }
+      }
+    }
+  } else {
+    LOG(WARNING)<<"CallGuideOrderDetailSelect count < 0";
+  }
+}
+
 void UserMysql::CallAppointmentRecordSelect(void* param, Value* value) {
   base_storage::DBStorageEngine* engine =
       (base_storage::DBStorageEngine*) (param);
@@ -2070,6 +2193,21 @@ void UserMysql::CallAppointmentRecordSelect(void* param, Value* value) {
     info->Set(L"data_list_", list);
   } else {
     LOG(WARNING)<<"CallAppointmentRecordSelect count < 0";
+  }
+}
+void UserMysql::CallDefineGuideSkillsUpdateSelect(void* param, Value* value) {
+  base_storage::DBStorageEngine* engine =
+      (base_storage::DBStorageEngine*) (param);
+  MYSQL_ROW rows;
+  int32 num = engine->RecordCount();
+  DicValue* dict = reinterpret_cast<DicValue*>(value);
+  if (num > 0) {
+    while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
+      if (rows[0] != NULL)
+        dict->SetString(L"skills_", rows[0]);
+    }
+  } else {
+    LOG(WARNING)<<"CallDefineGuideSkillsUpdateSelect count < 0";
   }
 }
 

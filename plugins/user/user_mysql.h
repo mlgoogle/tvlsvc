@@ -111,12 +111,18 @@ class UserMysql {
 
   int32 OrderDetailsSelect(int64 oid, int64 type, DicValue* dic);
 
-  int32 CheckPasswdSelect(int64 uid, std::string pass, int64 type, DicValue* dic);
+  int32 CheckPasswdSelect(int64 uid, std::string pass, int64 type,
+                          DicValue* dic);
 
   int32 ChangePasswdSelect(int64 uid, std::string oldpass, std::string newpass,
-                              int64 ctype, int64 ptype, DicValue* dic);
+                           int64 ctype, int64 ptype, DicValue* dic);
 
   int32 GuideOrderSelect(int64 uid, int64 lastid, int64 count, DicValue* dic);
+
+  int32 GuideOrderDetailSelect(int64 oid, DicValue* dic);
+
+  int32 DefineGuideSkillsUpdateSelect(int64 uid, int64 type, std::string skills,
+                                      DicValue* dic);
 
   int32 CancelOrderStatusUpdate();
 
@@ -161,6 +167,8 @@ class UserMysql {
   static void CallCheckPasswdSelect(void* param, Value* value);
   static void CallChangePasswdSelect(void* param, Value* value);
   static void CallGuideOrderSelect(void* param, Value* value);
+  static void CallGuideOrderDetailSelect(void* param, Value* value);
+  static void CallDefineGuideSkillsUpdateSelect(void* param, Value* value);
  private:
   base_logic::DataEngine* mysql_engine_;
 };
