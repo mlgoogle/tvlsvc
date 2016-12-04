@@ -229,12 +229,24 @@ int32 UserManager::AssignPacket(const int32 socket, PacketHead* packet) {
       interface->VerifyPasswd(socket, packet);
       break;
     }
+    case CHECK_SMS_CODE_REQ: {
+      interface->CheckSMSCode(socket, packet);
+      break;
+    }
     case CHANGE_COMM_PASSWD_REQ: {
       interface->ChangePayPasswd(socket, packet);
       break;
     }
     case GUIDE_ORDER_RECORD_REQ: {
       interface->GuideOrderRecord(socket, packet);
+      break;
+    }
+    case GUIDE_ORDER_DETAIL_REQ: {
+      interface->GuideOrderDetail(socket, packet);
+      break;
+    }
+    case DEFINE_GUIDE_SKILL_REQ: {
+      interface->DefineGuideSkills(socket, packet);
       break;
     }
   }

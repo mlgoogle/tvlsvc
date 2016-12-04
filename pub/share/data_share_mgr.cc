@@ -575,5 +575,27 @@ void DataShareMgr::GetImgToken(std::string*token, int64* time) {
   *time = token_time_;
 }
 
+void DataShareMgr::UpdateSMSToken(std::string key, std::string token) {
+  base_logic::WLockGd lk(lock_);
+  sms_token_map_[key] = token;
+}
+
+bool DataShareMgr::CheckSMSToken(std::string key, std::string token) {
+  base_logic::WLockGd lk(lock_);
+  SMSTokenMap::iterator it = sms_token_map_.find(key);
+  if (it != sms_token_map_.end()) {
+    if (token == it->second)
+      return true;
+  }
+  return false;
+}
+
+void DataShareMgr::EraseSMSToken(std::string key) {
+  base_logic::WLockGd lk(lock_);
+  SMSTokenMap::iterator it = sms_token_map_.find(key);
+  if (it != sms_token_map_.end())
+    sms_token_map_.erase(it);
+}
+
 }
 // namespace share

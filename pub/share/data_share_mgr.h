@@ -47,6 +47,11 @@ __attribute__((visibility("default")))
   int32 QueryShareSkillDetail(int64 id, DicValue* dic);
   int32 QuerySkillShare(int64 id, int64 count, DicValue* info);
 
+  // key 15149320909:0 value:md5(str)
+  void UpdateSMSToken(std::string key, std::string token);
+  void EraseSMSToken(std::string key);
+  bool CheckSMSToken(std::string key, std::string token);
+
   void CheckHeartLoss();
   void UserOffline(int fd);
 
@@ -70,6 +75,8 @@ __attribute__((visibility("default")))
   DeviceTokenMap dt_map_;
   UnReadMap unread_map_;
   NickMap nick_map_;
+  //存用户最新的token key[手机号:type] value[token]
+  SMSTokenMap sms_token_map_;
 
   //旅游分享类别
   ShareTypeMap share_type_map_;
@@ -83,6 +90,7 @@ __attribute__((visibility("default")))
   ShareIdMap banner_share_map_;
 
   std::string img_token_;
+
   int64 token_time_;
 };
 }  // namespace share

@@ -120,9 +120,15 @@ class UserInterface {
 
   int32 VerifyPasswd(const int32 socket, PacketHead* packet);
 
+  int32 CheckSMSCode(const int32 socket, PacketHead* packet);
+
   int32 ChangePayPasswd(const int32 socket, PacketHead* packet);
 
   int32 GuideOrderRecord(const int32 socket, PacketHead* packet);
+
+  int32 GuideOrderDetail(const int32 socket, PacketHead* packet);
+
+  int32 DefineGuideSkills(const int32 socket, PacketHead* packet);
 
   int32 AuthorUser(std::string phone, std::string passwd, int32 type,
                    DicValue* v);

@@ -1224,8 +1224,10 @@ int32 ChangeGuideServiceRecv::Deserialize() {
       LOG_IF(ERROR, !r) << "ChangeGuideServiceRecv::phone_num_ parse error";
       r = dic->GetString(L"token_", &token_);
       LOG_IF(ERROR, !r) << "ChangeGuideServiceRecv::token_ parse error";
+      r = dic->GetString(L"phone_num_", &phone_num_);
+      LOG_IF(ERROR, !r) << "ChangeGuideServiceRecv::phone_num_ parse error";
       ListValue* list;
-      r = dic->GetList(L"serveice", &list);
+      r = dic->GetList(L"serveice_list_", &list);
       if (!r) {
         err = REQUEST_JSON_ERR;
         break;
@@ -1241,7 +1243,8 @@ int32 ChangeGuideServiceRecv::Deserialize() {
           info->GetBigInteger(L"change_type_", &data->change_type_);
           info->GetString(L"service_name_", &data->service_name_);
           info->GetBigInteger(L"service_price_", &data->service_price_);
-          info->GetString(L"service_time_", &data->service_time_);
+          info->GetBigInteger(L"service_start_", &data->service_start_);
+          info->GetBigInteger(L"service_end_", &data->service_end_);
           service_list_.push_back(data);
         }
       }
@@ -1395,6 +1398,106 @@ int32 GuideOrderRecv::Deserialize() {
       LOG_IF(ERROR, !r) << "GuideOrderRecv::count_ parse error";
     } else {
       LOG(ERROR)<< "GuideOrderRecv Deserialize error";
+      err = REQUEST_JSON_ERR;
+      break;
+    }
+  }while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                                serializer);
+  return err;
+}
+
+GuideOrderDetailRecv::GuideOrderDetailRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  order_id_ = 0;
+}
+
+int32 GuideOrderDetailRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+      base_logic::IMPL_JSON, &body_str_, false);
+  std::string err_str;
+  DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetBigInteger(L"order_id_", &order_id_);
+      LOG_IF(ERROR, !r) << "GuideOrderRecv::order_id_ parse error";
+    } else {
+      LOG(ERROR)<< "GuideOrderDetailRecv Deserialize error";
+      err = REQUEST_JSON_ERR;
+      break;
+    }
+  }while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                                serializer);
+  return err;
+}
+
+CheckSMSCodeRecv::CheckSMSCodeRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  verify_code_ = 0;
+  verify_type_ = 0;  //0-注册 1-登录 2-更新服务
+  timestamp_ = 0;  //时间戳
+}
+
+int32 CheckSMSCodeRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+      base_logic::IMPL_JSON, &body_str_, false);
+  std::string err_str;
+  DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetBigInteger(L"timestamp_", &timestamp_);
+      LOG_IF(ERROR, !r) << "CheckSMSCodeRecv::timestamp_ parse error";
+      r = dic->GetBigInteger(L"verify_code_", &verify_code_);
+      LOG_IF(ERROR, !r) << "CheckSMSCodeRecv::verify_code_ parse error";
+      r = dic->GetBigInteger(L"verify_type_", &verify_type_);
+      LOG_IF(ERROR, !r) << "CheckSMSCodeRecv::verify_type_ parse error";
+      r = dic->GetString(L"phone_num_", &phone_num_);
+      LOG_IF(ERROR, !r) << "CheckSMSCodeRecv::phone_num_ parse error";
+      r = dic->GetString(L"token_", &token_);
+      LOG_IF(ERROR, !r) << "CheckSMSCodeRecv::token_ parse error";
+    } else {
+      LOG(ERROR)<< "CheckSMSCodeRecv Deserialize error";
+      err = REQUEST_JSON_ERR;
+      break;
+    }
+  }while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                                serializer);
+  return err;
+}
+
+DefineGuideSkillsRecv::DefineGuideSkillsRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  uid_ = 0;
+  change_type_ = 0;
+}
+
+int32 DefineGuideSkillsRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+      base_logic::IMPL_JSON, &body_str_, false);
+  std::string err_str;
+  DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetBigInteger(L"uid_", &uid_);
+      LOG_IF(ERROR, !r) << "DefineGuideSkillsRecv::uid_ parse error";
+      r = dic->GetBigInteger(L"change_type_", &change_type_);
+      LOG_IF(ERROR, !r) << "DefineGuideSkillsRecv::change_type_ parse error";
+      r = dic->GetString(L"skills_", &skills_);
+      LOG_IF(ERROR, !r) << "DefineGuideSkillsRecv::skills_ parse error";
+
+    } else {
+      LOG(ERROR)<< "DefineGuideSkillsRecv Deserialize error";
       err = REQUEST_JSON_ERR;
       break;
     }
