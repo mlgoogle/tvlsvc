@@ -596,8 +596,146 @@ class DefineGuideSkillsRecv : public PacketHead {
   int64 change_type_; // 0-拉取 1-修改
 };
 
+class VerifyVleaderHeadRecv : public PacketHead {
+ public:
+  VerifyVleaderHeadRecv(PacketHead packet);
+  int32 Deserialize();
+
+  inline int64 uid() { return uid_; }
+  inline std::string head_url() { return head_url_; }
+  
+ private:
+  int64 uid_;
+  std::string head_url_;
+};
+
+class ChangeUserInfoRecv : public PacketHead {
+ public:
+  ChangeUserInfoRecv(PacketHead packet);
+  int32 Deserialize();
+
+  inline int64 uid() { return uid_; }
+  inline std::string nickname() { return nickname_; }
+  inline int64 gender() { return gender_; }
+  inline std::string address() { return address_; }
+  
+ private:
+  int64 uid_;
+  std::string nickname_;
+  int64 gender_;
+  std::string address_;
+};
+
+#define CHANGE_BANK_CARD_ADD_UPDATE 0
+#define CHNAGE_BANK_CARD_DELETE 1
+class ChangeBankCardRecv : public PacketHead {
+ public:
+  ChangeBankCardRecv(PacketHead packet);
+  int32 Deserialize();
+
+  inline int64 uid() { return uid_; }
+  inline int64 type() { return type_; }
+  inline std::string account() { return account_; }
+  inline std::string bank_username() { return bank_username_; }
+  inline int64 bank() { return bank_; }
+  
+ private:
+  int64 uid_;
+  int64 type_;
+  std::string account_;
+  std::string bank_username_;
+  int64 bank_;
+};
+
+class BankCardInfoRecv : public PacketHead {
+ public:
+  BankCardInfoRecv(PacketHead packet);
+  int32 Deserialize();
+
+  inline int64 uid() { return uid_; }
+  
+ private:
+  int64 uid_;
+};
+
+class ChangeDefaultBankCardRecv : public PacketHead {
+ public:
+  ChangeDefaultBankCardRecv(PacketHead packet);
+  int32 Deserialize();
+
+  inline int64 uid() { return uid_; }
+  inline std::string account() { return account_; }
+  
+ private:
+  int64 uid_;
+  std::string account_;
+};
+
+class UserWithdrawRecv : public PacketHead {
+ public:
+  UserWithdrawRecv(PacketHead packet);
+  int32 Deserialize();
+
+  inline int64 uid() { return uid_; }
+  inline std::string account() { return account_; }
+  inline int64 cash() { return cash_; }
+  
+ private:
+  int64 uid_;
+  std::string account_;
+  int64 cash_;
+};
+
+class UserWithdrawRecordRecv : public PacketHead {
+ public:
+  UserWithdrawRecordRecv(PacketHead packet);
+  int32 Deserialize();
+
+  inline int64 uid() { return uid_; }
+  inline std::string account() { return account_; }
+  inline int64 size() { return size_; }
+  inline int64 num() { return num_; }
+  
+ private:
+  int64 uid_;
+  std::string account_;
+  int64 size_;
+  int64 num_;
+};
+ 
+struct PhotoUrl {
+  std::string photo_url_;
+  std::string thumbnail_url_;
+};
+
+class UserUploadPhotoRecv : public PacketHead {
+ public:
+  UserUploadPhotoRecv(PacketHead packet);
+  int32 Deserialize();
+  virtual ~UserUploadPhotoRecv();
+
+  inline int64 uid() { return uid_; }
+  inline std::list<PhotoUrl*> photo_list() { return photo_list_; }
+ private:
+  int64 uid_;
+  std::list<PhotoUrl*> photo_list_;
+};
+
+class UserPhotoAlbumRecv : public PacketHead {
+ public:
+  UserPhotoAlbumRecv(PacketHead packet);
+  int32 Deserialize();
+
+  inline int64 uid() { return uid_; }
+  inline int64 size() { return size_; }
+  inline int64 num() { return num_; }
+  
+ private:
+  int64 uid_;
+  int64 size_;
+  int64 num_;
+};
+ 
 }  // namespace user
-
-
 
 #endif  // PLUGINS_USER_USER_PROTO_H_
