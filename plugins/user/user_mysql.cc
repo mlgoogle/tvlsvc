@@ -2330,7 +2330,7 @@ void UserMysql::CallAppointmentRecordSelect(void* param, Value* value) {
       if (rows[12] != NULL)
         dict->SetBigInteger(L"order_price_", atoll(rows[12]));
       if (rows[13] != NULL)
-        dict->SetString(L"service_time_", rows[13]);
+        dict->SetBigInteger(L"service_start_", atoll(rows[13]));
       if (rows[14] != NULL)
         dict->SetBigInteger(L"service_type_", atoll(rows[14]));
       if (rows[15] != NULL)
@@ -2341,6 +2341,8 @@ void UserMysql::CallAppointmentRecordSelect(void* param, Value* value) {
         dict->SetString(L"to_head_", rows[17]);
       if (rows[18] != NULL)
         dict->SetBigInteger(L"order_id_", atoll(rows[18]));
+      if (rows[19] != NULL)
+        dict->SetBigInteger(L"service_end_", atoll(rows[19]));
       list->Append(dict);
     }
     info->Set(L"data_list_", list);
