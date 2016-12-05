@@ -789,6 +789,159 @@ int32 UserMysql::NewAppointmentInsert(int64 uid, int64 city, int64 start,
   } while (0);
   return err;
 }
+	
+int32 UserMysql::VerifyVleaderHeadInsert(int64 uid, std::string head_url, DicValue* dic) {
+  int32 err = 0;
+  bool r = false;
+  do {
+	std::stringstream ss;
+    ss << "call proc_VerifyVleaderHeadInsert(" << uid << ",'" << head_url << "')";
+    LOG(INFO)<< "sql:" << ss.str();
+    r = mysql_engine_->WriteData(ss.str());
+    if (!r) {
+      err = SQL_EXEC_ERROR;
+      break;
+    }
+  } while (0);
+  return err;
+}
+
+int32 UserMysql::ChangeUserInfoUpdate(int64 uid, std::string nickname, int64 gender, std::string address, DicValue* dic) {
+  int32 err = 0;
+  bool r = false;
+  do {
+	std::stringstream ss;
+    ss << "call proc_ChangeUserInfoUpdate(" << uid << ",'" << nickname << "'," << gender << ",'" << address <<  "')";
+    LOG(INFO)<< "sql:" << ss.str();
+    r = mysql_engine_->WriteData(ss.str());
+    if (!r) {
+      err = SQL_EXEC_ERROR;
+      break;
+    }
+  } while (0);
+  return err;
+}
+	
+int32 UserMysql::ChangeBankCardInsertOrDelete(int64 type, int64 uid, std::string account, std::string bank_username,
+			int64 bank, DicValue* dic) {
+  int32 err = 0;
+  bool r = false;
+  do {
+    std::stringstream ss;
+    ss << "call proc_ChangeBankCardInsertOrDelete(" << type << "," << uid
+				<< ",'" <<  account << "','" << bank_username << "'," << bank << ")";
+    LOG(INFO)<< "sql:" << ss.str();
+    r = mysql_engine_->WriteData(ss.str());
+    if (!r) {
+      err = SQL_EXEC_ERROR;
+      break;
+    }
+  } while (0);
+  return err;
+}
+
+int32 UserMysql::BankCardInfoSelect(int64 uid, DicValue* dic) {
+  int32 err = 0;
+  bool r = false;
+  do {
+    std::stringstream ss;
+    ss << "call proc_BankCardInfoSelect(" << uid << ")";
+    LOG(INFO)<< "sql:" << ss.str();
+    r = mysql_engine_->ReadData(ss.str(), dic, CallBankCardInfoSelect);
+    if (!r) {
+      err = SQL_EXEC_ERROR;
+      break;
+    }
+  } while (0);
+  return err;
+}
+
+int32 UserMysql::ChangeDefaultBankCardUpdate(int64 uid, std::string account, DicValue* dic) {
+  int32 err = 0;
+  bool r = false;
+  do {
+    std::stringstream ss;
+    ss << "call proc_ChangeDefaultBankCardUpdate(" << uid << ",'" << account << "')";
+    LOG(INFO)<< "sql:" << ss.str();
+    r = mysql_engine_->WriteData(ss.str());
+    if (!r) {
+      err = SQL_EXEC_ERROR;
+      break;
+    }
+  } while (0);
+  return err;
+}
+
+int32 UserMysql::UserWithdrawInsertAndSelect(int64 uid, std::string account, int64 cash, DicValue* dic) {
+  int32 err = 0;
+  bool r = false;
+  do {
+    std::stringstream ss;
+    ss << "call proc_UserWithdrawInsertAndSelect(" << uid << ",'" << account << "'," << cash << ")";
+    LOG(INFO)<< "sql:" << ss.str();
+    r = mysql_engine_->ReadData(ss.str(), dic, CallUserWithdrawInsertAndSelect);
+    if (!r) {
+      err = SQL_EXEC_ERROR;
+      break;
+    }
+  } while (0);
+  return err;
+}
+
+int32 UserMysql::UserWithdrawRecordSelect(int64 uid, std::string account, int64 size, int64 num, DicValue* dic) {
+  int32 err = 0;
+  bool r = false;
+  do {
+    if (size <= 0 || num <= 0) {
+      err = SQL_EXEC_ERROR;
+      break;
+    }
+
+    std::stringstream ss;
+    ss << "call proc_UserWithdrawRecordSelect(" << uid << ",'" << account << "'," << size << "," << num << ")";
+    LOG(INFO)<< "sql:" << ss.str();
+    r = mysql_engine_->ReadData(ss.str(), dic, CallUserWithdrawRecordSelect);
+    if (!r) {
+      err = SQL_EXEC_ERROR;
+      break;
+    }
+  } while (0);
+  return err;
+}
+
+int32 UserMysql::UserUploadPhotoInsert(int64 uid, std::list<std::string> sqls, DicValue* dic) {
+  int32 err = 0;
+  bool r = false;
+  do {
+    r = mysql_engine_->WriteDatas(sqls);
+    if (!r) {
+      err = SQL_EXEC_ERROR;
+      break;
+    }
+  } while (0);
+  return err;
+}
+
+int32 UserMysql::UserPhotoAlbumSelect(int64 uid, int64 size, int64 num, DicValue* dic) {
+  int32 err = 0;
+  bool r = false;
+  do {
+    if (size <= 0 || num <= 0) {
+      err = SQL_EXEC_ERROR;
+      break;
+    }
+
+    std::stringstream ss;
+    ss << "call proc_UserPhotoAlbumSelect(" << uid << ","  << size << "," << num << ")";
+    LOG(INFO)<< "sql:" << ss.str();
+    r = mysql_engine_->ReadData(ss.str(), dic, CallUserPhotoAlbumSelect);
+    if (!r) {
+      err = SQL_EXEC_ERROR;
+      break;
+    }
+  } while (0);
+  return err;
+}
 
 int32 UserMysql::CheckPasswdSelect(int64 uid, std::string pass, int64 type,
                                    DicValue* dic) {
@@ -2261,6 +2414,106 @@ void UserMysql::CallGuideOrderSelect(void* param, Value* value) {
   }
 }
 
+void UserMysql::CallBankCardInfoSelect(void* param, Value* value) {
+  base_storage::DBStorageEngine* engine =
+      (base_storage::DBStorageEngine*) (param);
+  MYSQL_ROW rows;
+  int32 num = engine->RecordCount();
+  DicValue* info = reinterpret_cast<DicValue*>(value);
+  if (num > 0) {
+    ListValue* list = new ListValue();
+    while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
+      DicValue* dict = new DicValue();
+      if (rows[0] != NULL)
+        dict->SetString(L"account_", rows[0]);
+      if (rows[1] != NULL)
+        dict->SetString(L"bank_username_", rows[1]);
+      if (rows[2] != NULL)
+        dict->SetBigInteger(L"bank_", atoll(rows[2]));
+      if (rows[3] != NULL && atoll(rows[3]) != 0)
+		dict->SetBigInteger("is_default_", atoll(rows[3]));
+	  list->Append(dict); 
+    }
+	info->Set("bank_card_list_", list);
+  } else {
+    LOG(WARNING)<<"CallBankInfoSelect count < 0";
+  }
 }
-  // namespace user
+
+void UserMysql::CallUserWithdrawInsertAndSelect(void* param, Value* value) {
+  base_storage::DBStorageEngine* engine =
+      (base_storage::DBStorageEngine*) (param);
+  MYSQL_ROW rows;
+  int32 num = engine->RecordCount();
+  DicValue* dict = reinterpret_cast<DicValue*>(value);
+  if (num > 0) {
+    while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
+      if (rows[0] != NULL) {
+        dict->SetBigInteger(L"result_", atoll(rows[0]));
+      }
+    }
+  } else {
+    LOG(WARNING)<<"CallUserWithdrawInsertAndSelect count < 0";
+  }
+}
+
+void UserMysql::CallUserWithdrawRecordSelect(void* param, Value* value) {
+  base_storage::DBStorageEngine* engine =
+      (base_storage::DBStorageEngine*) (param);
+  MYSQL_ROW rows;
+  int32 num = engine->RecordCount();
+  DicValue* info = reinterpret_cast<DicValue*>(value);
+  if (num > 0) {
+    ListValue* list = new ListValue();
+    while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
+      DicValue* dict = new DicValue();
+      if (rows[0] != NULL)
+        dict->SetBigInteger(L"cash_", atoll(rows[0]));
+      if (rows[1] != NULL)
+        dict->SetString(L"account_", rows[1]);
+      if (rows[2] != NULL)
+        dict->SetString(L"request_time_", rows[2]);
+      if (rows[3] != NULL)
+        dict->SetBigInteger("status_", atoll(rows[3]));
+      if (rows[4] != NULL)
+      dict->SetString(L"withdraw_time_", rows[4]);
+      if (rows[5] != NULL)
+        dict->SetString(L"fail_reason_", rows[5]);
+      if (rows[6] != NULL)
+        dict->SetString(L"bank_username_", rows[6]);
+      if (rows[7] != NULL)
+        dict->SetString(L"bank_name_", rows[7]);
+      list->Append(dict); 
+    }
+    info->Set("withdraw_record_", list);
+  } else {
+    LOG(WARNING)<<"CallUserWithdrawRecordSelect count < 0";
+  }
+}
+
+void UserMysql::CallUserPhotoAlbumSelect(void* param, Value* value) {
+  base_storage::DBStorageEngine* engine =
+      (base_storage::DBStorageEngine*) (param);
+  MYSQL_ROW rows;
+  int32 num = engine->RecordCount();
+  DicValue* info = reinterpret_cast<DicValue*>(value);
+  if (num > 0) {
+    ListValue* list = new ListValue();
+    while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
+      DicValue* dict = new DicValue();
+      if (rows[0] != NULL)
+        dict->SetString(L"photo_url_", rows[0]);
+      if (rows[1] != NULL)
+        dict->SetString(L"thumbnail_url_", rows[1]);
+      if (rows[2] != NULL)
+        dict->SetString(L"upload_time_", rows[2]);
+      list->Append(dict); 
+    }
+    info->Set("photo_list_", list);
+  } else {
+    LOG(WARNING)<<"CallUserPhotoAlbumSelect count < 0";
+  }
+}
+    
+} // namespace user
 

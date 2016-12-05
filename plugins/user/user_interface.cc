@@ -512,6 +512,182 @@ int32 UserInterface::GuidesInfo(const int32 socket, PacketHead* packet) {
   return err;
 }
 
+int32 UserInterface::VerifyVleaderHead(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    VerifyVleaderHeadRecv recv(*packet);
+    err = recv.Deserialize();
+    if (err < 0)
+      break;
+    DicValue dic;
+    err = user_mysql_->VerifyVleaderHeadInsert(recv.uid(), recv.head_url(), &dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, VERIFY_VLEADER_HEAD_RLY);
+  } while (0);
+  if (err < 0)
+    SendError(socket, packet, err, VERIFY_VLEADER_HEAD_RLY);
+  return err;
+}
+
+int32 UserInterface::ChangeUserInfo(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    ChangeUserInfoRecv recv(*packet);
+    err = recv.Deserialize();
+    if (err < 0)
+      break;
+    DicValue dic;
+    err = user_mysql_->ChangeUserInfoUpdate(recv.uid(), recv.nickname(), recv.gender(), recv.address(), &dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, CHANGE_USER_INFO_RLY);
+  } while (0);
+  if (err < 0)
+    SendError(socket, packet, err, CHANGE_USER_INFO_RLY);
+  return err;
+}
+
+int32 UserInterface::ChangeBankCard(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    ChangeBankCardRecv recv(*packet);
+    err = recv.Deserialize();
+    if (err < 0)
+      break;
+    DicValue dic;
+    err = user_mysql_->ChangeBankCardInsertOrDelete(recv.type(), recv.uid(), recv.account(),
+                                        recv.bank_username(), recv.bank(), &dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, CHANGE_BANK_CARD_RLY);
+  } while (0);
+  if (err < 0)
+    SendError(socket, packet, err, CHANGE_BANK_CARD_RLY);
+  return err;
+}
+
+int32 UserInterface::BankCardInfo(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    BankCardInfoRecv recv(*packet);
+    err = recv.Deserialize();
+    if (err < 0)
+      break;
+    DicValue dic;
+    err = user_mysql_->BankCardInfoSelect(recv.uid(), &dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, BANK_CARD_INFO_RLY);
+  } while (0);
+  if (err < 0)
+    SendError(socket, packet, err, BANK_CARD_INFO_RLY);
+  return err;
+}
+
+int32 UserInterface::ChangeDefaultBankCard(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    ChangeDefaultBankCardRecv recv(*packet);
+    err = recv.Deserialize();
+    if (err < 0)
+      break;
+    DicValue dic;
+    err = user_mysql_->ChangeDefaultBankCardUpdate(recv.uid(), recv.account(),  &dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, CHANGE_DEFAULT_BANK_CARD_RLY);
+  } while (0);
+  if (err < 0)
+    SendError(socket, packet, err, CHANGE_DEFAULT_BANK_CARD_RLY);
+  return err;
+}
+
+int32 UserInterface::UserWithdraw(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    UserWithdrawRecv recv(*packet);
+    err = recv.Deserialize();
+    if (err < 0)
+      break;
+    DicValue dic;
+    err = user_mysql_->UserWithdrawInsertAndSelect(recv.uid(), recv.account(),  recv.cash(), &dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, USER_WITHDRAW_RLY);
+  } while (0);
+  if (err < 0)
+    SendError(socket, packet, err, USER_WITHDRAW_RLY);
+  return err;
+}
+
+int32 UserInterface::UserWithdrawRecord(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    UserWithdrawRecordRecv recv(*packet);
+    err = recv.Deserialize();
+    if (err < 0)
+      break;
+    DicValue dic;
+    err = user_mysql_->UserWithdrawRecordSelect(recv.uid(), recv.account(), recv.size(), recv.num(), &dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, USER_WITHDRAW_RECORD_RLY);
+  } while (0);
+  if (err < 0)
+    SendError(socket, packet, err, USER_WITHDRAW_RECORD_RLY);
+  return err;
+}
+
+int32 UserInterface::UserUploadPhoto(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    UserUploadPhotoRecv recv(*packet);
+    err = recv.Deserialize();
+    if (err < 0)
+      break;
+    std::list<PhotoUrl*> list = recv.photo_list();
+    std::list<std::string> sql_list;
+    std::list<PhotoUrl*>::iterator it = list.begin();
+    for (; it != list.end(); ++it) {
+      PhotoUrl* data = *it;
+      if (data != NULL) {
+        std::stringstream ss;
+        ss << "call proc_UserUploadPhotoInsert(" << recv.uid() << ",'"
+           << data->photo_url_ << "','" << data-> thumbnail_url_ << "')";
+        sql_list.push_back(ss.str());
+      }
+    }
+    DicValue dic;
+    err = user_mysql_->UserUploadPhotoInsert(recv.uid(), sql_list, &dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, USER_UPLOAD_PHOTO_RLY);
+  } while (0);
+  if (err < 0) {
+    SendError(socket, packet, err, USER_UPLOAD_PHOTO_RLY);
+  }
+  return err;
+}
+
+int32 UserInterface::UserPhotoAlbum(const int32 socket, PacketHead* packet) {
+  int32 err = 0;
+  do {
+    UserPhotoAlbumRecv recv(*packet);
+    err = recv.Deserialize();
+    if (err < 0)
+      break;
+    DicValue dic;
+    err = user_mysql_->UserPhotoAlbumSelect(recv.uid(), recv.size(), recv.num(), &dic);
+    if (err < 0)
+      break;
+    SendMsg(socket, packet, &dic, USER_PHOTO_ALBUM_RLY);
+  } while (0);
+  if (err < 0)
+    SendError(socket, packet, err, USER_PHOTO_ALBUM_RLY);
+  return err;
+}
+
 int32 UserInterface::CloseSocket(const int fd) {
   data_share_mgr_->UserOffline(fd);
   return 0;

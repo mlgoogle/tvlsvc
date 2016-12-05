@@ -117,6 +117,24 @@ class UserInterface {
   int32 GuidesInfo(const int32 socket, PacketHead* packet);
 
   int32 OrderDetails(const int32 socket, PacketHead* packet);
+  
+  int32 VerifyVleaderHead(const int32 socket, PacketHead* packet);
+
+  int32 ChangeUserInfo(const int32 socket, PacketHead* packet);
+
+  int32 ChangeBankCard(const int32 socket, PacketHead* packet);
+
+  int32 BankCardInfo(const int32 socket, PacketHead* packet);
+
+  int32 ChangeDefaultBankCard(const int32 socket, PacketHead* packet);
+
+  int32 UserWithdraw(const int32 socket, PacketHead* packet);
+
+  int32 UserWithdrawRecord(const int32 socket, PacketHead* packet);
+
+  int32 UserUploadPhoto(const int32 socket, PacketHead* packet);
+
+  int32 UserPhotoAlbum(const int32 socket, PacketHead* packet);
 
   int32 VerifyPasswd(const int32 socket, PacketHead* packet);
 

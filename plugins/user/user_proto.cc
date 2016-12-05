@@ -1407,6 +1407,169 @@ int32 GuideOrderRecv::Deserialize() {
   return err;
 }
 
+VerifyVleaderHeadRecv::VerifyVleaderHeadRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  uid_ = 0;
+}  
+  
+int32 VerifyVleaderHeadRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+      base_logic::IMPL_JSON, &body_str_, false);
+  std::string err_str;
+  DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetBigInteger(L"uid_", &uid_);
+      LOG_IF(ERROR, !r) << "VerifyVleaderHeadRecv::uid_ parse error";
+      r = dic->GetString(L"head_url_", &head_url_);
+      LOG_IF(ERROR, !r) << "VerifyVleaderHeadRecv::head_ parse error";
+    } else {
+      LOG(ERROR)<< "VerifyVleaderHeadRecv Deserialize error";
+      err = REQUEST_JSON_ERR;
+      break;
+    }
+  }while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                                serializer);
+  return err;
+}
+
+ChangeUserInfoRecv::ChangeUserInfoRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  uid_ = 0;
+  gender_ = 0;
+}  
+
+int32 ChangeUserInfoRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+      base_logic::IMPL_JSON, &body_str_, false);
+  std::string err_str;
+  DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetBigInteger(L"uid_", &uid_);
+      LOG_IF(ERROR, !r) << "ChangUserInfoRecv::uid_ parse error";
+      r = dic->GetString(L"nickname_", &nickname_);
+      LOG_IF(ERROR, !r) << "ChangUserInfoRecv::nickname_ parse error";
+      r = dic->GetBigInteger(L"gender_", &gender_);
+      LOG_IF(ERROR, !r) << "ChangUserInfoRecv::gender_ parse error";
+      r = dic->GetString(L"address_", &address_);
+      LOG_IF(ERROR, !r) << "ChangUserInfoRecv::address_ parse error";
+    } else {
+      LOG(ERROR)<< "ChangUserInfoRecv Deserialize error";
+      err = REQUEST_JSON_ERR;
+      break;
+    }
+  }while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                                serializer);
+  return err;
+}
+
+ChangeBankCardRecv::ChangeBankCardRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  uid_ = 0;
+  type_ = 0;
+  bank_ = 0;
+}  
+
+int32 ChangeBankCardRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+      base_logic::IMPL_JSON, &body_str_, false);
+  std::string err_str;
+  DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetBigInteger(L"uid_", &uid_);
+      LOG_IF(ERROR, !r) << "ChangeBankCardRecv::uid_ parse error";
+      r = dic->GetBigInteger(L"type_", &type_);
+      r = dic->GetString(L"account_", &account_);
+      LOG_IF(ERROR, !r) << "ChangeBankCardRecv::account_ parse error";
+      r = dic->GetString(L"bank_username_", &bank_username_);
+      LOG_IF(ERROR, !r && type_ == CHANGE_BANK_CARD_ADD_UPDATE)
+				<< "ChangeBankCardRecv::bank_username_ parse error";
+      r = dic->GetBigInteger(L"bank_", &bank_);
+      LOG_IF(ERROR, !r && type_ == CHANGE_BANK_CARD_ADD_UPDATE)
+				<< "ChangeBankCardRecv::bank_ parse error";
+    } else {
+      LOG(ERROR)<< "ChangeBankCardRecv Deserialize error";
+      err = REQUEST_JSON_ERR;
+      break;
+    }
+  }while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                                serializer);
+  return err;
+}
+
+BankCardInfoRecv::BankCardInfoRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  uid_ = 0;
+}  
+
+int32 BankCardInfoRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+      base_logic::IMPL_JSON, &body_str_, false);
+  std::string err_str;
+  DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetBigInteger(L"uid_", &uid_);
+      LOG_IF(ERROR, !r) << "BankCardInfoRecv::uid_ parse error";
+    } else {
+      LOG(ERROR)<< "BankCardInfoRecv Deserialize error";
+      err = REQUEST_JSON_ERR;
+      break;
+    }
+  }while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                                serializer);
+  return err;
+}
+
+
+ChangeDefaultBankCardRecv::ChangeDefaultBankCardRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  uid_ = 0;
+}  
+
+int32 ChangeDefaultBankCardRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+      base_logic::IMPL_JSON, &body_str_, false);
+  std::string err_str;
+  DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetBigInteger(L"uid_", &uid_);
+      LOG_IF(ERROR, !r) << "ChangeDefaultBankCardRecv::uid_ parse error";
+      r = dic->GetString(L"account_", &account_);
+      LOG_IF(ERROR, !r) << "ChangeDefaultBankCardRecv::account_ parse error";
+    } else {
+      LOG(ERROR)<< "ChangeDefaultBankCardRecv Deserialize error";
+      err = REQUEST_JSON_ERR;
+      break;
+    }
+  }while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                                serializer);
+  return err;
+}
+
 GuideOrderDetailRecv::GuideOrderDetailRecv(PacketHead packet) {
   head_ = packet.head();
   body_str_ = packet.body_str();
@@ -1426,6 +1589,76 @@ int32 GuideOrderDetailRecv::Deserialize() {
       LOG_IF(ERROR, !r) << "GuideOrderRecv::order_id_ parse error";
     } else {
       LOG(ERROR)<< "GuideOrderDetailRecv Deserialize error";
+      err = REQUEST_JSON_ERR;
+      break;
+    }
+  }while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                                serializer);
+  return err;
+}
+
+UserWithdrawRecv::UserWithdrawRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  uid_ = 0;
+}  
+
+int32 UserWithdrawRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+      base_logic::IMPL_JSON, &body_str_, false);
+  std::string err_str;
+  DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetBigInteger(L"uid_", &uid_);
+      LOG_IF(ERROR, !r) << "UserWithdrawRecv::uid_ parse error";
+      r = dic->GetString(L"account_", &account_);
+      LOG_IF(ERROR, !r) << "UserWithdrawRecv::account_ parse error";
+      r = dic->GetBigInteger(L"cash_", &cash_);
+      LOG_IF(ERROR, !r) << "UserWithdrawRecv::cash_ parse error";
+    } else {
+      LOG(ERROR)<< "UserWithdrawRecv Deserialize error";
+      err = REQUEST_JSON_ERR;
+      break;
+    }
+  }while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                                serializer);
+  return err;
+}
+
+UserWithdrawRecordRecv::UserWithdrawRecordRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  uid_ = 0;
+  size_ = 0;
+  num_ = 0;
+}  
+
+int32 UserWithdrawRecordRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+      base_logic::IMPL_JSON, &body_str_, false);
+  std::string err_str;
+  DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetBigInteger(L"uid_", &uid_);
+      LOG_IF(ERROR, !r) << "UserWithdrawRecordRecv::uid_ parse error";
+      r = dic->GetString(L"account_", &account_);
+	  if (!r)
+		  account_ = ""; 
+      //LOG_IF(ERROR, !r) << "UserWithdrawRecordRecv::account_ parse error";
+      r = dic->GetBigInteger(L"size_", &size_);
+      LOG_IF(ERROR, !r) << "UserWithdrawRecordRecv::size_ parse error";
+      r = dic->GetBigInteger(L"num_", &num_);
+      LOG_IF(ERROR, !r) << "UserWithdrawRecordRecv::num_ parse error";
+    } else {
+      LOG(ERROR)<< "UserWithdrawRecordRecv Deserialize error";
       err = REQUEST_JSON_ERR;
       break;
     }
@@ -1473,6 +1706,69 @@ int32 CheckSMSCodeRecv::Deserialize() {
   return err;
 }
 
+UserUploadPhotoRecv::UserUploadPhotoRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  uid_ = 0;
+}
+
+UserUploadPhotoRecv::~UserUploadPhotoRecv() {
+  std::list<PhotoUrl*>::iterator it = photo_list_.begin();
+  for (; it != photo_list_.end(); it++) {
+    PhotoUrl* data = *it;
+    if (data != NULL) {
+      delete data;
+      data = NULL;
+    }
+  }
+  photo_list_.clear();
+}
+
+int32 UserUploadPhotoRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+      base_logic::IMPL_JSON, &body_str_, false);
+  std::string err_str;
+  DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetBigInteger(L"uid_", &uid_);
+      LOG_IF(ERROR, !r) << "UserUploadPhotoRecv::uid_ parse error";
+      ListValue* list;
+      r = dic->GetList(L"photo_list_", &list);
+      LOG_IF(ERROR, !r) << "UserUploadPhotoRecv::photo_list_ parse error:";
+	  if (r && typeid(*list) == typeid(ListValue)) {
+        int count = list->GetSize();
+        for (int i = 0; i < count; i++) {
+          DicValue* info;
+          r = list->GetDictionary(i, &info);
+          if (r) {
+            PhotoUrl* data = new PhotoUrl;
+            info->GetString(L"photo_url_", &data->photo_url_);
+            info->GetString(L"thumbnail_url_", &data->thumbnail_url_);
+            photo_list_.push_back(data);
+          }
+        }
+	  } else {
+        if (!r) {
+          err = REQUEST_JSON_ERR;
+          break;
+        }
+      }
+    } else {
+      LOG(ERROR)<< "UserUploadPhotoRecv Deserialize error";
+      if (!r) {
+        err = REQUEST_JSON_ERR;
+        break;
+      }
+    }
+  }while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                                serializer);
+  return err;
+}
+
 DefineGuideSkillsRecv::DefineGuideSkillsRecv(PacketHead packet) {
   head_ = packet.head();
   body_str_ = packet.body_str();
@@ -1495,9 +1791,42 @@ int32 DefineGuideSkillsRecv::Deserialize() {
       LOG_IF(ERROR, !r) << "DefineGuideSkillsRecv::change_type_ parse error";
       r = dic->GetString(L"skills_", &skills_);
       LOG_IF(ERROR, !r) << "DefineGuideSkillsRecv::skills_ parse error";
-
     } else {
       LOG(ERROR)<< "DefineGuideSkillsRecv Deserialize error";
+      err = REQUEST_JSON_ERR;
+      break;
+    }
+  }while (0);
+  base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+                                                serializer);
+  return err;
+}
+
+UserPhotoAlbumRecv::UserPhotoAlbumRecv(PacketHead packet) {
+  head_ = packet.head();
+  body_str_ = packet.body_str();
+  uid_ = 0;
+  size_ = 0;
+  num_ = 0;
+}  
+
+int32 UserPhotoAlbumRecv::Deserialize() {
+  int32 err = 0;
+  bool r = false;
+  base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+      base_logic::IMPL_JSON, &body_str_, false);
+  std::string err_str;
+  DicValue* dic = (DicValue*) serializer->Deserialize(&err, &err_str);
+  do {
+    if (dic != NULL) {
+      r = dic->GetBigInteger(L"uid_", &uid_);
+      LOG_IF(ERROR, !r) << "UserPhotoAlbumRecv::uid_ parse error";
+      r = dic->GetBigInteger(L"size_", &size_);
+      LOG_IF(ERROR, !r) << "UserPhotoAlbumRecv::size_ parse error";
+      r = dic->GetBigInteger(L"num_", &num_);
+      LOG_IF(ERROR, !r) << "UserPhotoAlbumRecv::num_ parse error";
+    } else {
+      LOG(ERROR)<< "UserPhotoAlbumRecv Deserialize error";
       err = REQUEST_JSON_ERR;
       break;
     }
