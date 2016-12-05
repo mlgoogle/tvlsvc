@@ -110,6 +110,25 @@ class UserMysql {
   int32 UserCashSelect(int64 uid, DicValue* dic);
 
   int32 OrderDetailsSelect(int64 oid, int64 type, DicValue* dic);
+  
+  int32 VerifyVleaderHeadInsert(int64 uid, std::string head_url, DicValue* dic);
+
+  int32 ChangeUserInfoUpdate(int64 uid, std::string nickname, int64 gender, std::string, DicValue* dic);
+
+  int32 ChangeBankCardInsertOrDelete(int64 type, int64 uid, std::string account,
+					std::string bank_username, int64 bank, DicValue* dic);
+
+  int32 BankCardInfoSelect(int64 uid, DicValue* dic);
+
+  int32 ChangeDefaultBankCardUpdate(int64 uid, std::string account, DicValue* dic);
+
+  int32 UserWithdrawInsertAndSelect(int64 uid, std::string account, int64 cash, DicValue* dic);
+
+  int32 UserWithdrawRecordSelect(int64 uid, std::string account, int64 size, int64 num, DicValue* dic);
+
+  int32 UserUploadPhotoInsert(int64 uid, std::list<std::string> sqls, DicValue* dic);
+
+  int32 UserPhotoAlbumSelect(int64 uid, int64 size, int64 num, DicValue* dic);
 
   int32 CheckPasswdSelect(int64 uid, std::string pass, int64 type,
                           DicValue* dic);
@@ -167,6 +186,10 @@ class UserMysql {
   static void CallCheckPasswdSelect(void* param, Value* value);
   static void CallChangePasswdSelect(void* param, Value* value);
   static void CallGuideOrderSelect(void* param, Value* value);
+  static void CallBankCardInfoSelect(void* param, Value* value);
+  static void CallUserWithdrawInsertAndSelect(void* param, Value* value);
+  static void CallUserWithdrawRecordSelect(void* param, Value* value);
+  static void CallUserPhotoAlbumSelect(void* param, Value* value);
   static void CallGuideOrderDetailSelect(void* param, Value* value);
   static void CallDefineGuideSkillsUpdateSelect(void* param, Value* value);
  private:

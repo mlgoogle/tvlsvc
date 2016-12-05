@@ -209,14 +209,6 @@ int32 UserManager::AssignPacket(const int32 socket, PacketHead* packet) {
       interface->EntrySkillShare(socket, packet);
       break;
     }
-    case GUIDE_SERVICE_LIST_REQ: {
-      interface->GuideServiceList(socket, packet);
-      break;
-    }
-    case CHANGE_GUIDE_SERVICE_REQ: {
-      interface->ChangeGuideService(socket, packet);
-      break;
-    }
     case GUIDE_INFO_REQ: {
       interface->GuidesInfo(socket, packet);
       break;
@@ -235,6 +227,42 @@ int32 UserManager::AssignPacket(const int32 socket, PacketHead* packet) {
     }
     case CHANGE_COMM_PASSWD_REQ: {
       interface->ChangePayPasswd(socket, packet);
+      break;
+    }
+    case VERIFY_VLEADER_HEAD_REQ: {
+      interface->VerifyVleaderHead(socket, packet);
+      break;
+    }
+    case CHANGE_USER_INFO_REQ: {
+	  interface->ChangeUserInfo(socket, packet);
+    } 
+    case CHANGE_BANK_CARD_REQ: {
+      interface->ChangeBankCard(socket, packet);
+    }
+    case BANK_CARD_INFO_REQ: {
+    	interface->BankCardInfo(socket, packet);
+	}
+    case CHANGE_DEFAULT_BANK_CARD_REQ: {
+		interface->ChangeDefaultBankCard(socket, packet);
+    }
+    case USER_WITHDRAW_REQ: {
+		interface->UserWithdraw(socket, packet);
+    }
+    case USER_WITHDRAW_RECORD_REQ: {
+		interface->UserWithdrawRecord(socket, packet);
+	}
+    case USER_UPLOAD_PHOTO_REQ: {
+		interface->UserUploadPhoto(socket, packet);
+	}
+	case USER_PHOTO_ALBUM_REQ: {
+		interface->UserPhotoAlbum(socket, packet);
+	}
+    case GUIDE_SERVICE_LIST_REQ: {
+      interface->GuideServiceList(socket, packet);
+      break;
+    }
+    case CHANGE_GUIDE_SERVICE_REQ: {
+      interface->ChangeGuideService(socket, packet);
       break;
     }
     case GUIDE_ORDER_RECORD_REQ: {
