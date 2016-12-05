@@ -1218,16 +1218,16 @@ int32 ChangeGuideServiceRecv::Deserialize() {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"uid_", &uid_);
       LOG_IF(ERROR, !r) << "ChangeGuideServiceRecv::uid_ parse error";
-      r = dic->GetBigInteger(L"verify_code_", &verify_code_);
-      LOG_IF(ERROR, !r) << "ChangeGuideServiceRecv::verify_code_ parse error";
-      r = dic->GetBigInteger(L"timestamp_", &timestamp_);
-      LOG_IF(ERROR, !r) << "ChangeGuideServiceRecv::phone_num_ parse error";
-      r = dic->GetString(L"token_", &token_);
-      LOG_IF(ERROR, !r) << "ChangeGuideServiceRecv::token_ parse error";
-      r = dic->GetString(L"phone_num_", &phone_num_);
-      LOG_IF(ERROR, !r) << "ChangeGuideServiceRecv::phone_num_ parse error";
+//      r = dic->GetBigInteger(L"verify_code_", &verify_code_);
+//      LOG_IF(ERROR, !r) << "ChangeGuideServiceRecv::verify_code_ parse error";
+//      r = dic->GetBigInteger(L"timestamp_", &timestamp_);
+//      LOG_IF(ERROR, !r) << "ChangeGuideServiceRecv::phone_num_ parse error";
+//      r = dic->GetString(L"token_", &token_);
+//      LOG_IF(ERROR, !r) << "ChangeGuideServiceRecv::token_ parse error";
+//      r = dic->GetString(L"phone_num_", &phone_num_);
+//      LOG_IF(ERROR, !r) << "ChangeGuideServiceRecv::phone_num_ parse error";
       ListValue* list;
-      r = dic->GetList(L"serveice_list_", &list);
+      r = dic->GetList(L"service_list_", &list);
       if (!r) {
         err = REQUEST_JSON_ERR;
         break;
