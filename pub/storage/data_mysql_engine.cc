@@ -16,7 +16,7 @@ bool DataMYSQLEngine::WriteData(const std::string& sql) {
   if (engine == NULL) {
     return false;
   }
-  engine->Release();
+  engine->FreeRes();
   r = engine->SQLExec(sql.c_str());
   if (!r) {
     return false;
@@ -31,7 +31,7 @@ bool DataMYSQLEngine::WriteDatas(std::list<std::string>& sqls) {
   if (engine == NULL) {
     return false;
   }
-  engine->Release();
+  engine->FreeRes();
   r = engine->SQLExecs(sqls);
   if (!r) {
     return false;
@@ -50,7 +50,7 @@ bool DataMYSQLEngine::ReadData(const std::string& sql, base_logic::Value* value,
       r = false;
       break;
     }
-    engine->Release();
+    engine->FreeRes();
     r = engine->SQLExec(sql.c_str());
     if (!r) {
       r = false;
@@ -61,7 +61,7 @@ bool DataMYSQLEngine::ReadData(const std::string& sql, base_logic::Value* value,
       break;
     } else {
       storage_get(reinterpret_cast<void*>(engine), value);
-      engine->Release();
+      engine->FreeRes();
     }
   }while (0);
   db_pool_.DBConnectionPush(engine);
