@@ -73,34 +73,6 @@ int32 UserInterface::InitShareGuide() {
   InitShareType();
   InitShareDetails();
   InitShareSkills();
-
-//  do {
-//    DicValue type_dic;
-//    err = user_mysql_->ShareTourismTypeSelect(&type_dic);
-//    if (err < 0)
-//      break;
-//    if (!type_dic.empty()) {
-//      ListValue* info;
-//      type_dic.GetList(L"data_list", &info);
-//      if (info != NULL && !info->empty()) {
-//        data_share_mgr_->InitShareType(info);
-//      }
-//    } else {
-//      break;
-//    }
-//    DicValue detail_dic;
-//    err = user_mysql_->ShareTourismDetailsSelect(&detail_dic);
-//    if (err < 0)
-//      break;
-//    if (!detail_dic.empty()) {
-//      ListValue* info;
-//      detail_dic.GetList(L"data_list", &info);
-//      if (info != NULL && !info->empty()) {
-//        data_share_mgr_->InitTourismShare(info);
-//      }
-//    }
-//  } while (0);
-  test();
   return err;
 }
 

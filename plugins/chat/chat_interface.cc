@@ -241,6 +241,11 @@ int32 ChatInterface::ChatMessage(const int32 socket, PacketHead* packet) {
       SendPacket(u->socket_fd(), &rev);
     }
   }while (0);
+  if (err < 0)
+    SendError(socket, packet, err, CHAT_MESSAGE_RLY);
+  else
+    SendMsg(socket, packet, NULL, CHAT_MESSAGE_RLY);
+
   //保存消息
   std::stringstream ss;
   ss << "call proc_ChatRecordInsert(" << rev.from_uid() << "," << rev.to_uid()
