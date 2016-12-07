@@ -235,27 +235,35 @@ int32 UserManager::AssignPacket(const int32 socket, PacketHead* packet) {
     }
     case CHANGE_USER_INFO_REQ: {
 	  interface->ChangeUserInfo(socket, packet);
-    } 
+	  break;
+	} 
     case CHANGE_BANK_CARD_REQ: {
       interface->ChangeBankCard(socket, packet);
+	  break;
     }
     case BANK_CARD_INFO_REQ: {
-    	interface->BankCardInfo(socket, packet);
-	}
+      interface->BankCardInfo(socket, packet);
+      break;
+    }
     case CHANGE_DEFAULT_BANK_CARD_REQ: {
-		interface->ChangeDefaultBankCard(socket, packet);
+      interface->ChangeDefaultBankCard(socket, packet);
+      break;
     }
     case USER_WITHDRAW_REQ: {
-		interface->UserWithdraw(socket, packet);
+      interface->UserWithdraw(socket, packet);
+      break;
     }
     case USER_WITHDRAW_RECORD_REQ: {
-		interface->UserWithdrawRecord(socket, packet);
-	}
+      interface->UserWithdrawRecord(socket, packet);
+      break;
+    }
     case USER_UPLOAD_PHOTO_REQ: {
-		interface->UserUploadPhoto(socket, packet);
-	}
-	case USER_PHOTO_ALBUM_REQ: {
-		interface->UserPhotoAlbum(socket, packet);
+      interface->UserUploadPhoto(socket, packet);
+      break;
+    }
+    case USER_PHOTO_ALBUM_REQ: {
+      interface->UserPhotoAlbum(socket, packet);
+      break;
 	}
     case GUIDE_SERVICE_LIST_REQ: {
       interface->GuideServiceList(socket, packet);
