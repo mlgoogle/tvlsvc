@@ -1660,7 +1660,7 @@ void UserInterface::SendPacket(const int socket, PacketHead* packet) {
   delete[] s;
   s = NULL;
   LOG_IF(ERROR, total != packet->packet_length())
-      << "send packet wrong:opcode[]" << packet->operate_code();
+      << "send packet wrong:opcode[" << packet->operate_code() << "]";
 }
 
 void UserInterface::SendError(const int socket, PacketHead* packet, int32 err,
