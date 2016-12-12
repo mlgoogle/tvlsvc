@@ -2343,6 +2343,8 @@ void UserMysql::CallAppointmentRecordSelect(void* param, Value* value) {
         dict->SetBigInteger(L"order_id_", atoll(rows[18]));
       if (rows[19] != NULL)
         dict->SetBigInteger(L"service_end_", atoll(rows[19]));
+      if (rows[20] != NULL)
+        dict->SetString(L"recommend_uid_", rows[20]);
       list->Append(dict);
     }
     info->Set(L"data_list_", list);
