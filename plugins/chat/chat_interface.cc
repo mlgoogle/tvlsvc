@@ -230,45 +230,47 @@ int32 ChatInterface::ChatMessage(const int32 socket, PacketHead* packet) {
       if (rev.to_uid() == -1) {
         LOG(INFO)<< "chat to user -1";
         err = chat_mysql_->ChatRecordInsert(rev.from_uid(), rev.to_uid(),
-            rev.content(), rev.msg_time(), 1);
+            rev.content(), rev.msg_time(), 0);
         break;
       }
       //     PushChatMsg(rev);
       PushGtMsg(rev.from_uid(), rev.to_uid(), rev.body_str(), rev.content(),
           CHAT_MESSAGE_RLY);
+      err = chat_mysql_->ChatRecordInsert(rev.from_uid(), rev.to_uid(),
+          rev.content(), rev.msg_time(), 1);
+      break;
     } else {
       rev.set_operate_code(CHAT_MESSAGE_RLY);
       SendPacket(u->socket_fd(), &rev);
+      //保存及时消息
+      std::stringstream ss;
+      ss << "call proc_ChatRecordInsert(" << rev.from_uid() << "," << rev.to_uid()
+         << ",'" << rev.content() << "'," << rev.msg_time() << "," << 0 << ")";
+      msg_list_.push_back(ss.str());
+      if (msg_list_.size() > 10) {
+        LOG(INFO)<< "msg_list > 10";
+        std::list<std::string> new_list_;
+        {
+          base_logic::RLockGd lk(lock_);
+          new_list_.splice(new_list_.begin(), msg_list_);
+        }
+        LOG(INFO) << "new_list size:" << new_list_.size();
+        err = chat_mysql_->ChatRecordInsert(new_list_);
+        if (err < 0) {
+          {
+            LOG(INFO) << "new_list insert mysql err:";
+            base_logic::RLockGd lk(lock_);
+            msg_list_.splice(msg_list_.begin(), new_list_);
+          }
+        }
+
+      }
     }
   }while (0);
   if (err < 0)
     SendError(socket, packet, err, CHAT_MESSAGE_RLY);
   else
     SendMsg(socket, packet, NULL, CHAT_MESSAGE_RLY);
-
-  //保存消息
-  std::stringstream ss;
-  ss << "call proc_ChatRecordInsert(" << rev.from_uid() << "," << rev.to_uid()
-     << ",'" << rev.content() << "'," << rev.msg_time() << "," << 0 << ")";
-  msg_list_.push_back(ss.str());
-  if (msg_list_.size() > 10) {
-    LOG(INFO)<< "msg_list > 10";
-    std::list<std::string> new_list_;
-    {
-      base_logic::RLockGd lk(lock_);
-      new_list_.splice(new_list_.begin(), msg_list_);
-    }
-    LOG(INFO) << "new_list size:" << new_list_.size();
-    err = chat_mysql_->ChatRecordInsert(new_list_);
-    if (err < 0) {
-      {
-        LOG(INFO) << "new_list insert mysql err:";
-        base_logic::RLockGd lk(lock_);
-        msg_list_.splice(msg_list_.begin(), new_list_);
-      }
-    }
-
-  }
   return err;
 }
 
