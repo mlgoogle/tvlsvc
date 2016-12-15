@@ -492,7 +492,8 @@ int32 UserInterface::VerifyVleaderHead(const int32 socket, PacketHead* packet) {
     if (err < 0)
       break;
     DicValue dic;
-    err = user_mysql_->VerifyVleaderHeadInsert(recv.uid(), recv.head_url(), &dic);
+    err = user_mysql_->VerifyVleaderHeadInsert(recv.uid(), recv.head_url(),
+                                               &dic);
     if (err < 0)
       break;
     SendMsg(socket, packet, &dic, VERIFY_VLEADER_HEAD_RLY);
@@ -510,7 +511,9 @@ int32 UserInterface::ChangeUserInfo(const int32 socket, PacketHead* packet) {
     if (err < 0)
       break;
     DicValue dic;
-    err = user_mysql_->ChangeUserInfoUpdate(recv.uid(), recv.nickname(), recv.gender(), recv.address(), &dic);
+    err = user_mysql_->ChangeUserInfoUpdate(recv.uid(), recv.nickname(),
+                                            recv.gender(), recv.address(),
+                                            &dic);
     if (err < 0)
       break;
     SendMsg(socket, packet, &dic, CHANGE_USER_INFO_RLY);
@@ -528,8 +531,10 @@ int32 UserInterface::ChangeBankCard(const int32 socket, PacketHead* packet) {
     if (err < 0)
       break;
     DicValue dic;
-    err = user_mysql_->ChangeBankCardInsertOrDelete(recv.type(), recv.uid(), recv.account(),
-                                        recv.bank_username(), recv.bank(), &dic);
+    err = user_mysql_->ChangeBankCardInsertOrDelete(recv.type(), recv.uid(),
+                                                    recv.account(),
+                                                    recv.bank_username(),
+                                                    recv.bank(), &dic);
     if (err < 0)
       break;
     SendMsg(socket, packet, &dic, CHANGE_BANK_CARD_RLY);
@@ -557,7 +562,8 @@ int32 UserInterface::BankCardInfo(const int32 socket, PacketHead* packet) {
   return err;
 }
 
-int32 UserInterface::ChangeDefaultBankCard(const int32 socket, PacketHead* packet) {
+int32 UserInterface::ChangeDefaultBankCard(const int32 socket,
+                                           PacketHead* packet) {
   int32 err = 0;
   do {
     ChangeDefaultBankCardRecv recv(*packet);
@@ -565,7 +571,8 @@ int32 UserInterface::ChangeDefaultBankCard(const int32 socket, PacketHead* packe
     if (err < 0)
       break;
     DicValue dic;
-    err = user_mysql_->ChangeDefaultBankCardUpdate(recv.uid(), recv.account(),  &dic);
+    err = user_mysql_->ChangeDefaultBankCardUpdate(recv.uid(), recv.account(),
+                                                   &dic);
     if (err < 0)
       break;
     SendMsg(socket, packet, &dic, CHANGE_DEFAULT_BANK_CARD_RLY);
@@ -583,7 +590,8 @@ int32 UserInterface::UserWithdraw(const int32 socket, PacketHead* packet) {
     if (err < 0)
       break;
     DicValue dic;
-    err = user_mysql_->UserWithdrawInsertAndSelect(recv.uid(), recv.account(),  recv.cash(), &dic);
+    err = user_mysql_->UserWithdrawInsertAndSelect(recv.uid(), recv.account(),
+                                                   recv.cash(), &dic);
     if (err < 0)
       break;
     SendMsg(socket, packet, &dic, USER_WITHDRAW_RLY);
@@ -593,7 +601,8 @@ int32 UserInterface::UserWithdraw(const int32 socket, PacketHead* packet) {
   return err;
 }
 
-int32 UserInterface::UserWithdrawRecord(const int32 socket, PacketHead* packet) {
+int32 UserInterface::UserWithdrawRecord(const int32 socket,
+                                        PacketHead* packet) {
   int32 err = 0;
   do {
     UserWithdrawRecordRecv recv(*packet);
@@ -601,7 +610,8 @@ int32 UserInterface::UserWithdrawRecord(const int32 socket, PacketHead* packet) 
     if (err < 0)
       break;
     DicValue dic;
-    err = user_mysql_->UserWithdrawRecordSelect(recv.uid(), recv.account(), recv.size(), recv.num(), &dic);
+    err = user_mysql_->UserWithdrawRecordSelect(recv.uid(), recv.account(),
+                                                recv.size(), recv.num(), &dic);
     if (err < 0)
       break;
     SendMsg(socket, packet, &dic, USER_WITHDRAW_RECORD_RLY);
@@ -626,7 +636,7 @@ int32 UserInterface::UserUploadPhoto(const int32 socket, PacketHead* packet) {
       if (data != NULL) {
         std::stringstream ss;
         ss << "call proc_UserUploadPhotoInsert(" << recv.uid() << ",'"
-           << data->photo_url_ << "','" << data-> thumbnail_url_ << "')";
+           << data->photo_url_ << "','" << data->thumbnail_url_ << "')";
         sql_list.push_back(ss.str());
       }
     }
@@ -650,7 +660,8 @@ int32 UserInterface::UserPhotoAlbum(const int32 socket, PacketHead* packet) {
     if (err < 0)
       break;
     DicValue dic;
-    err = user_mysql_->UserPhotoAlbumSelect(recv.uid(), recv.size(), recv.num(), &dic);
+    err = user_mysql_->UserPhotoAlbumSelect(recv.uid(), recv.size(), recv.num(),
+                                            &dic);
     if (err < 0)
       break;
     SendMsg(socket, packet, &dic, USER_PHOTO_ALBUM_RLY);
@@ -678,12 +689,12 @@ int32 UserInterface::HeartPacket(const int32 socket, PacketHead* packet) {
 }
 
 int32 UserInterface::AlipayServer(const int32 socket, PacketHead* packet) {
-  LOG(INFO)<< "alipay server req";
+  LOG(INFO) << "alipay server req";
   return 0;
 }
 
 int32 UserInterface::AlipayClient(const int32 socket, PacketHead* packet) {
-  LOG(INFO)<< "alipay client req";
+  LOG(INFO) << "alipay client req";
   return 0;
 }
 
@@ -823,15 +834,15 @@ int32 UserInterface::InvoiceDetail(const int32 socket, PacketHead* packet) {
 
 int32 UserInterface::DeviceToken(const int32 socket, PacketHead* packet) {
   int32 err = 0;
-  LOG(INFO)<< "DeviceToken";
+  LOG(INFO) << "DeviceToken";
   do {
     DeviceTokenRecv rev(*packet);
     err = rev.Deserialize();
-    LOG(INFO)<< "DeviceToken Deserialize err:" << err;
+    LOG(INFO) << "DeviceToken Deserialize err:" << err;
     if (err < 0)
       break;
     int result = data_share_mgr_->AddDeviceToken(rev.uid(), rev.device_token());
-    LOG(INFO)<< "AddDeviceToken result:" << result;
+    LOG(INFO) << "AddDeviceToken result:" << result;
     if (result >= 0)
       err = user_mysql_->DeviceTokenUpdate(rev.uid(), rev.device_token());
     if (err < 0)
@@ -839,7 +850,7 @@ int32 UserInterface::DeviceToken(const int32 socket, PacketHead* packet) {
     SendMsg(socket, packet, NULL, DEVICE_TOKEN_RLY);
   } while (0);
   if (err < 0) {
-    LOG(INFO)<< "DeviceToken SendError err:" << err;
+    LOG(INFO) << "DeviceToken SendError err:" << err;
     SendError(socket, packet, err, DEVICE_TOKEN_RLY);
   }
   return err;
@@ -1027,7 +1038,7 @@ int32 UserInterface::UpImgToken(const int32 socket, PacketHead* packet) {
 }
 
 void UserInterface::test() {
-  LOG(INFO)<< "UserInterface::test()";
+  LOG(INFO) << "UserInterface::test()";
 
 ////  DicValue dic;
 ////  std::string temp;
@@ -1178,17 +1189,17 @@ int32 UserInterface::WXPlaceOrder(const int32 socket, PacketHead* packet) {
       if (dic != NULL) {
         std::string return_code;
         dic->GetString(L"return_code", &return_code);
-        LOG(INFO)<< "return_code:" << return_code;
+        LOG(INFO) << "return_code:" << return_code;
         //下单成功
         if (return_code.find("SUCCESS") != std::string::npos) {
           std::string result_code;
           dic->GetString(L"result_code", &result_code);
-          LOG(INFO)<< "result_code:" << result_code;
+          LOG(INFO) << "result_code:" << result_code;
           //业务逻辑成功
           if (result_code.find("SUCCESS") != std::string::npos) {
             std::string prepay_id;
             dic->GetString(L"prepay_id", &prepay_id);
-            LOG(INFO)<< "prepay_id:" << prepay_id;
+            LOG(INFO) << "prepay_id:" << prepay_id;
             int npos1 = prepay_id.find("<![CDATA[");
             int npos2 = prepay_id.find("]]>");
             prepay_id = prepay_id.substr(npos1 + 9, npos2 - npos1 - 9);
@@ -1256,7 +1267,7 @@ int32 UserInterface::WXPayServerResponse(const int32 socket,
     //支付成功
     DicValue dic;
     if (recv.appid() != APPID && recv.mch_id() != MCH_ID) {
-      LOG(ERROR)<< "WXPAY SERVER RESULT appid:[" << recv.appid() << "]";
+      LOG(ERROR) << "WXPAY SERVER RESULT appid:[" << recv.appid() << "]";
       LOG(ERROR) << "WXPAY SERVER RESULT mch_id:[" << recv.mch_id() << "]";
       break;
     }
@@ -1359,8 +1370,8 @@ int32 UserInterface::ObtainVerifyCode(const int32 socket, PacketHead* packet) {
     ss << SMS_KEY << timestamp_ << rand_code_ << rev.phone_num();
     base::MD5Sum md5(ss.str());
     dic.SetString(L"token_", md5.GetHash().c_str());
-    LOG(INFO)<< "token:" << ss.str();
-    LOG(INFO)<< "md5 token:" << md5.GetHash();
+    LOG(INFO) << "token:" << ss.str();
+    LOG(INFO) << "md5 token:" << md5.GetHash();
     ss.str("");
     ss.clear();
     ss << rev.phone_num() << ":" << rev.verify_type();
@@ -1371,7 +1382,7 @@ int32 UserInterface::ObtainVerifyCode(const int32 socket, PacketHead* packet) {
     ss.clear();
     ss << SHELL_SMS << " " << rev.phone_num() << " " << rand_code_ << " "
        << rev.verify_type();
-    LOG(INFO)<< ss.str();
+    LOG(INFO) << ss.str();
     system(ss.str().c_str());
   } while (0);
   if (err < 0) {
@@ -1512,8 +1523,8 @@ int32 UserInterface::ChangePasswd(const int32 socket, PacketHead* packet) {
       err = USER_NOT_IN_CACHE;
       break;
     }
-    LOG(INFO)<< "oldpwd:" << rev.old_passwd();
-    LOG(INFO)<< "pwd" << p->passwd();
+    LOG(INFO) << "oldpwd:" << rev.old_passwd();
+    LOG(INFO) << "pwd" << p->passwd();
     if (p->passwd() != rev.old_passwd()) {
       err = CHANGE_OLD_PWD_ERR;
       break;
@@ -1601,7 +1612,7 @@ int32 UserInterface::UserLogin(const int32 socket, PacketHead* packet) {
     }
     DicValue dic;
     err = AuthorUser(rev.phone_num(), rev.passwd(), rev.user_type(), &dic);
-    LOG(INFO)<< "UserLogin err:" << err;
+    LOG(INFO) << "UserLogin err:" << err;
     if (err < 0)
       break;
     SendMsg(socket, packet, &dic, USER_LOGIN_RLY);
@@ -1610,7 +1621,7 @@ int32 UserInterface::UserLogin(const int32 socket, PacketHead* packet) {
   if (err < 0) {
     SendError(socket, packet, err, USER_LOGIN_RLY);
   }
-  LOG(INFO)<< "UserLogin finish err:" << err;
+  LOG(INFO) << "UserLogin finish err:" << err;
   return err;
 }
 
@@ -1633,7 +1644,7 @@ void UserInterface::AddUser(int32 fd, DicValue* v, int64 type,
   user->set_is_login(true);
   user->set_socket_fd(fd);
   user->set_passwd(pwd);
-  LOG(INFO)<< "adduser login :" << user->uid();
+  LOG(INFO) << "adduser login :" << user->uid();
   data_share_mgr_->AddUser(user);
 }
 
@@ -1651,7 +1662,7 @@ int32 UserInterface::AuthorUser(std::string phone, std::string passwd,
 void UserInterface::SendPacket(const int socket, PacketHead* packet) {
 
   char* s = new char[packet->packet_length()];
-  LOG(INFO)<< "packet body:" << packet->body_str();
+  LOG(INFO) << "packet body:" << packet->body_str();
   memset(s, 0, packet->packet_length());
   memcpy(s, &packet->head(), HEAD_LENGTH);
   memcpy(s + HEAD_LENGTH, packet->body_str().c_str(),
@@ -1659,8 +1670,8 @@ void UserInterface::SendPacket(const int socket, PacketHead* packet) {
   int total = util::SendFull(socket, s, packet->packet_length());
   delete[] s;
   s = NULL;
-  LOG_IF(ERROR, total != packet->packet_length())
-      << "send packet wrong:opcode[" << packet->operate_code() << "]";
+  LOG_IF(ERROR, total != packet->packet_length()) << "send packet wrong:opcode["
+      << packet->operate_code() << "]";
 }
 
 void UserInterface::SendError(const int socket, PacketHead* packet, int32 err,
