@@ -11,6 +11,7 @@
 
 #include "glog/logging.h"
 #include "base/logic/logic_comm.h"
+#include "public/basic/basic_util.h"
 
 #include "chat/chat_proto.h"
 #include "chat/chat_opcode.h"
@@ -234,7 +235,10 @@ int32 ChatInterface::ChatMessage(const int32 socket, PacketHead* packet) {
         break;
       }
       //     PushChatMsg(rev);
-      PushGtMsg(rev.from_uid(), rev.to_uid(), rev.body_str(), rev.content(),
+      std::string temp;
+      std::string temp_content = rev.content();
+      base::BasicUtil::UrlDecode(temp_content, temp);
+      PushGtMsg(rev.from_uid(), rev.to_uid(), rev.body_str(), temp,
           CHAT_MESSAGE_RLY);
       err = chat_mysql_->ChatRecordInsert(rev.from_uid(), rev.to_uid(),
           rev.content(), rev.msg_time(), 1);

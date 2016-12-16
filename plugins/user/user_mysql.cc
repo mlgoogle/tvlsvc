@@ -1116,7 +1116,7 @@ void UserMysql::CallGuideServiceSelect(void* param, Value* value) {
       if (rows[4] != NULL)
         dict->SetBigInteger(L"service_type_", atoll(rows[4]));
       if (rows[5] != NULL)
-        dict->SetBigInteger(L"service_end_", atoll(rows[4]));
+        dict->SetBigInteger(L"service_end_", atoll(rows[5]));
       list->Append(dict);
     }
     info->Set(L"service_list_", list);
