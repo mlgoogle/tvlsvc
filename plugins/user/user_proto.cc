@@ -818,7 +818,7 @@ int32 WXPayServerRecv::Deserialize() {
       r = dic->GetString(L"wxpay_result_", &xml_str_);
       LOG_IF(ERROR, !r) << "WXPayServerRecv::xml_str_ parse error";
       LOG(INFO)<< "WXPAY SERVER RESULT***" << xml_str_ << "***";
-      if (r) {
+      if (r && xml_str_.length() > 5) {
         base_logic::ValueSerializer* deserializer =
             base_logic::ValueSerializer::Create(base_logic::IMPL_XML,
                                                 &xml_str_);

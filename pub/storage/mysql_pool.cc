@@ -52,6 +52,7 @@ base_storage::DBStorageEngine* MYSQL_Pool::DBConnectionPop() {
     engine->Connections(addrlist_);
   }
   if (!engine->CheckConnect()) {
+    engine->Release();
     LOG(WARNING)<< "reconnect ";
     int reconnects = 3;
     do {

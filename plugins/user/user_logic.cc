@@ -57,9 +57,7 @@ bool Userlogic::Init() {
     LOG(ERROR) << "user config load error";
     return false;
   }
-  LOG(INFO) << "user plugin init 111";
   UserInterface::GetInstance()->InitConfig(config);
-  LOG(INFO) << "user plugin init over";
   InitShareData();
   return true;
 }
