@@ -212,7 +212,6 @@ int32 UserMysql::RegisterInsertAndSelect(std::string phone, std::string pass,
 			err = SQL_EXEC_ERROR;
       break;
     }
-//    dic->GetBigInteger(L"result")
   } while (0);
   return err;
 }
@@ -953,20 +952,19 @@ int32 UserMysql::UserInvitationCodeUpDate(std::string phoneNum, std::string invi
 	int32 err = 0;
 	bool r = false;
 	do {
-		//if (uid <= 0 || invitationCode <= 0) {
-		//	err = SQL_EXEC_ERROR;
-		//	break;
-		//}
-
 		/*Invitation Code  AlwaysOnline*/
 		//时间暂定为90天
 
 		std::stringstream ss;
-		ss << "call proc_UserInvitationCodeUpDate('" << phoneNum << "','" << invitationCode << "'" << invitationDate << ")";
+		ss << "call proc_RegInvitationCode('" << phoneNum << "','" << invitationCode << "'," << invitationDate << ")";
 		LOG(INFO) << "sql:" << ss.str();
-		r = mysql_engine_->WriteData(ss.str());
-		if (!r) {
-			err = SQL_EXEC_ERROR;
+		r = mysql_engine_->ReadData(ss.str(), dic, CallUserInvitationCodeUpDate);
+		//注册一定有结果返回
+		if (!r || dic->empty()) {
+			int64 nError;
+			dic->GetBigInteger(L"result_", &nError);
+			if (nError == 0)
+				err = INVITATION_PHONE_NUM_ERR;
 			break;
 		}
 	} while (0);
@@ -2553,7 +2551,28 @@ void UserMysql::CallUserPhotoAlbumSelect(void* param, Value* value) {
 
 void UserMysql::CallUserInvitationCodeUpDate(void* param, Value* value)
 {
-
+	base_storage::DBStorageEngine* engine =
+		(base_storage::DBStorageEngine*) (param);
+	MYSQL_ROW rows;
+	int32 num = engine->RecordCount();
+	DicValue* dict = reinterpret_cast<DicValue*>(value);
+	if (num > 0) {
+		while (rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)) {
+			if (rows[0] != NULL) {
+				dict->SetBigInteger(L"result_", atoll(rows[0]));
+				//邀请码为注册过
+				if (atoi(rows[0]) == 0)
+					break;
+			}
+			else
+			{
+				dict->SetBigInteger(L"result_", 0);
+			}
+		}
+	}
+	else {
+		LOG(WARNING) << "CallUserInvitationCodeUpDate count < 0";
+	}
 }
 
 
