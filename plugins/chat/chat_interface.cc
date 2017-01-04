@@ -431,6 +431,10 @@ int32 ChatInterface::EvaluateTrip(const int32 socket, PacketHead* packet) {
     {
 
     }
+
+	//提成给邀请者
+	err = chat_mysql_->UpDateTripCommission(rev.order_id());
+
   } while (0);
   if (err < 0)
     SendError(socket, packet, err, EVALUATE_TRIP_RLY);

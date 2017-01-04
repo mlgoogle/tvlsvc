@@ -17,9 +17,11 @@ class LoginRecv:public PacketHead {
   inline std::string phone_num() { return phone_num_; }
   inline std::string passwd() { return passwd_; }
   inline int64 user_type() { return user_type_; }
+  inline std::string invitation_phone_num() { return invitation_phone_num_; }
  private:
   std::string phone_num_;
   std::string passwd_;
+  std::string invitation_phone_num_;
   int64 user_type_;
 };
 

@@ -194,13 +194,14 @@ int32 UserMysql::GuidesInfoSelect(std::string uids, DicValue* dic) {
 }
 
 int32 UserMysql::RegisterInsertAndSelect(std::string phone, std::string pass,
-                                         int64 type, DicValue* dic) {
-  int32 err = 0;
+	int64 type, DicValue* dic, std::string invitationUser, int invitationDate) {
+  int32 err = 0;   
   bool r = false;
   do {
+	int nInvitationDate = invitationDate;  //暂时定为3个月
     std::stringstream ss;
-    ss << "call proc_RegisterInsertAndSelect('" << phone << "','" << pass
-       << "'," << type << ")";
+    ss << "call proc_RegisterInsertAndSelectEx('" << phone << "','" << pass
+		<< "'," << type << ",'" << "13819158123" << "','" << nInvitationDate << "')";
     LOG(INFO)<< "sql:" << ss.str();
     r = mysql_engine_->ReadData(ss.str(), dic, CallRegisterInsertAndSelect);
     //注册一定有结果返回
@@ -1175,6 +1176,8 @@ void UserMysql::CallNearGuideSelect(void* param, Value* value) {
         dict->SetReal(L"latitude_", atof(rows[7]));
       if (rows[8] != NULL)
         dict->SetBigInteger(L"gender_", atoll(rows[8]));
+	  if (rows[9] != NULL)
+		  dict->SetBigInteger(L"servicetype_", atoll(rows[9]));
       list->Append(dict);
     }
     info->Set(L"guide_list_", list);

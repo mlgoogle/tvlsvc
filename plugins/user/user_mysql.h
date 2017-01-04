@@ -31,7 +31,7 @@ class UserMysql {
   int32 RecommendGuideSelect(int64 city, int64 type, DicValue* dic);
   int32 GuidesInfoSelect(std::string uids, DicValue* dic);
   int32 RegisterInsertAndSelect(std::string phone, std::string pass, int64 type,
-                                DicValue* dic);
+	  DicValue* dic, std::string invitationUser, int invitationDate);
   int32 ChangePwdUpdate(int64 uid, std::string pwd);
   int32 ImproveUserUpdate(int64 uid, int64 sex, std::string nickname,
                           std::string headurl, std::string addr, double lon,

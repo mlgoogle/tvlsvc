@@ -55,6 +55,14 @@ int32 LoginRecv::Deserialize() {
         err = PHONE_NUM_ERR;
         break;
       }
+	  r = dic->GetString(L"invitation_phone_num_", &invitation_phone_num_);
+	  LOG_IF(ERROR, !r) << "LoginRecv::invitation_phone_num_ parse error";
+	  if (phone_num_.length() < 11) {
+		  LOG(ERROR) << "invitation_phone_num_ is wrong";
+		  err = INVITATION_PHONE_NUM_ERR;
+		  break;
+	  }
+
       r = dic->GetBigInteger(L"user_type_", &user_type_);
       LOG_IF(ERROR, !r) << "LoginRecv::user_type_ parse error";
     } else {
