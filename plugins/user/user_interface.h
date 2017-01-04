@@ -136,6 +136,8 @@ class UserInterface {
 
   int32 UserPhotoAlbum(const int32 socket, PacketHead* packet);
 
+  int32 UserRegInvitationCode(const int32 socket, PacketHead* packet);
+
   int32 VerifyPasswd(const int32 socket, PacketHead* packet);
 
   int32 CheckSMSCode(const int32 socket, PacketHead* packet);

@@ -109,6 +109,7 @@ class RegisterAccountRecv : public PacketHead {
   inline std::string passwd() { return passwd_; }
   inline std::string token() { return token_; }
   inline int64 user_type() { return user_type_; }
+  inline std::string invitation_phone_num() { return invitation_phone_num_; }
  private:
   int64 timestamp_;
   int64 verify_code_;
@@ -116,6 +117,7 @@ class RegisterAccountRecv : public PacketHead {
   std::string phone_num_;
   std::string passwd_;
   std::string token_;
+  std::string invitation_phone_num_;
 };
 
 class ImproveDataRecv : public PacketHead {
@@ -735,7 +737,19 @@ class UserPhotoAlbumRecv : public PacketHead {
   int64 size_;
   int64 num_;
 };
- 
+
+class  UserRegInvitationCodeRecv :public PacketHead {
+public:
+	UserRegInvitationCodeRecv(PacketHead packet);
+	int32 Deserialize();
+
+	inline std::string phoneNum() { return phoneNum_; }
+	inline std::string invitationCode() { return invitationCode_; }
+
+private:
+	std::string phoneNum_;
+	std::string invitationCode_;
+}; 
 }  // namespace user
 
 #endif  // PLUGINS_USER_USER_PROTO_H_

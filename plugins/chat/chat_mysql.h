@@ -35,6 +35,8 @@ class ChatMysql {
   int32 EvaluateTripInsert(int64 oid, int64 s_score, int64 u_score,
                            std::string remarks, int64 from, int64 to);
 
+  int32 UpDateTripCommission(int64 rederId);
+
   int32 PullPushMsgSelect(int64 uid, DicValue* dic);
 
   int32 EvaluateInfoSelect(int64 oid, DicValue* dic);
@@ -58,6 +60,7 @@ class ChatMysql {
   static void CallSpentCashUpdate(void* param, Value* value);
   static void CallCancelOrderPayUpdate(void* param, Value* value);
   static void CallGuideOrderStatusUpdate(void* param, Value* value);
+  static void CallGetUserInvitationInfo(void* param, Value* value);
   static void CallPullPushMsgSelect(void* param, Value* value);
 
  private:

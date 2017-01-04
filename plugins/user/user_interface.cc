@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <time.h>
 #include <sys/socket.h>
 
@@ -671,6 +672,25 @@ int32 UserInterface::UserPhotoAlbum(const int32 socket, PacketHead* packet) {
   return err;
 }
 
+int32 UserInterface::UserRegInvitationCode(const int32 socket, PacketHead* packet) {
+	int32 err = 0;
+	do {
+		UserRegInvitationCodeRecv recv(*packet);
+		err = recv.Deserialize();
+		if (err < 0)
+			break;
+		DicValue dic;
+		/*暂定为90天 AlwaysOnline*/
+		err = user_mysql_->UserInvitationCodeUpDate(recv.phoneNum(),recv.invitationCode(), 90,  &dic);
+		if (err < 0)
+			break;
+		SendMsg(socket, packet, &dic, USER_REG_INVITATIONCODE_RLY);
+	} while (0);
+	if (err < 0)
+		SendError(socket, packet, err, USER_REG_INVITATIONCODE_RLY);
+	return err;
+}
+
 int32 UserInterface::CloseSocket(const int fd) {
   data_share_mgr_->UserOffline(fd);
   return 0;
@@ -1324,6 +1344,7 @@ int32 UserInterface::IdentityReviewStatus(const int32 socket,
 
 int32 UserInterface::RegisterAccount(const int32 socket, PacketHead* packet) {
   int32 err = 0;
+  //LOG(INFO) << "AlwaysOnline test:";
   do {
     RegisterAccountRecv rev(*packet);
     err = rev.Deserialize();
@@ -1341,8 +1362,9 @@ int32 UserInterface::RegisterAccount(const int32 socket, PacketHead* packet) {
       break;
     }
     DicValue dic;
+
     err = user_mysql_->RegisterInsertAndSelect(rev.phone_num(), rev.passwd(),
-                                               rev.user_type(), &dic);
+		rev.user_type(), &dic);
     if (err < 0)
       break;
     SendMsg(socket, packet, &dic, REGISTER_ACCOUNT_RLY);
@@ -1513,6 +1535,7 @@ int32 UserInterface::ChangeGuideService(const int32 socket,
 
 int32 UserInterface::ChangePasswd(const int32 socket, PacketHead* packet) {
   int32 err = 0;
+  //LOG(INFO) << "AlwaysOnline test:";
   do {
     ChangePasswdRecv rev(*packet);
     err = rev.Deserialize();
@@ -1523,6 +1546,37 @@ int32 UserInterface::ChangePasswd(const int32 socket, PacketHead* packet) {
       err = USER_NOT_IN_CACHE;
       break;
     }
+
+	/************TEST***********/
+	int a[100];
+	std::string sInvitation_code = "13819158789";
+	int n, i = 0;
+	int64 x = 13819158789;
+	LOG(INFO) << "Invitation_code:" << sInvitation_code << '\n';
+	while (x != 0)
+	{
+		a[i] = x % 32;
+		i++;
+		n = i;
+		x = x / 32;
+	}
+	for (i = (n - 1); i >= 0; i--)
+	{
+		if (a[i] <= 9)
+		{ 
+			LOG(INFO) << "Invitation_code11111:" << (char)(a[i] + 48);
+			sInvitation_code = sInvitation_code + (char)(a[i] + 48);
+		}			
+		else
+		{
+			sInvitation_code = sInvitation_code + (char)(a[i] - 10 + 'a');
+		}
+
+	}
+	LOG(INFO) << "Invitation_code:" << sInvitation_code << '\n';
+	/************TEST***********/
+
+
     LOG(INFO) << "oldpwd:" << rev.old_passwd();
     LOG(INFO) << "pwd" << p->passwd();
     if (p->passwd() != rev.old_passwd()) {
