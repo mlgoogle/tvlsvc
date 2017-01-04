@@ -55,14 +55,6 @@ int32 LoginRecv::Deserialize() {
         err = PHONE_NUM_ERR;
         break;
       }
-	  r = dic->GetString(L"invitation_phone_num_", &invitation_phone_num_);
-	  LOG_IF(ERROR, !r) << "LoginRecv::invitation_phone_num_ parse error";
-	  if (phone_num_.length() < 11) {
-		  LOG(ERROR) << "invitation_phone_num_ is wrong";
-		  err = INVITATION_PHONE_NUM_ERR;
-		  break;
-	  }
-
       r = dic->GetBigInteger(L"user_type_", &user_type_);
       LOG_IF(ERROR, !r) << "LoginRecv::user_type_ parse error";
     } else {
@@ -309,6 +301,15 @@ int32 RegisterAccountRecv::Deserialize() {
       LOG_IF(ERROR, !r) << "RegisterAccountRecv::passwd_ parse error";
       r = dic->GetString(L"token_", &token_);
       LOG_IF(ERROR, !r) << "RegisterAccount::token_ parse error";
+
+	  r = dic->GetString(L"invitation_phone_num_", &invitation_phone_num_);
+	  LOG(INFO) << invitation_phone_num_ << '\n';
+	  LOG_IF(ERROR, !r) << "LoginRecv::invitation_phone_num_ parse error";
+	  if (phone_num_.length() < 11) {
+		  LOG(ERROR) << "invitation_phone_num_ is wrong";
+		  err = INVITATION_PHONE_NUM_ERR;
+		  break;
+	  }
     } else {
       LOG(ERROR)<< "RegisterAccountRecv Deserialize error";
       err = REGISTER_ACCOUNT_JSON_ERR;
@@ -1842,6 +1843,37 @@ int32 UserPhotoAlbumRecv::Deserialize() {
   base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
                                                 serializer);
   return err;
+}
+
+UserRegInvitationCodeRecv::UserRegInvitationCodeRecv(PacketHead packet) {
+	head_ = packet.head();
+	body_str_ = packet.body_str();
+}
+
+int32 UserRegInvitationCodeRecv::Deserialize()
+{
+	int32 err = 0;
+	bool r = false;
+	base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+		base_logic::IMPL_JSON, &body_str_, false);
+	std::string err_str;
+	DicValue* dic = (DicValue*)serializer->Deserialize(&err, &err_str);
+	do {
+		if (dic != NULL) {
+			r = dic->GetString(L"phoneNum_", &phoneNum_);
+			LOG_IF(ERROR, !r) << "UserRegInvitationCodeRecv::uid_ parse error";
+			r = dic->GetString(L"invitationCode_", &invitationCode_);
+			LOG_IF(ERROR, !r) << "UserRegInvitationCodeRecv::invitationCode_ parse error";
+		}
+		else {
+			LOG(ERROR) << "UserRegInvitationCodeRecv Deserialize error";
+			err = REQUEST_JSON_ERR;
+			break;
+		}
+	} while (0);
+	base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+		serializer);
+	return err;
 }
 
 }  // namespace user

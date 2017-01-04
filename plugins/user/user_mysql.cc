@@ -194,19 +194,22 @@ int32 UserMysql::GuidesInfoSelect(std::string uids, DicValue* dic) {
 }
 
 int32 UserMysql::RegisterInsertAndSelect(std::string phone, std::string pass,
-	int64 type, DicValue* dic, std::string invitationUser, int invitationDate) {
+	int64 type, DicValue* dic) {
   int32 err = 0;   
   bool r = false;
   do {
-	int nInvitationDate = invitationDate;  //暂时定为3个月
     std::stringstream ss;
-    ss << "call proc_RegisterInsertAndSelectEx('" << phone << "','" << pass
-		<< "'," << type << ",'" << "13819158123" << "','" << nInvitationDate << "')";
+    ss << "call proc_RegisterInsertAndSelect('" << phone << "','" << pass
+		<< "'," << type <<"')";
     LOG(INFO)<< "sql:" << ss.str();
     r = mysql_engine_->ReadData(ss.str(), dic, CallRegisterInsertAndSelect);
     //注册一定有结果返回
     if (!r || dic->empty()) {
-      err = SQL_EXEC_ERROR;
+		int64 nError;
+		dic->GetBigInteger(L"result_", &nError);
+
+		if (nError == 0)
+			err = SQL_EXEC_ERROR;
       break;
     }
 //    dic->GetBigInteger(L"result")
@@ -944,6 +947,32 @@ int32 UserMysql::UserPhotoAlbumSelect(int64 uid, int64 size, int64 num, DicValue
   return err;
 }
 
+
+int32 UserMysql::UserInvitationCodeUpDate(std::string phoneNum, std::string invitationCode, int invitationDate, DicValue* dic)
+{
+	int32 err = 0;
+	bool r = false;
+	do {
+		//if (uid <= 0 || invitationCode <= 0) {
+		//	err = SQL_EXEC_ERROR;
+		//	break;
+		//}
+
+		/*Invitation Code  AlwaysOnline*/
+		//时间暂定为90天
+
+		std::stringstream ss;
+		ss << "call proc_UserInvitationCodeUpDate('" << phoneNum << "','" << invitationCode << "'" << invitationDate << ")";
+		LOG(INFO) << "sql:" << ss.str();
+		r = mysql_engine_->WriteData(ss.str());
+		if (!r) {
+			err = SQL_EXEC_ERROR;
+			break;
+		}
+	} while (0);
+	return err;
+}
+
 int32 UserMysql::CheckPasswdSelect(int64 uid, std::string pass, int64 type,
                                    DicValue* dic) {
   int32 err = 0;
@@ -1323,7 +1352,7 @@ void UserMysql::CallRegisterInsertAndSelect(void* param, Value* value) {
       if (rows[0] != NULL) {
         dict->SetBigInteger(L"result_", atoll(rows[0]));
         //用户已注册过
-        if (atoi(rows[0]) == 0)
+      if (atoi(rows[0]) == 0)
           break;
       }
       if (rows[1] != NULL)
@@ -2521,6 +2550,12 @@ void UserMysql::CallUserPhotoAlbumSelect(void* param, Value* value) {
     LOG(WARNING)<<"CallUserPhotoAlbumSelect count < 0";
   }
 }
-    
+
+void UserMysql::CallUserInvitationCodeUpDate(void* param, Value* value)
+{
+
+}
+
+
 } // namespace user
 
