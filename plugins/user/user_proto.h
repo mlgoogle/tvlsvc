@@ -749,7 +749,17 @@ public:
 private:
 	std::string phoneNum_;
 	std::string invitationCode_;
-}; 
+};
+class UserAppVersionInfoeRecv :public PacketHead {
+public:
+	UserAppVersionInfoeRecv(PacketHead packet);
+	int32 Deserialize();
+
+	inline int AppType() { return app_type_; }
+
+private:
+	int64 app_type_;
+};
 }  // namespace user
 
 #endif  // PLUGINS_USER_USER_PROTO_H_

@@ -691,6 +691,26 @@ int32 UserInterface::UserRegInvitationCode(const int32 socket, PacketHead* packe
 	return err;
 }
 
+int32 UserInterface::UserAppVersionInfo(const int32 socket, PacketHead* packet)
+{
+	int32 err = 0;
+	do {
+		UserAppVersionInfoeRecv recv(*packet);
+		err = recv.Deserialize();
+		if (err < 0)
+			break;
+		DicValue dic;
+		err = user_mysql_->UserAppVersionInfo(recv.AppType(),&dic);
+		if (err < 0)
+			break;
+		SendMsg(socket, packet, &dic, USER_APP_VERSION_INFO_RLY);
+	} while (0);
+	if (err < 0) {
+		SendError(socket, packet, err, USER_APP_VERSION_INFO_RLY);
+	}
+	return err;
+}
+
 int32 UserInterface::CloseSocket(const int fd) {
   data_share_mgr_->UserOffline(fd);
   return 0;
@@ -1749,6 +1769,5 @@ void UserInterface::SendMsg(const int socket, PacketHead* packet, DicValue* dic,
   send.set_operate_code(opcode);
   SendPacket(socket, &send);
 }
-
 }  // namespace user
 

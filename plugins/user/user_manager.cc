@@ -269,6 +269,10 @@ int32 UserManager::AssignPacket(const int32 socket, PacketHead* packet) {
       interface->UserRegInvitationCode(socket, packet);
       break;
 	}
+	case USER_APP_VERSION_INFO_REQ: {
+      interface->UserAppVersionInfo(socket, packet);
+      break;
+	}
     case GUIDE_SERVICE_LIST_REQ: {
       interface->GuideServiceList(socket, packet);
       break;

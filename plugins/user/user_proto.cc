@@ -1876,5 +1876,33 @@ int32 UserRegInvitationCodeRecv::Deserialize()
 	return err;
 }
 
+UserAppVersionInfoeRecv::UserAppVersionInfoeRecv(PacketHead packet) {
+	head_ = packet.head();
+	body_str_ = packet.body_str();
+	app_type_ = 0;
+}
+
+int32 UserAppVersionInfoeRecv::Deserialize() {
+	int32 err = 0;
+	bool r = false;
+	base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+		base_logic::IMPL_JSON, &body_str_, false);
+	std::string err_str;
+	DicValue* dic = (DicValue*)serializer->Deserialize(&err, &err_str);
+	do {
+		if (dic != NULL) {
+			r = dic->GetBigInteger(L"app_type_", &app_type_);
+			LOG_IF(ERROR, !r) << "UserAppVersionInfoeRecv::app_type_ parse error";
+		}
+		else {
+			LOG(ERROR) << "UserAppVersionInfoeRecv Deserialize error";
+			err = REQUEST_JSON_ERR;
+			break;
+		}
+	} while (0);
+	base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+		serializer);
+	return err;
+}
 }  // namespace user
 

@@ -132,6 +132,8 @@ class UserMysql {
 
   int32 UserInvitationCodeUpDate(std::string phoneNum, std::string invitationCode, int invitationDate, DicValue* dic);
 
+  int32 UserAppVersionInfo(int64 appType,DicValue* dic);
+
   int32 CheckPasswdSelect(int64 uid, std::string pass, int64 type,
                           DicValue* dic);
 
@@ -195,6 +197,7 @@ class UserMysql {
   static void CallGuideOrderDetailSelect(void* param, Value* value);
   static void CallDefineGuideSkillsUpdateSelect(void* param, Value* value);
   static void CallUserInvitationCodeUpDate(void* param, Value* value);
+  static void CallUserAppVersionInfo(void* param, Value* value);
  private:
   base_logic::DataEngine* mysql_engine_;
 };
