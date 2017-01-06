@@ -20,7 +20,7 @@ class ChatMysql {
   ~ChatMysql();
 
   int32 ChatRecordInsert(int64 from, int64 to, std::string msg, int64 time,
-                         int64 is_push);
+                         int64 is_push, int64 type);
   int32 ChatRecordInsert(std::list<std::string> sqls);
 
   int32 ChatRecordQuery(int64 from, int64 to, int64 count, int64 id,

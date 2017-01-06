@@ -27,13 +27,13 @@ ChatMysql::~ChatMysql() {
 }
 
 int32 ChatMysql::ChatRecordInsert(int64 from, int64 to, std::string msg,
-                                  int64 time, int64 is_push) {
+	int64 time, int64 is_push, int64 type) {
   int32 err = 0;
   bool r = false;
   do {
     std::stringstream ss;
     ss << "call proc_ChatRecordInsert(" << from << "," << to << ",'" << msg
-       << "'," << time << "," << is_push << ");";
+		<< "'," << time << "," << is_push << "," << type << ");";
     LOG(INFO)<< "sql:" << ss.str();
     r = mysql_engine_->WriteData(ss.str());
     if (!r) {
