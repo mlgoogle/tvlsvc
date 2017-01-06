@@ -5,6 +5,7 @@
 #include "chat/chat_mysql.h"
 
 #include <mysql/mysql.h>
+#include <sys/time.h>
 
 #include "pub/storage/data_engine.h"
 #include "pub/comm/comm_head.h"
@@ -26,13 +27,13 @@ ChatMysql::~ChatMysql() {
 }
 
 int32 ChatMysql::ChatRecordInsert(int64 from, int64 to, std::string msg,
-                                  int64 time, int64 is_push) {
+	int64 time, int64 is_push, int64 type) {
   int32 err = 0;
   bool r = false;
   do {
     std::stringstream ss;
     ss << "call proc_ChatRecordInsert(" << from << "," << to << ",'" << msg
-       << "'," << time << "," << is_push << ");";
+		<< "'," << time << "," << is_push << "," << type << ");";
     LOG(INFO)<< "sql:" << ss.str();
     r = mysql_engine_->WriteData(ss.str());
     if (!r) {
@@ -173,6 +174,64 @@ int32 ChatMysql::EvaluateTripInsert(int64 oid, int64 s_score, int64 u_score,
     }
   } while (0);
   return err;
+}
+
+int32 ChatMysql::UpDateTripCommission(int64 orderId) {
+	int32 err = 0;
+	bool r = false;
+	do {
+		std::stringstream ss;
+		ss << "call proc_UserInvitationInfo(" << orderId <<")";
+		LOG(INFO) << "sql:" << ss.str();
+		DicValue dic;
+		r = mysql_engine_->ReadData(ss.str(), &dic, CallGetUserInvitationInfo);
+		if (!r) {
+			err = SQL_EXEC_ERROR;
+			break;
+		}		
+		if (!dic.empty())
+		{
+			std::string strUserRegTime;
+			int nInvitationUserTime;
+			int64 nUserId = 0;
+			
+			dic.GetString(L"startime", &strUserRegTime);
+			dic.GetInteger(L"date", &nInvitationUserTime);
+			dic.GetBigInteger(L"userId", &nUserId);
+
+			time_t timep;
+			struct tm *p;
+			time(&timep);
+			timep = timep - nInvitationUserTime * 24 * 60 * 60;
+			p = localtime(&timep);
+			int nInvitationTime = (p->tm_year + 1900) * 10000 + (p->tm_mon + 1) * 100 + p->tm_mday;
+			LOG(INFO) << "Invitation time  is  " << nInvitationTime << '\n';			
+
+			tm tmStartTime;
+			time(&timep);
+			strptime(strUserRegTime.c_str(), "%Y-%m-%d %H:%M:%S", &tmStartTime); //将字符串转换为tm时间 
+			int nRegTime = (tmStartTime.tm_year + 1900) * 10000 + (tmStartTime.tm_mon + 1) * 100 + tmStartTime.tm_mday;
+			LOG(INFO) << "Reg time  is  " << nRegTime << '\n';
+
+			if (nRegTime >= nInvitationTime)
+			{				
+				if (nUserId != 0)
+				{
+					std::stringstream sSql;
+					sSql << "call proc_UpdateCommission(" << orderId << "," << nUserId << ")";
+					LOG(INFO) << sSql.str() << '\n';
+					r = mysql_engine_->WriteData(sSql.str());
+
+					if (!r) {
+						err = SQL_EXEC_ERROR;
+						break;
+					}
+				}				
+			}
+		}
+
+	} while (0);
+	return err;
 }
 
 int32 ChatMysql::GuideOrderStatusUpdate(int64 oid, int64 o_status) {
@@ -443,6 +502,41 @@ void ChatMysql::CallGuideOrderStatusUpdate(void* param, Value* value) {
   }
 }
 
+void ChatMysql::CallGetUserInvitationInfo(void* param, Value* value) {
+	base_storage::DBStorageEngine* engine =
+		(base_storage::DBStorageEngine*) (param);
+	MYSQL_ROW rows;
+	int32 num = engine->RecordCount();
+	DicValue* dict = reinterpret_cast<DicValue*>(value);
+	if (num > 0) {
+		while (rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)) {
+			if (rows[0] != NULL)
+			{
+				dict->SetString(L"startime", rows[0]);
+			}
+			if (rows[1] != NULL)
+			{
+				dict->SetInteger(L"date", atoi(rows[1]));
+			}
+			else
+			{
+				dict->SetInteger(L"date", 0);
+			}
+			if (rows[2] != NULL)
+			{
+				dict->SetBigInteger(L"userId", atoll(rows[2]));
+			}
+			else
+			{
+				dict->SetBigInteger(L"userId", 0);
+			}
+		}
+	}
+	else {
+		LOG(WARNING) << "Call CallGuideOrderStatusUpdate count < 0";
+	}
+}
+
 void ChatMysql::CallPullPushMsgSelect(void* param, Value* value) {
   base_storage::DBStorageEngine* engine =
       (base_storage::DBStorageEngine*) (param);
@@ -461,6 +555,8 @@ void ChatMysql::CallPullPushMsgSelect(void* param, Value* value) {
         dict->SetBigInteger(L"msg_time_", atoll(rows[2]));
       if (rows[3] != NULL)
         dict->SetString(L"content_", (rows[3]));
+	  if (rows[4] != NULL)
+		  dict->SetBigInteger(L"msg_type_", atoll(rows[4]));
       list->Append(dict);
     }
   } else {

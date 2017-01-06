@@ -20,7 +20,7 @@ class ChatMysql {
   ~ChatMysql();
 
   int32 ChatRecordInsert(int64 from, int64 to, std::string msg, int64 time,
-                         int64 is_push);
+                         int64 is_push, int64 type);
   int32 ChatRecordInsert(std::list<std::string> sqls);
 
   int32 ChatRecordQuery(int64 from, int64 to, int64 count, int64 id,
@@ -34,6 +34,8 @@ class ChatMysql {
 
   int32 EvaluateTripInsert(int64 oid, int64 s_score, int64 u_score,
                            std::string remarks, int64 from, int64 to);
+
+  int32 UpDateTripCommission(int64 rederId);
 
   int32 PullPushMsgSelect(int64 uid, DicValue* dic);
 
@@ -58,6 +60,7 @@ class ChatMysql {
   static void CallSpentCashUpdate(void* param, Value* value);
   static void CallCancelOrderPayUpdate(void* param, Value* value);
   static void CallGuideOrderStatusUpdate(void* param, Value* value);
+  static void CallGetUserInvitationInfo(void* param, Value* value);
   static void CallPullPushMsgSelect(void* param, Value* value);
 
  private:

@@ -301,6 +301,15 @@ int32 RegisterAccountRecv::Deserialize() {
       LOG_IF(ERROR, !r) << "RegisterAccountRecv::passwd_ parse error";
       r = dic->GetString(L"token_", &token_);
       LOG_IF(ERROR, !r) << "RegisterAccount::token_ parse error";
+
+	  r = dic->GetString(L"invitation_phone_num_", &invitation_phone_num_);
+	  LOG(INFO) << invitation_phone_num_ << '\n';
+	  LOG_IF(ERROR, !r) << "LoginRecv::invitation_phone_num_ parse error";
+	  if (phone_num_.length() < 11) {
+		  LOG(ERROR) << "invitation_phone_num_ is wrong";
+		  err = INVITATION_PHONE_NUM_ERR;
+		  break;
+	  }
     } else {
       LOG(ERROR)<< "RegisterAccountRecv Deserialize error";
       err = REGISTER_ACCOUNT_JSON_ERR;
@@ -1808,7 +1817,59 @@ UserPhotoAlbumRecv::UserPhotoAlbumRecv(PacketHead packet) {
   uid_ = 0;
   size_ = 0;
   num_ = 0;
-}  
+}
+
+UploadContactsRecv::UploadContactsRecv(PacketHead packet) {
+	head_ = packet.head();
+	body_str_ = packet.body_str();
+	uid_ = 0;
+}
+
+int32 UploadContactsRecv::Deserialize() {
+	int32 err = 0;
+	bool r = false;
+	base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+		base_logic::IMPL_JSON, &body_str_, false);
+	std::string err_str;
+	DicValue* dic = (DicValue*)serializer->Deserialize(&err, &err_str);
+	do {
+		if (dic != NULL) {
+			r = dic->GetBigInteger(L"uid", &uid_);
+			LOG_IF(ERROR, !r) << "UploadContactsRecv::uid_ parse error";
+			ListValue* list;
+			r = dic->GetList(L"contacts_list", &list);
+			if (!r) {
+				err = REQUEST_JSON_ERR;
+				break;
+			}
+			int count = list->GetSize();
+			for (int i = 0; i < count; i++) {
+				DicValue* info;
+				r = list->GetDictionary(i, &info);
+				if (r) {
+					std::string name;
+					std::string phone_num;
+					info->GetString(L"name", &name);
+					info->GetString(L"phone_num", &phone_num);
+					std::stringstream ss;
+					ss << "call proc_UploadContactsInsert('" << name << "','" << phone_num
+						<< "'," << uid_ << ")";
+					LOG(INFO) << "call proc_UploadContactsInsert(" << name << ",'" << phone_num
+						<< "','" << uid_ << "')";
+					sql_list_.push_back(ss.str()); 
+				}
+			}
+		}
+		else {
+			LOG(ERROR) << "UploadContactsRecv Deserialize error";
+			err = REQUEST_JSON_ERR;
+			break;
+		}
+	} while (0);
+	base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+		serializer);
+	return err;
+}
 
 int32 UserPhotoAlbumRecv::Deserialize() {
   int32 err = 0;
@@ -1836,5 +1897,64 @@ int32 UserPhotoAlbumRecv::Deserialize() {
   return err;
 }
 
+UserRegInvitationCodeRecv::UserRegInvitationCodeRecv(PacketHead packet) {
+	head_ = packet.head();
+	body_str_ = packet.body_str();
+}
+
+int32 UserRegInvitationCodeRecv::Deserialize()
+{
+	int32 err = 0;
+	bool r = false;
+	base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+		base_logic::IMPL_JSON, &body_str_, false);
+	std::string err_str;
+	DicValue* dic = (DicValue*)serializer->Deserialize(&err, &err_str);
+	do {
+		if (dic != NULL) {
+			r = dic->GetString(L"phoneNum_", &phoneNum_);
+			LOG_IF(ERROR, !r) << "UserRegInvitationCodeRecv::uid_ parse error";
+			r = dic->GetString(L"invitationCode_", &invitationCode_);
+			LOG_IF(ERROR, !r) << "UserRegInvitationCodeRecv::invitationCode_ parse error";
+		}
+		else {
+			LOG(ERROR) << "UserRegInvitationCodeRecv Deserialize error";
+			err = REQUEST_JSON_ERR;
+			break;
+		}
+	} while (0);
+	base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+		serializer);
+	return err;
+}
+
+UserAppVersionInfoeRecv::UserAppVersionInfoeRecv(PacketHead packet) {
+	head_ = packet.head();
+	body_str_ = packet.body_str();
+	app_type_ = 0;
+}
+
+int32 UserAppVersionInfoeRecv::Deserialize() {
+	int32 err = 0;
+	bool r = false;
+	base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+		base_logic::IMPL_JSON, &body_str_, false);
+	std::string err_str;
+	DicValue* dic = (DicValue*)serializer->Deserialize(&err, &err_str);
+	do {
+		if (dic != NULL) {
+			r = dic->GetBigInteger(L"app_type_", &app_type_);
+			LOG_IF(ERROR, !r) << "UserAppVersionInfoeRecv::app_type_ parse error";
+		}
+		else {
+			LOG(ERROR) << "UserAppVersionInfoeRecv Deserialize error";
+			err = REQUEST_JSON_ERR;
+			break;
+		}
+	} while (0);
+	base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+		serializer);
+	return err;
+}
 }  // namespace user
 

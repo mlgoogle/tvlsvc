@@ -265,6 +265,18 @@ int32 UserManager::AssignPacket(const int32 socket, PacketHead* packet) {
       interface->UserPhotoAlbum(socket, packet);
       break;
 	}
+	case UPLOAD_CONTACTS_REQ: {
+	  interface->UploadContacts(socket, packet);
+	  break;
+	}
+	case USER_REG_INVITATIONCODE_REQ: {
+      interface->UserRegInvitationCode(socket, packet);
+      break;
+	}
+	case USER_APP_VERSION_INFO_REQ: {
+      interface->UserAppVersionInfo(socket, packet);
+      break;
+	}
     case GUIDE_SERVICE_LIST_REQ: {
       interface->GuideServiceList(socket, packet);
       break;
