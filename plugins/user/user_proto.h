@@ -738,6 +738,18 @@ class UserPhotoAlbumRecv : public PacketHead {
   int64 num_;
 };
 
+class UploadContactsRecv : public PacketHead {
+public:
+	UploadContactsRecv(PacketHead packet);
+	int32 Deserialize();
+
+	inline int64 uid() { return uid_; }
+	inline std::list<std::string> sql_list() { return sql_list_; }
+private:
+	int64 uid_;
+	std::list<std::string> sql_list_;
+};
+
 class  UserRegInvitationCodeRecv :public PacketHead {
 public:
 	UserRegInvitationCodeRecv(PacketHead packet);

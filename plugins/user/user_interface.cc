@@ -672,6 +672,23 @@ int32 UserInterface::UserPhotoAlbum(const int32 socket, PacketHead* packet) {
   return err;
 }
 
+int32 UserInterface::UploadContacts(const int32 socket, PacketHead* packet) {
+	int32 err = 0;
+	do {
+		UploadContactsRecv rev(*packet);
+		err = rev.Deserialize();
+		if (err < 0)
+			break;
+		err = user_mysql_->WriteDatas(rev.sql_list());
+		if (err < 0)
+			break;
+		SendMsg(socket, packet, NULL, UPLOAD_CONTACTS_REQ);
+	} while (0);
+	if (err < 0)
+		SendError(socket, packet, err, UPLOAD_CONTACTS_REQ);
+	return err;
+}
+
 int32 UserInterface::UserRegInvitationCode(const int32 socket, PacketHead* packet) {
 	int32 err = 0;
 	do {

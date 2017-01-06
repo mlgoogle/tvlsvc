@@ -946,6 +946,18 @@ int32 UserMysql::UserPhotoAlbumSelect(int64 uid, int64 size, int64 num, DicValue
   return err;
 }
 
+int32 UserMysql::WriteDatas(std::list<std::string> sqls) {
+	int32 err = 0;
+	bool r = false;
+	do {
+		r = mysql_engine_->WriteDatas(sqls);
+		if (!r) {
+			err = SQL_EXEC_ERROR;
+			break;
+		}
+	} while (0);
+	return err;
+}
 
 int32 UserMysql::UserInvitationCodeUpDate(std::string phoneNum, std::string invitationCode, int invitationDate, DicValue* dic)
 {

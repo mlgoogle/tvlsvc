@@ -130,6 +130,8 @@ class UserMysql {
 
   int32 UserPhotoAlbumSelect(int64 uid, int64 size, int64 num, DicValue* dic);
 
+  int32 WriteDatas(std::list<std::string> sqls);
+
   int32 UserInvitationCodeUpDate(std::string phoneNum, std::string invitationCode, int invitationDate, DicValue* dic);
 
   int32 UserAppVersionInfo(int64 appType,DicValue* dic);

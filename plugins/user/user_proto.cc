@@ -1817,7 +1817,59 @@ UserPhotoAlbumRecv::UserPhotoAlbumRecv(PacketHead packet) {
   uid_ = 0;
   size_ = 0;
   num_ = 0;
-}  
+}
+
+UploadContactsRecv::UploadContactsRecv(PacketHead packet) {
+	head_ = packet.head();
+	body_str_ = packet.body_str();
+	uid_ = 0;
+}
+
+int32 UploadContactsRecv::Deserialize() {
+	int32 err = 0;
+	bool r = false;
+	base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+		base_logic::IMPL_JSON, &body_str_, false);
+	std::string err_str;
+	DicValue* dic = (DicValue*)serializer->Deserialize(&err, &err_str);
+	do {
+		if (dic != NULL) {
+			r = dic->GetBigInteger(L"uid", &uid_);
+			LOG_IF(ERROR, !r) << "UploadContactsRecv::uid_ parse error";
+			ListValue* list;
+			r = dic->GetList(L"contacts_list", &list);
+			if (!r) {
+				err = REQUEST_JSON_ERR;
+				break;
+			}
+			int count = list->GetSize();
+			for (int i = 0; i < count; i++) {
+				DicValue* info;
+				r = list->GetDictionary(i, &info);
+				if (r) {
+					std::string name;
+					std::string phone_num;
+					info->GetString(L"name", &name);
+					info->GetString(L"phone_num", &phone_num);
+					std::stringstream ss;
+					ss << "call proc_UploadContactsInsert('" << name << "','" << phone_num
+						<< "'," << uid_ << ")";
+					LOG(INFO) << "call proc_UploadContactsInsert(" << name << ",'" << phone_num
+						<< "','" << uid_ << "')";
+					sql_list_.push_back(ss.str()); 
+				}
+			}
+		}
+		else {
+			LOG(ERROR) << "UploadContactsRecv Deserialize error";
+			err = REQUEST_JSON_ERR;
+			break;
+		}
+	} while (0);
+	base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+		serializer);
+	return err;
+}
 
 int32 UserPhotoAlbumRecv::Deserialize() {
   int32 err = 0;
