@@ -555,6 +555,8 @@ void ChatMysql::CallPullPushMsgSelect(void* param, Value* value) {
         dict->SetBigInteger(L"msg_time_", atoll(rows[2]));
       if (rows[3] != NULL)
         dict->SetString(L"content_", (rows[3]));
+	  if (rows[4] != NULL)
+		  dict->SetBigInteger(L"msg_type_", atoll(rows[4]));
       list->Append(dict);
     }
   } else {
