@@ -946,6 +946,18 @@ int32 UserMysql::UserPhotoAlbumSelect(int64 uid, int64 size, int64 num, DicValue
   return err;
 }
 
+int32 UserMysql::WriteDatas(std::list<std::string> sqls) {
+	int32 err = 0;
+	bool r = false;
+	do {
+		r = mysql_engine_->WriteDatas(sqls);
+		if (!r) {
+			err = SQL_EXEC_ERROR;
+			break;
+		}
+	} while (0);
+	return err;
+}
 
 int32 UserMysql::UserInvitationCodeUpDate(std::string phoneNum, std::string invitationCode, int invitationDate, DicValue* dic)
 {
@@ -965,6 +977,23 @@ int32 UserMysql::UserInvitationCodeUpDate(std::string phoneNum, std::string invi
 			dic->GetBigInteger(L"result_", &nError);
 			if (nError == 0)
 				err = INVITATION_PHONE_NUM_ERR;
+			break;
+		}
+	} while (0);
+	return err;
+}
+
+int32 UserMysql::UserAppVersionInfo(int64 appType, DicValue* dic)
+{
+	int32 err = 0;
+	bool r = false;
+	do {
+		std::stringstream ss;
+		ss << "call proc_UserAppVersionInfo(" << appType <<")";
+		LOG(INFO) << "sql:" << ss.str();
+		r = mysql_engine_->ReadData(ss.str(), dic, CallUserAppVersionInfo);
+		if (!r) {
+			err = SQL_EXEC_ERROR;
 			break;
 		}
 	} while (0);
@@ -2574,7 +2603,44 @@ void UserMysql::CallUserInvitationCodeUpDate(void* param, Value* value)
 		LOG(WARNING) << "CallUserInvitationCodeUpDate count < 0";
 	}
 }
-
-
+void UserMysql::CallUserAppVersionInfo(void* param, Value* value)
+{
+	base_storage::DBStorageEngine* engine =
+		(base_storage::DBStorageEngine*) (param);
+	MYSQL_ROW rows;
+	int32 num = engine->RecordCount();
+	DicValue* dict = reinterpret_cast<DicValue*>(value);
+	if (num > 0) {
+		while (rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)) {
+			if (rows[0] != NULL) {
+				dict->SetString(L"newVersion", rows[0]);
+			}
+			else{
+				dict->SetString(L"newVersion", "NULL");
+			}
+			if (rows[1] != NULL) {
+				dict->SetString(L"buildVersion", rows[1]);
+			}
+			else{
+				dict->SetString(L"buildVersion", "NULL");
+			}
+			if (rows[2] != NULL) {
+				dict->SetBigInteger(L"mustUpdate", atoll(rows[2]));
+			}
+			else{
+				dict->SetBigInteger(L"mustUpdate", 0);
+			}
+			if (rows[3] != NULL) {
+				dict->SetString(L"DetailedInfo", rows[3]);
+			}
+			else{
+				dict->SetString(L"DetailedInfo", rows[3]);
+			}
+		}
+	}
+	else {
+		LOG(WARNING) << "CallUserAppVersionInfo count < 0";
+	}
+}
 } // namespace user
 

@@ -231,7 +231,7 @@ int32 ChatInterface::ChatMessage(const int32 socket, PacketHead* packet) {
       if (rev.to_uid() == -1) {
         LOG(INFO)<< "chat to user -1";
         err = chat_mysql_->ChatRecordInsert(rev.from_uid(), rev.to_uid(),
-            rev.content(), rev.msg_time(), 0);
+            rev.content(), rev.msg_time(), 0, rev.msg_type());
         break;
       }
       //     PushChatMsg(rev);
@@ -241,7 +241,7 @@ int32 ChatInterface::ChatMessage(const int32 socket, PacketHead* packet) {
       PushGtMsg(rev.from_uid(), rev.to_uid(), rev.body_str(), temp,
           CHAT_MESSAGE_RLY);
       err = chat_mysql_->ChatRecordInsert(rev.from_uid(), rev.to_uid(),
-          rev.content(), rev.msg_time(), 1);
+		  rev.content(), rev.msg_time(), 1, rev.msg_type());
       break;
     } else {
       rev.set_operate_code(CHAT_MESSAGE_RLY);
@@ -249,7 +249,7 @@ int32 ChatInterface::ChatMessage(const int32 socket, PacketHead* packet) {
       //保存及时消息
       std::stringstream ss;
       ss << "call proc_ChatRecordInsert(" << rev.from_uid() << "," << rev.to_uid()
-         << ",'" << rev.content() << "'," << rev.msg_time() << "," << 0 << ")";
+         << ",'" << rev.content() << "'," << rev.msg_time() << "," << 0 << ",msg_type" << rev.msg_type() <<")";
       msg_list_.push_back(ss.str());
       if (msg_list_.size() > 10) {
         LOG(INFO)<< "msg_list > 10";
@@ -489,7 +489,7 @@ int32 ChatInterface::PushGtMsg(int64 from, int64 to, std::string category,
     LOG(INFO)<< "content::" << category;
     util::PushApnChatMsg((char*) token.c_str(),
                          data_share_mgr_->AddUnReadCount(to),
-                         (char*) nick.c_str(), (char*) content.c_str(),
+						 (char*)nick.c_str(), (char*)content.c_str(),
                          (char*) SpliceGtPushBody(category, type).c_str());
   } while (0);
   return err;

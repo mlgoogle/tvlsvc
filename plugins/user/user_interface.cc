@@ -672,6 +672,23 @@ int32 UserInterface::UserPhotoAlbum(const int32 socket, PacketHead* packet) {
   return err;
 }
 
+int32 UserInterface::UploadContacts(const int32 socket, PacketHead* packet) {
+	int32 err = 0;
+	do {
+		UploadContactsRecv rev(*packet);
+		err = rev.Deserialize();
+		if (err < 0)
+			break;
+		err = user_mysql_->WriteDatas(rev.sql_list());
+		if (err < 0)
+			break;
+		SendMsg(socket, packet, NULL, UPLOAD_CONTACTS_REQ);
+	} while (0);
+	if (err < 0)
+		SendError(socket, packet, err, UPLOAD_CONTACTS_REQ);
+	return err;
+}
+
 int32 UserInterface::UserRegInvitationCode(const int32 socket, PacketHead* packet) {
 	int32 err = 0;
 	do {
@@ -688,6 +705,26 @@ int32 UserInterface::UserRegInvitationCode(const int32 socket, PacketHead* packe
 	} while (0);
 	if (err < 0)
 		SendError(socket, packet, err, USER_REG_INVITATIONCODE_RLY);
+	return err;
+}
+
+int32 UserInterface::UserAppVersionInfo(const int32 socket, PacketHead* packet)
+{
+	int32 err = 0;
+	do {
+		UserAppVersionInfoeRecv recv(*packet);
+		err = recv.Deserialize();
+		if (err < 0)
+			break;
+		DicValue dic;
+		err = user_mysql_->UserAppVersionInfo(recv.AppType(),&dic);
+		if (err < 0)
+			break;
+		SendMsg(socket, packet, &dic, USER_APP_VERSION_INFO_RLY);
+	} while (0);
+	if (err < 0) {
+		SendError(socket, packet, err, USER_APP_VERSION_INFO_RLY);
+	}
 	return err;
 }
 
@@ -1749,6 +1786,5 @@ void UserInterface::SendMsg(const int socket, PacketHead* packet, DicValue* dic,
   send.set_operate_code(opcode);
   SendPacket(socket, &send);
 }
-
 }  // namespace user
 

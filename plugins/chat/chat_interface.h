@@ -62,7 +62,7 @@ class ChatInterface {
   int32 PushAskMsg(AskInvitationRecv rev);
 
   int32 PushGtMsg(int64 from, int64 to, std::string category,
-                  std::string content, int64 type);
+	  std::string content, int64 type);
 
   void SendPacket(const int socket, PacketHead* packet);
 

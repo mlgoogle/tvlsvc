@@ -738,6 +738,18 @@ class UserPhotoAlbumRecv : public PacketHead {
   int64 num_;
 };
 
+class UploadContactsRecv : public PacketHead {
+public:
+	UploadContactsRecv(PacketHead packet);
+	int32 Deserialize();
+
+	inline int64 uid() { return uid_; }
+	inline std::list<std::string> sql_list() { return sql_list_; }
+private:
+	int64 uid_;
+	std::list<std::string> sql_list_;
+};
+
 class  UserRegInvitationCodeRecv :public PacketHead {
 public:
 	UserRegInvitationCodeRecv(PacketHead packet);
@@ -749,7 +761,17 @@ public:
 private:
 	std::string phoneNum_;
 	std::string invitationCode_;
-}; 
+};
+class UserAppVersionInfoeRecv :public PacketHead {
+public:
+	UserAppVersionInfoeRecv(PacketHead packet);
+	int32 Deserialize();
+
+	inline int AppType() { return app_type_; }
+
+private:
+	int64 app_type_;
+};
 }  // namespace user
 
 #endif  // PLUGINS_USER_USER_PROTO_H_

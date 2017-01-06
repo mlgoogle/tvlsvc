@@ -149,9 +149,11 @@ int32 ChatPacket::Deserialize() {
       LOG_IF(ERROR, !r) << "ChatPacket::msg_time_ parse error";
       r = dic->GetString(L"content_", &content_);
       LOG_IF(ERROR, !r) << "ChatPacket::content_ parse error";
+	  r = dic->GetBigInteger(L"msg_type_", &msg_type_);
+	  LOG_IF(ERROR, !r) << "ChatPacket::msg_type_ parse error";
 //      base::BasicUtil::UrlDecode(content_, content_);
       LOG(INFO)<< "from:" << from_uid_ << " to:" << to_uid_ << " content:"
-      << content_;
+		  << content_ << "msg_type" << msg_type_;
     } else {
       LOG(ERROR) << "ChatPacket Deserialize error";
       err = CHAT_PACKET_JSON_ERR;

@@ -99,10 +99,14 @@ class ChatPacket : public PacketHead {
   inline std::string content() {
     return content_;
   }
+  inline int64 msg_type(){
+	  return msg_type_;
+  }
  private:
   int64 from_uid_;
   int64 to_uid_;
   int64 msg_time_;
+  int64 msg_type_;
   std::string content_;
 };
 
