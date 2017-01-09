@@ -273,7 +273,11 @@ int32 UserManager::AssignPacket(const int32 socket, PacketHead* packet) {
       interface->UserRegInvitationCode(socket, packet);
       break;
 	}
-	case USER_APP_VERSION_INFO_REQ: {
+	case USER_INSURANCE_PRICE_REQ: {
+      interface->UserInsurancePrice(socket, packet);
+      break;
+	}
+	case USER_INSURANCE_PAY_REQ: {
       interface->UserAppVersionInfo(socket, packet);
       break;
 	}

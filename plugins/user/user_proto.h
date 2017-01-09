@@ -767,10 +767,23 @@ public:
 	UserAppVersionInfoeRecv(PacketHead packet);
 	int32 Deserialize();
 
-	inline int AppType() { return app_type_; }
+	inline int64 AppType() { return app_type_; }
 
 private:
 	int64 app_type_;
+};
+
+class UserInsurancePriceRecv :public PacketHead {
+public:
+	UserInsurancePriceRecv(PacketHead packet);
+	int32 Deserialize();
+
+	inline int64 InsuranceType() { return insurance_type_; }
+	inline int64 OrderPrice() { return order_price_; }
+
+private:
+	int64 insurance_type_;
+	int64 order_price_;
 };
 }  // namespace user
 
