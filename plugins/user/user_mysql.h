@@ -31,7 +31,7 @@ class UserMysql {
   int32 RecommendGuideSelect(int64 city, int64 type, DicValue* dic);
   int32 GuidesInfoSelect(std::string uids, DicValue* dic);
   int32 RegisterInsertAndSelect(std::string phone, std::string pass, int64 type,
-	  DicValue* dic, std::string invitationUser, int invitationDate);
+	  DicValue* dic);
   int32 ChangePwdUpdate(int64 uid, std::string pwd);
   int32 ImproveUserUpdate(int64 uid, int64 sex, std::string nickname,
                           std::string headurl, std::string addr, double lon,
@@ -130,6 +130,12 @@ class UserMysql {
 
   int32 UserPhotoAlbumSelect(int64 uid, int64 size, int64 num, DicValue* dic);
 
+  int32 WriteDatas(std::list<std::string> sqls);
+
+  int32 UserInvitationCodeUpDate(std::string phoneNum, std::string invitationCode, int invitationDate, DicValue* dic);
+
+  int32 UserAppVersionInfo(int64 appType,DicValue* dic);
+
   int32 CheckPasswdSelect(int64 uid, std::string pass, int64 type,
                           DicValue* dic);
 
@@ -192,6 +198,8 @@ class UserMysql {
   static void CallUserPhotoAlbumSelect(void* param, Value* value);
   static void CallGuideOrderDetailSelect(void* param, Value* value);
   static void CallDefineGuideSkillsUpdateSelect(void* param, Value* value);
+  static void CallUserInvitationCodeUpDate(void* param, Value* value);
+  static void CallUserAppVersionInfo(void* param, Value* value);
  private:
   base_logic::DataEngine* mysql_engine_;
 };
