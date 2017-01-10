@@ -278,7 +278,7 @@ int32 UserManager::AssignPacket(const int32 socket, PacketHead* packet) {
       break;
 	}
 	case USER_INSURANCE_PAY_REQ: {
-      interface->UserAppVersionInfo(socket, packet);
+      interface->UserInsurancePay(socket, packet);
       break;
 	}
     case GUIDE_SERVICE_LIST_REQ: {

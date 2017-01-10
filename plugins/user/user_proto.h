@@ -785,6 +785,19 @@ private:
 	int64 insurance_type_;
 	int64 order_price_;
 };
+
+class UserInsurancePayRecv :public PacketHead {
+public:
+	UserInsurancePayRecv(PacketHead packet);
+	int32 Deserialize();
+
+	inline int64 InsurancePrice() { return insurance_price_; }
+	inline std::string InsuranceUsername() { return insurance_username_; }
+
+private:
+	int64 insurance_price_;
+	std::string insurance_username_;
+};
 }  // namespace user
 
 #endif  // PLUGINS_USER_USER_PROTO_H_
