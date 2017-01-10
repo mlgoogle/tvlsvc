@@ -721,13 +721,39 @@ int32 UserInterface::UserInsurancePrice(const int32 socket, PacketHead* packet) 
 			//break;
 		//游客身份
 		if (recv.InsuranceType() == 0)
-			dic.SetBigInteger(L"insurance_price_", 20);
+			dic.SetBigInteger(L"is_success_", 20);
 		else
-			dic.SetBigInteger(L"insurance_price_", recv.OrderPrice() * 0.1);
-		SendMsg(socket, packet, &dic, USER_INSURANCE_PAY_REQ);
+			dic.SetBigInteger(L"is_success_", recv.OrderPrice() * 0.1);
+		SendMsg(socket, packet, &dic, USER_INSURANCE_PRICE_RLY);
 	} while (0);
 	if (err < 0)
-		SendError(socket, packet, err, USER_INSURANCE_PAY_REQ);
+		SendError(socket, packet, err, USER_INSURANCE_PRICE_RLY);
+	return err;
+}
+
+int32 UserInterface::UserInsurancePay(const int32 socket, PacketHead* packet){
+	int32 err = 0;
+	do {
+		UserInsurancePayRecv recv(*packet);
+		err = recv.Deserialize();
+		if (err < 0)
+			break;
+		DicValue dic;
+		//err = user_mysql_->UserInvitationCodeUpDate(recv.phoneNum(), recv.invitationCode(), 90, &dic);
+		//if (err < 0)
+		//break;
+		//支付
+		//if (recv.InsuranceType() == 0)
+		//	dic.SetBigInteger(L"insurance_price_", 20);
+		//else
+		//	dic.SetBigInteger(L"insurance_price_", recv.OrderPrice() * 0.1);
+		int nError = 0;
+		dic.SetBigInteger(L"is_success_", nError);
+		if (nError == 0)
+		SendMsg(socket, packet, &dic, USER_INSURANCE_PRICE_RLY);
+	} while (0);
+	if (err < 0)
+		SendError(socket, packet, err, USER_INSURANCE_PRICE_RLY);
 	return err;
 }
 
