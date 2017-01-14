@@ -140,6 +140,10 @@ class UserInterface {
 
   int32 UserRegInvitationCode(const int32 socket, PacketHead* packet);
 
+  int32 UserInsurancePrice(const int32 socket, PacketHead* packet);
+
+  int32 UserInsurancePay(const int32 socket, PacketHead* packet);
+
   int32 UserAppVersionInfo(const int32 socket, PacketHead* packet);
 
   int32 VerifyPasswd(const int32 socket, PacketHead* packet);
