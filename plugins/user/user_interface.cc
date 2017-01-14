@@ -757,6 +757,26 @@ int32 UserInterface::UserInsurancePay(const int32 socket, PacketHead* packet){
 	return err;
 }
 
+int32 UserInterface::UserIdCardInfo(const int32 socket, PacketHead* packet)
+{
+	int32 err = 0;
+	do {
+		UserIdCardInfoRecv recv(*packet);
+		err = recv.Deserialize();
+		if (err < 0)
+			break;
+		DicValue dic;
+		err = user_mysql_->UserIdCardInfo(recv.IdCardNum(), recv.IdCardName(), recv.IdCardUrlName(), recv.Uid(), &dic);
+		if (err < 0)
+			break;
+		SendMsg(socket, packet, NULL, USER_IDCARD_INFO_RLY);
+	} while (0);
+	if (err < 0) {
+		SendError(socket, packet, err, USER_IDCARD_INFO_RLY);
+	}
+	return err;
+}
+
 int32 UserInterface::UserAppVersionInfo(const int32 socket, PacketHead* packet)
 {
 	int32 err = 0;

@@ -2019,5 +2019,40 @@ int32 UserInsurancePayRecv::Deserialize() {
 		serializer);
 	return err;
 }
+
+UserIdCardInfoRecv::UserIdCardInfoRecv(PacketHead packet) {
+	head_ = packet.head();
+	body_str_ = packet.body_str();
+	uid_ = 0;
+}
+
+int32 UserIdCardInfoRecv::Deserialize() {
+	int32 err = 0;
+	bool r = false;
+	base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+		base_logic::IMPL_JSON, &body_str_, false);
+	std::string err_str;
+	DicValue* dic = (DicValue*)serializer->Deserialize(&err, &err_str);
+	do {
+		if (dic != NULL) {
+			r = dic->GetString(L"idcard_num_", &IdCardNum_);
+			LOG_IF(ERROR, !r) << "UserIdCardInfoRecv::IdCardNum_ parse error";
+			r = dic->GetString(L"idcard_name_", &IdCardName_);
+			LOG_IF(ERROR, !r) << "UserIdCardInfoRecv::IdCardName_ parse error";
+			r = dic->GetString(L"idcard_urlname_", &IdCardUrlName_);
+			LOG_IF(ERROR, !r) << "UserIdCardInfoRecv::IdCardUrlName_ parse error";
+			r = dic->GetBigInteger(L"uid_", &uid_);
+			LOG_IF(ERROR, !r) << "UserIdCardInfoRecv::uid_ parse error";
+		}
+		else {
+			LOG(ERROR) << "UserIdCardInfoRecv Deserialize error";
+			err = REQUEST_JSON_ERR;
+			break;
+		}
+	} while (0);
+	base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+		serializer);
+	return err;
+}
 }  // namespace user
 

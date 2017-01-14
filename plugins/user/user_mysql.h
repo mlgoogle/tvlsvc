@@ -136,6 +136,8 @@ class UserMysql {
 
   int32 UserAppVersionInfo(int64 appType,DicValue* dic);
 
+  int32 UserIdCardInfo(std::string IdCardNum, std::string IdCardName, std::string IdCardUrlName, int64 uid, DicValue* dic);
+
   int32 CheckPasswdSelect(int64 uid, std::string pass, int64 type,
                           DicValue* dic);
 
