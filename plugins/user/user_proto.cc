@@ -1956,5 +1956,68 @@ int32 UserAppVersionInfoeRecv::Deserialize() {
 		serializer);
 	return err;
 }
+
+UserInsurancePriceRecv::UserInsurancePriceRecv(PacketHead packet) {
+	head_ = packet.head();
+	body_str_ = packet.body_str();
+	insurance_type_ = 0;
+	order_price_ = 0;
+}
+
+int32 UserInsurancePriceRecv::Deserialize() {
+	int32 err = 0;
+	bool r = false;
+	base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+		base_logic::IMPL_JSON, &body_str_, false);
+	std::string err_str;
+	DicValue* dic = (DicValue*)serializer->Deserialize(&err, &err_str);
+	do {
+		if (dic != NULL) {
+			r = dic->GetBigInteger(L"insurance_type_", &insurance_type_);
+			LOG_IF(ERROR, !r) << "UserInsurancePriceRecv::insurance_type_ parse error";
+			r = dic->GetBigInteger(L"order_price_", &order_price_);
+			LOG_IF(ERROR, !r) << "UserInsurancePriceRecv::order_price_ parse error";
+		}
+		else {
+			LOG(ERROR) << "UserInsurancePriceRecv Deserialize error";
+			err = REQUEST_JSON_ERR;
+			break;
+		}
+	} while (0);
+	base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+		serializer);
+	return err;
+}
+
+UserInsurancePayRecv::UserInsurancePayRecv(PacketHead packet) {
+	head_ = packet.head();
+	body_str_ = packet.body_str();
+	insurance_price_ = 0;
+}
+
+int32 UserInsurancePayRecv::Deserialize() {
+	int32 err = 0;
+	bool r = false;
+	base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+		base_logic::IMPL_JSON, &body_str_, false);
+	std::string err_str;
+	DicValue* dic = (DicValue*)serializer->Deserialize(&err, &err_str);
+	do {
+		if (dic != NULL) {
+			r = dic->GetBigInteger(L"insurance_price_", &insurance_price_);
+			LOG_IF(ERROR, !r) << "UserInsurancePay::insurance_price_ parse error";
+			r = dic->GetString(L"insurance_username_", &insurance_username_);
+			LOG_IF(ERROR, !r) << "UserInsurancePay::insurance_username_ parse error";
+		}
+		else {
+			LOG(ERROR) << "UserInsurancePay Deserialize error";
+			err = REQUEST_JSON_ERR;
+			break;
+		}
+	} while (0);
+	base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+		serializer);
+	return err;
+}
 }  // namespace user
 
