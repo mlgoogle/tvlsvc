@@ -200,7 +200,7 @@ int32 UserMysql::RegisterInsertAndSelect(std::string phone, std::string pass,
   do {
     std::stringstream ss;
     ss << "call proc_RegisterInsertAndSelect('" << phone << "','" << pass
-		<< "'," << type <<"')";
+		<< "'," << type <<")";
     LOG(INFO)<< "sql:" << ss.str();
     r = mysql_engine_->ReadData(ss.str(), dic, CallRegisterInsertAndSelect);
     //注册一定有结果返回
@@ -1000,6 +1000,23 @@ int32 UserMysql::UserAppVersionInfo(int64 appType, DicValue* dic)
 	return err;
 }
 
+int32 UserMysql::UserIdCardInfo(std::string IdCardNum, std::string IdCardName, std::string IdCardUrlName, int64 uid, DicValue* dic)
+{
+	int32 err = 0;
+	bool r = false;
+	do {
+		std::stringstream ss;
+		ss << "call proc_IdCardIdentificatInsert('" << IdCardNum << "','" << IdCardName << "','" << IdCardUrlName << "'," << uid << ")";
+		LOG(INFO) << "sql:" << ss.str();
+		r = mysql_engine_->WriteData(ss.str());
+		if (!r) {
+			err = SQL_EXEC_ERROR;
+			break;
+		}
+	} while (0);
+	return err;
+}
+
 int32 UserMysql::CheckPasswdSelect(int64 uid, std::string pass, int64 type,
                                    DicValue* dic) {
   int32 err = 0;
@@ -1219,7 +1236,7 @@ void UserMysql::CallNearGuideSelect(void* param, Value* value) {
       if (rows[1] != NULL)
         dict->SetString(L"phone_num_", rows[1]);
       if (rows[2] != NULL)
-        dict->SetString(L"nick_name_", rows[2]);
+        dict->SetString(L"nickname_", rows[2]);
       if (rows[3] != NULL)
         dict->SetBigInteger(L"praise_lv_", atoll(rows[3]));
       if (rows[4] != NULL)
@@ -1900,14 +1917,13 @@ void UserMysql::CallIdentityReviewStatusSelect(void* param, Value* value) {
     while (rows = (*(MYSQL_ROW*) (engine->FetchRows())->proc)) {
       if (rows[0] != NULL) {
         dict->SetBigInteger(L"review_status_", atoll(rows[0]));
+		if (atoll(rows[0]) == 2)
+		{
+			dict->SetString(L"failed_reason_","身份证姓名不匹配");
+		}
       } else {
         //没有查到用户
         dict->SetBigInteger(L"review_status_", -1);
-      }
-      if (rows[1] != NULL) {
-        dict->SetString(L"failed_reason_", rows[1]);
-      } else {
-        dict->SetString(L"failed_reason_", "");
       }
     }
   } else {
