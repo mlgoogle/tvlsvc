@@ -200,7 +200,7 @@ int32 UserMysql::RegisterInsertAndSelect(std::string phone, std::string pass,
   do {
     std::stringstream ss;
     ss << "call proc_RegisterInsertAndSelect('" << phone << "','" << pass
-		<< "'," << type <<"')";
+		<< "'," << type <<")";
     LOG(INFO)<< "sql:" << ss.str();
     r = mysql_engine_->ReadData(ss.str(), dic, CallRegisterInsertAndSelect);
     //注册一定有结果返回
@@ -1236,7 +1236,7 @@ void UserMysql::CallNearGuideSelect(void* param, Value* value) {
       if (rows[1] != NULL)
         dict->SetString(L"phone_num_", rows[1]);
       if (rows[2] != NULL)
-        dict->SetString(L"nick_name_", rows[2]);
+        dict->SetString(L"nickname_", rows[2]);
       if (rows[3] != NULL)
         dict->SetBigInteger(L"praise_lv_", atoll(rows[3]));
       if (rows[4] != NULL)
