@@ -3,7 +3,7 @@
 OUT_PUT = ${SO_DIR}/chat/chat.so 
 
 SRC_DIR = ../../
-LIB_DIR = ./../../../baselib
+LIB_DIR = ./../../../mylib
 SRC_PLUGINS = ${SRC_DIR}plugins
 SO_DIR = ${SRC_DIR}bin/plugins
 SRC_PUB_NET = ${SRC_DIR}pub/net
@@ -16,7 +16,7 @@ LINK_DYNAMIC = -Wl,-Bdynamic -lpthread
 LINK_STATIC = -Wl,-Bstatic -L${LIB_DIR}/third_party/glog/lib/libglog.a
 LINK_PATH = -L/usr/lib64/mysql
 
-CXXFLAGS += -g -Wextra -w -shared -fPIC 
+CXXFLAGS += -g -Wextra -w -shared -fPIC -D USR_LOG_MSG -D USR_LOG_WARN -D USR_LOG_ERROR
 
 INCLUDE_PATHS = -I${LIB_DIR} \
 		-I${SRC_PLUGINS} \
