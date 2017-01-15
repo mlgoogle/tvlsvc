@@ -13,6 +13,7 @@
 
 #include "pub/comm/comm_head.h"
 #include "pub/util/util.h"
+#include "logic/logic_comm.h"
 
 namespace user {
 
@@ -33,10 +34,12 @@ int32 LoginRecv::Deserialize() {
   do {
     if (v != NULL) {
       if (typeid(*v) == typeid(ListValue)) {
-        LOG(INFO)<< "listvalue:";
+        //LOG(INFO)<< "listvalue:";
+		  LOG_MSG("listvalue:");
         ((ListValue*)v)->GetDictionary(0, &dic);
       } else if (typeid(*v) == typeid(DicValue)) {
-        LOG(INFO) << "dicvalue:";
+        //LOG(INFO) << "dicvalue:";
+		  LOG_MSG("dicvalue:");
         dic = (DicValue*) v;
       } else {
         err = USER_LOGIN_JSON_ERR;
@@ -51,14 +54,20 @@ int32 LoginRecv::Deserialize() {
       r = dic->GetString(L"phone_num_", &phone_num_);
       LOG_IF(ERROR, !r) << "LoginRecv::phone_num_ parse error";
       if (phone_num_.length() < 11) {
-        LOG(ERROR) << "phone_num_ is wrong";
+        //LOG(ERROR) << "phone_num_ is wrong";
+		  LOG_ERROR("phone_num_ is wrong");
         err = PHONE_NUM_ERR;
         break;
       }
       r = dic->GetBigInteger(L"user_type_", &user_type_);
-      LOG_IF(ERROR, !r) << "LoginRecv::user_type_ parse error";
+     // LOG_IF(ERROR, !r) << "LoginRecv::user_type_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("LoginRecv::user_type_ parse error");
+	  }
     } else {
-      LOG(ERROR) << "LoginRecv Deserialize error";
+      //LOG(ERROR) << "LoginRecv Deserialize error";
+		LOG_ERROR("LoginRecv Deserialize error");
       err = USER_LOGIN_JSON_ERR;
     }
   }while (0);
@@ -95,7 +104,8 @@ int32 SMSCodeLoginRecv::Deserialize() {
       r = dic->GetString(L"token_", &token_);
       LOG_IF(ERROR, !r) << "SMSCodeLoginRecv::token_ parse error";
     } else {
-      LOG(ERROR)<< "SMSCodeLoginRecv Deserialize error";
+      //LOG(ERROR)<< "SMSCodeLoginRecv Deserialize error";
+		LOG_ERROR("SMSCodeLoginRecv Deserialize error");
       err = SMS_CODE_LOGIN_JSON_ERR;
       break;
     }
@@ -123,13 +133,26 @@ int32 ObtainGuideRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetReal(L"distance_", &distance_);
-      LOG_IF(ERROR, !r) << "ObtainGuideRecv::distance_ parse error";
+     // LOG_IF(ERROR, !r) << "ObtainGuideRecv::distance_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("ObtainGuideRecv::distance_ parse error");
+	  }
       r = dic->GetReal(L"longitude_", &longitude_);
-      LOG_IF(ERROR, !r) << "ObtainGuideRecv::longitude_ parse error";
+      //LOG_IF(ERROR, !r) << "ObtainGuideRecv::longitude_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("ObtainGuideRecv::longitude_ parse error");
+	  }
       r = dic->GetReal(L"latitude_", &latitude_);
-      LOG_IF(ERROR, !r) << "ObtainGuideRecv::latitude_ parse error";
+      //LOG_IF(ERROR, !r) << "ObtainGuideRecv::latitude_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("ObtainGuideRecv::latitude_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "ObtainGuideRecv Deserialize error";
+      //LOG(ERROR)<< "ObtainGuideRecv Deserialize error";
+		LOG_ERROR("ObtainGuideRecv Deserialize error");
       err = NEARBY_GUIDE_JSON_ERR;
       break;
     }
@@ -155,9 +178,14 @@ int32 Heartbeat::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"uid_", &uid_);
-      LOG_IF(ERROR, !r) << "Heartbeat::uid_ parse error";
+      //LOG_IF(ERROR, !r) << "Heartbeat::uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("Heartbeat::uid_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "Heartbeat Deserialize error";
+      //LOG(ERROR)<< "Heartbeat Deserialize error";
+		LOG_ERROR("Heartbeat Deserialize error");
       err = HEART_PACKET_JSON_ERR;
       break;
     }
@@ -184,11 +212,20 @@ int32 RecommendGuideRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"city_code_", &city_code_);
-      LOG_IF(ERROR, !r) << "RecommendGuideRecv::city_code_ parse error";
+      //LOG_IF(ERROR, !r) << "RecommendGuideRecv::city_code_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("RecommendGuideRecv::city_code_ parse error");
+	  }
       r = dic->GetBigInteger(L"recommend_type_", &recommend_type_);
-      LOG_IF(ERROR, !r) << "RecommendGuideRecv::recommend_type_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("RecommendGuideRecv::recommend_type_ parse error");
+	  }
+      //LOG_IF(ERROR, !r) << "RecommendGuideRecv::recommend_type_ parse error";
     } else {
-      LOG(ERROR)<< "RecommendGuideRecv Deserialize error";
+      //LOG(ERROR)<< "RecommendGuideRecv Deserialize error";
+		LOG_ERROR("RecommendGuideRecv Deserialize error");
       err = RECOMMEND_GUIDE_JSON_ERR;
       break;
     }
@@ -214,21 +251,34 @@ int32 ChangePasswdRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"uid_", &uid_);
-      LOG_IF(ERROR, !r) << "ChangePasswdRecv::uid_ parse error";
+      //LOG_IF(ERROR, !r) << "ChangePasswdRecv::uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("ChangePasswdRecv::uid_ parse error");
+	  }
       r = dic->GetString(L"old_passwd_", &old_passwd_);
       if (r) {
         base::MD5Sum md5(old_passwd_);
         old_passwd_ = md5.GetHash();
       }
-      LOG_IF(ERROR, !r) << "ChangePasswdRecv::old_passwd_ parse error";
+      //LOG_IF(ERROR, !r) << "ChangePasswdRecv::old_passwd_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("ChangePasswdRecv::old_passwd_ parse error");
+	  }
       r = dic->GetString(L"new_passwd_", &new_passwd_);
       if (r) {
         base::MD5Sum md5(new_passwd_);
         new_passwd_ = md5.GetHash();
       }
-      LOG_IF(ERROR, !r) << "ChangePasswdRecv::new_passwd_ parse error";
+      //LOG_IF(ERROR, !r) << "ChangePasswdRecv::new_passwd_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("ChangePasswdRecv::new_passwd_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "ChangePasswdRecv Deserialize error";
+      //LOG(ERROR)<< "ChangePasswdRecv Deserialize error";
+		LOG_ERROR("ChangePasswdRecv Deserialize error");
       err = CHANGE_PASSWD_JSON_ERR;
       break;
     }
@@ -254,11 +304,20 @@ int32 ObtainVerifyCodeRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"verify_type_", &verify_type_);
-      LOG_IF(ERROR, !r) << "ObtainVerifyCodeRecv::verify_type_ parse error";
+      //LOG_IF(ERROR, !r) << "ObtainVerifyCodeRecv::verify_type_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("ObtainVerifyCodeRecv::verify_type_ parse error");
+	  }
       r = dic->GetString(L"phone_num_", &phone_num_);
-      LOG_IF(ERROR, !r) << "ObtainVerifyCodeRecv::phone_num_ parse error";
+      //LOG_IF(ERROR, !r) << "ObtainVerifyCodeRecv::phone_num_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("ObtainVerifyCodeRecv::phone_num_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "ObtainVerifyCodeRecv Deserialize error";
+      //LOG(ERROR)<< "ObtainVerifyCodeRecv Deserialize error";
+		LOG_ERROR("ObtainVerifyCodeRecv Deserialize error");
       err = OBTAIN_VERIFYCODE_JSON_ERR;
       break;
     }
@@ -286,32 +345,47 @@ int32 RegisterAccountRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"timestamp_", &timestamp_);
-      LOG_IF(ERROR, !r) << "RegisterAccountRecv::timestamp_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("RegisterAccountRecv::timestamp_ parse error");
+	  }
       r = dic->GetBigInteger(L"verify_code_", &verify_code_);
-      LOG_IF(ERROR, !r) << "RegisterAccountRecv::verify_code_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("RegisterAccountRecv::verify_code_ parse error");
+	  }
       r = dic->GetBigInteger(L"user_type_", &user_type_);
-      LOG_IF(ERROR, !r) << "RegisterAccountRecv::user_type_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("RegisterAccountRecv::user_type_ parse error");
+	  }
       r = dic->GetString(L"phone_num_", &phone_num_);
-      LOG_IF(ERROR, !r) << "RegisterAccountRecv::phone_num_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("RegisterAccountRecv::phone_num_ parse error");
+	  }
       r = dic->GetString(L"passwd_", &passwd_);
       if (r) {
         base::MD5Sum md5(passwd_);
         passwd_ = md5.GetHash();
       }
-      LOG_IF(ERROR, !r) << "RegisterAccountRecv::passwd_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("RegisterAccountRecv::passwd_ parse error");
+	  }
       r = dic->GetString(L"token_", &token_);
-      LOG_IF(ERROR, !r) << "RegisterAccount::token_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("RegisterAccountRecv::token_ parse error");
+	  }
 
 	  r = dic->GetString(L"invitation_phone_num_", &invitation_phone_num_);
-	  LOG(INFO) << invitation_phone_num_ << '\n';
-	  LOG_IF(ERROR, !r) << "LoginRecv::invitation_phone_num_ parse error";
-	  if (phone_num_.length() < 11) {
-		  LOG(ERROR) << "invitation_phone_num_ is wrong";
-		  err = INVITATION_PHONE_NUM_ERR;
-		  break;
+	  if (!r)
+	  {
+		  LOG_ERROR("RegisterAccountRecv::invitation_phone_num_ parse error");
 	  }
     } else {
-      LOG(ERROR)<< "RegisterAccountRecv Deserialize error";
+	  LOG_ERROR("RegisterAccountRecv Deserialize error");
       err = REGISTER_ACCOUNT_JSON_ERR;
       break;
     }
@@ -340,21 +414,42 @@ int32 ImproveDataRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"uid_", &uid_);
-      LOG_IF(ERROR, !r) << "ImproveDataRecv::uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("ImproveDataRecv::uid_ parse error");
+	  }
       r = dic->GetBigInteger(L"gender_", &gender_);
-      LOG_IF(ERROR, !r) << "ImproveDataRecv::gender_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("ImproveDataRecv::gender_ parse error");
+	  }
       r = dic->GetString(L"nickname_", &nickname_);
-      LOG_IF(ERROR, !r) << "ImproveDataRecv::nickname_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("ImproveDataRecv::nickname_ parse error");
+	  }
       r = dic->GetString(L"head_url_", &head_url_);
-      LOG_IF(ERROR, !r) << "ImproveDataRecv::head_url_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("ImproveDataRecv::head_url_ parse error");
+	  }
       r = dic->GetString(L"address_", &address_);
-      LOG_IF(ERROR, !r) << "ImproveDataRecv::address_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("ImproveDataRecv::address_ parse error");
+	  }
       r = dic->GetReal(L"longitude_", &longitude_);
-      LOG_IF(ERROR, !r) << "ImproveDataRecv::longitude_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("ImproveDataRecv::longitude_ parse error");
+	  }
       r = dic->GetReal(L"latitude_", &latitude_);
-      LOG_IF(ERROR, !r) << "ImproveDataRecv::latitude_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("ImproveDataRecv::latitude_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "ImproveDataRecv Deserialize error";
+	  LOG_ERROR("ImproveDataRecv Deserialize error");
       err = IMPROVE_DATA_JSON_ERR;
       break;
     }
@@ -379,12 +474,14 @@ int32 UserDetailRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetString(L"uid_str_", &uid_str_);
-      LOG_IF(ERROR, !r) << "UserDetailRecv::uid_str_ parse error";
-
+	  if (!r)
+	  {
+		  LOG_ERROR("UserDetailRecv::uid_str_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "UserDetailRecv Deserialize error";
-      err = REQUEST_JSON_ERR;
-      break;
+		LOG_ERROR("UserDetailRecv::Deserialize error");
+		err = REQUEST_JSON_ERR;
+		break;
     }
   }while (0);
   base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
@@ -410,13 +507,22 @@ int32 ObtainTripRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"uid_", &uid_);
-      LOG_IF(ERROR, !r) << "ObtainTripRecv::uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("ObtainTripRecv::uid_ parse error");
+	  }
       r = dic->GetBigInteger(L"order_id_", &order_id_);
-      LOG_IF(ERROR, !r) << "ObtainTripRecv::order_id_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("ObtainTripRecv::order_id_ parse error");
+	  }
       r = dic->GetBigInteger(L"count_", &count_);
-      LOG_IF(ERROR, !r) << "ObtainTripRecv::count_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("ObtainTripRecv::count_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "ObtainTripRecv Deserialize error";
+		LOG_ERROR("ObtainTripRecv Deserialize  error");
       err = TRIP_RECORD_JSON_ERR;
       break;
     }
@@ -441,10 +547,12 @@ int32 ServiceDetailsRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetString(L"oid_str_", &oid_str_);
-      LOG_IF(ERROR, !r) << "ServiceDetailsRecv::oid_str_ parse error";
-
+	  if (!r)
+	  {
+		  LOG_ERROR("ServiceDetailsRecv::oid_str_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "ServiceDetailsRecv Deserialize error";
+		LOG_ERROR("ServiceDetailsRecv Deserialize error");
       err = SERVICE_DETAILS_JSON_ERR;
       break;
     }
@@ -471,29 +579,63 @@ int32 DrawBillRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"uid_", &uid_);
-      LOG_IF(ERROR, !r) << "DrawBillRecv::uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("DrawBillRecv::uid_ parse error");
+	  }
       r = dic->GetString(L"oid_str_", &oid_str_);
-      LOG_IF(ERROR, !r) << "DrawBillRecv::oid_str_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("DrawBillRecv::oid_str_ parse error");
+	  }
       r = dic->GetString(L"title_", &title_);
-      LOG_IF(ERROR, !r) << "DrawBillRecv::title_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("DrawBillRecv::title_ parse error");
+	  }
       r = dic->GetString(L"taxpayer_num_", &taxpayer_num_);
-      LOG_IF(ERROR, !r) << "DrawBillRecv::taxpayer_num_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("DrawBillRecv::taxpayer_num_ parse error");
+	  }
       r = dic->GetString(L"company_addr_", &company_addr_);
-      LOG_IF(ERROR, !r) << "DrawBillRecv::company_addr_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("DrawBillRecv::company_addr_ parse error");
+	  }
       r = dic->GetBigInteger(L"invoice_type_", &invoice_type_);
-      LOG_IF(ERROR, !r) << "DrawBillRecv::invoice_type_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("DrawBillRecv::invoice_type_ parse error");
+	  }
       r = dic->GetString(L"user_name_", &user_name_);
-      LOG_IF(ERROR, !r) << "DrawBillRecv::user_name_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("DrawBillRecv::user_name_ parse error");
+	  }
       r = dic->GetString(L"user_mobile_", &user_mobile_);
-      LOG_IF(ERROR, !r) << "DrawBillRecv::user_mobile_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("DrawBillRecv::user_mobile_ parse error");
+	  }
       r = dic->GetString(L"area_", &area_);
-      LOG_IF(ERROR, !r) << "DrawBillRecv::area_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("DrawBillRecv::area_ parse error");
+	  }
       r = dic->GetString(L"addr_detail_", &addr_detail_);
-      LOG_IF(ERROR, !r) << "DrawBillRecv::addr_detail_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("DrawBillRecv::addr_detail_ parse error");
+	  }
       r = dic->GetString(L"remarks_", &remarks_);
-      LOG_IF(ERROR, !r) << "DrawBillRecv::remarks_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("DrawBillRecv::remarks_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "ServiceDetailsRecv Deserialize error";
+		LOG_ERROR("ServiceDetailsRecv Deserialize error");
+      //LOG(ERROR)<< "ServiceDetailsRecv Deserialize error";
       err = DRAW_BILL_JSON_ERR;
       break;
     }
@@ -519,15 +661,24 @@ int32 BillRecordRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"uid_", &uid_);
-      LOG_IF(ERROR, !r) << "BillRecordRecv::uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("BillRecordRecv::uid_ parse error");
+	  }
       r = dic->GetBigInteger(L"count_", &count_);
-      LOG_IF(ERROR, !r) << "BillRecordRecv::count_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("BillRecordRecv::count_ parse error");
+	  }
       if (count_ == 0 || count_ < 0 || count_ > 20)
         count_ = 20;
       r = dic->GetBigInteger(L"last_invoice_id_", &last_invoice_id_);
-      LOG_IF(ERROR, !r) << "BillRecordRecv::last_invoice_id_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("BillRecordRecv::last_invoice_id_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "BillRecordRecv Deserialize error";
+      LOG_ERROR("BillRecordRecv Deserialize error");
       err = BILL_RECORD_JSON_ERR;
       break;
     }
@@ -553,9 +704,12 @@ int32 InvoiceDetailRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"invoice_id_", &invoice_id_);
-      LOG_IF(ERROR, !r) << "InvoiceDetailRecv::invoice_id_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("InvoiceDetailRecv::invoice_id_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "InvoiceDetailRecv Deserialize error";
+		LOG_ERROR("InvoiceDetailRecv Deserialize error");
       err = INVOICE_DETAIL_JSON_ERR;
       break;
     }
@@ -581,11 +735,17 @@ int32 DeviceTokenRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"uid_", &uid_);
-      LOG_IF(ERROR, !r) << "DeviceTokenRecv::uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("DeviceTokenRecv::uid_ parse error");
+	  }
       r = dic->GetString(L"device_token_", &device_token_);
-      LOG_IF(ERROR, !r) << "DeviceTokenRecv::device_token_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("DeviceTokenRecv::device_token_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "DeviceTokenRecv Deserialize error";
+		LOG_ERROR("DeviceTokenRecv Deserialize error");
       err = SERVICE_DETAILS_JSON_ERR;
       break;
     }
@@ -611,9 +771,12 @@ int32 BlackcardInfoRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"uid_", &uid_);
-      LOG_IF(ERROR, !r) << "BlackcardInfoRecv::uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("BlackcardInfoRecv::uid_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "BlackcardInfoRecv Deserialize error";
+		LOG_ERROR("BlackcardInfoRecv Deserialize error");
       err = BLACKCARD_INFO_JSON_ERR;
       break;
     }
@@ -639,9 +802,12 @@ int32 BlackcardConsumRecordRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"uid_", &uid_);
-      LOG_IF(ERROR, !r) << "BlackcardConsumRecordRecv::uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("BlackcardConsumRecordRecv::uid_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "BlackcardConsumRecordRecv Deserialize error";
+		LOG_ERROR("BlackcardConsumRecordRecv Deserialize error");
       err = BLACKCARD_CONSUME_RECORD_JSON_ERR;
       break;
     }
@@ -668,11 +834,17 @@ int32 BlackcardPlaceOrderRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"uid_", &uid_);
-      LOG_IF(ERROR, !r) << "BlackcardPlaceOrderRecv::uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("BlackcardPlaceOrderRecv::uid_ parse error");
+	  }
       r = dic->GetBigInteger(L"wanted_lv_", &wanted_lv_);
-      LOG_IF(ERROR, !r) << "BlackcardPlaceOrderRecv::wanted_lv_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("BlackcardPlaceOrderRecv::wanted_lv_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "BlackcardConsumRecordRecv Deserialize error";
+		  LOG_ERROR("BlackcardPlaceOrderRecv::Deserialize parse error");
       err = REQUEST_JSON_ERR;
       break;
     }
@@ -704,33 +876,63 @@ int32 NewAppointmentRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"uid_", &uid_);
-      LOG_IF(ERROR, !r) << "NewAppointmentRecv::uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("NewAppointmentRecv::uid_ parse error");
+	  }
       r = dic->GetBigInteger(L"city_code_", &city_code_);
-      LOG_IF(ERROR, !r) << "NewAppointmentRecv::city_code_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("NewAppointmentRecv::city_code_ parse error");
+	  }
       r = dic->GetBigInteger(L"start_time_", &start_time_);
-      LOG_IF(ERROR, !r) << "NewAppointmentRecv::start_time_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("NewAppointmentRecv::start_time_ parse error");
+	  }
       r = dic->GetBigInteger(L"end_time_", &end_time_);
-      LOG_IF(ERROR, !r) << "NewAppointmentRecv::end_time_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("NewAppointmentRecv::end_time_ parse error");
+	  }
       r = dic->GetString(L"skills_", &skills_);
-      LOG_IF(ERROR, !r) << "NewAppointmentRecv::skills_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("NewAppointmentRecv::skills_ parse error");
+	  }
       r = dic->GetString(L"remarks_", &remarks_);
-      LOG_IF(ERROR, !r) << "NewAppointmentRecv::remarks_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("NewAppointmentRecv::remarks_ parse error");
+	  }
       r = dic->GetBigInteger(L"is_other_", &is_other_);
-      LOG_IF(ERROR, !r) << "NewAppointmentRecv::is_other_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("NewAppointmentRecv::is_other_ parse error");
+	  }
       if (is_other_ == 1) {
         r = dic->GetString(L"other_name_", &other_name_);
-        LOG_IF(ERROR, !r) << "NewAppointmentRecv::other_name_ parse error";
+		if (!r)
+		{
+			LOG_ERROR("NewAppointmentRecv::other_name_ parse error");
+		}
         r = dic->GetBigInteger(L"other_gender_", &other_gender_);
-        LOG_IF(ERROR, !r) << "NewAppointmentRecv::other_gender_ parse error";
+		if (!r)
+		{
+			LOG_ERROR("NewAppointmentRecv::other_gender_ parse error");
+		}
         r = dic->GetString(L"other_phone_", &other_phone_);
-        LOG_IF(ERROR, !r) << "NewAppointmentRecv::other_phone_ parse error";
+		if (!r)
+		{
+			LOG_ERROR("NewAppointmentRecv::other_phone_ parse error");
+		}
       } else {
         other_name_ = "";
         other_gender_ = 0;
         other_phone_ = "";
       }
     } else {
-      LOG(ERROR)<< "NewAppointmentRecv Deserialize error";
+		LOG_ERROR("NewAppointmentRecv Deserialize error");
       err = NEW_APPOINTMENT_JSON_ERR;
       break;
     }
@@ -757,13 +959,22 @@ int32 WxPlaceOrderRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"uid_", &uid_);
-      LOG_IF(ERROR, !r) << "WxPlaceOrderRecv::uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("WxPlaceOrderRecv::uid_ parse error");
+	  }
       r = dic->GetString(L"title_", &title_);
-      LOG_IF(ERROR, !r) << "WxPlaceOrderRecv::title_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("WxPlaceOrderRecv::title_ parse error");
+	  }
       r = dic->GetBigInteger(L"price_", &price_);
-      LOG_IF(ERROR, !r) << "WxPlaceOrderRecv::price_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("WxPlaceOrderRecv::price_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "WxPlaceOrderRecv Deserialize error";
+		LOG_ERROR("WxPlaceOrderRecv:: Deserialize error");
       err = WX_PLACE_ORDER_JSON_ERR;
       break;
     }
@@ -791,13 +1002,22 @@ int32 WXPayClientRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"uid_", &uid_);
-      LOG_IF(ERROR, !r) << "WXPayClientRecv::uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("WXPayClientRecv::uid_ parse error");
+	  }
       r = dic->GetBigInteger(L"recharge_id_", &recharge_id_);
-      LOG_IF(ERROR, !r) << "WXPayClientRecv::recharge_id_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("WXPayClientRecv::recharge_id_ parse error");
+	  }
       r = dic->GetBigInteger(L"pay_result_", &pay_result_);
-      LOG_IF(ERROR, !r) << "WXPayClientRecv::pay_result_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("WXPayClientRecv::pay_result_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "WxPlaceOrderRecv Deserialize error";
+		LOG_ERROR("WXPayClientRecv Deserialize error");
       err = WXPAY_CLIENT_JSON_ERR;
       break;
     }
@@ -825,8 +1045,13 @@ int32 WXPayServerRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetString(L"wxpay_result_", &xml_str_);
-      LOG_IF(ERROR, !r) << "WXPayServerRecv::xml_str_ parse error";
-      LOG(INFO)<< "WXPAY SERVER RESULT***" << xml_str_ << "***";
+	  if (!r)
+	  {
+		  LOG_ERROR("WXPayServerRecv::xml_str_ parse error");
+	  }
+	  LOG_MSG2("WXPAY SERVER RESULT***%s***", xml_str_.c_str());
+     // LOG_IF(ERROR, !r) << "WXPayServerRecv::xml_str_ parse error";
+      //LOG(INFO)<< "WXPAY SERVER RESULT***" << xml_str_ << "***";
       if (r && xml_str_.length() > 5) {
         base_logic::ValueSerializer* deserializer =
             base_logic::ValueSerializer::Create(base_logic::IMPL_XML,
@@ -867,14 +1092,14 @@ int32 WXPayServerRecv::Deserialize() {
             }
           }
         } else {
-          LOG(ERROR)<< "WxPlaceOrderRecv xml  Deserialize error";
+			LOG_ERROR("WxPlaceOrderRecv xml  Deserialize error");
         }
         base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_XML,
                                                       deserializer);
       }
 
     } else {
-      LOG(ERROR)<< "WxPlaceOrderRecv json Deserialize error";
+		LOG_ERROR("WxPlaceOrderRecv json Deserialize error");
       err = WXPAY_SERVER_JSON_ERR;
       break;
     }
@@ -900,13 +1125,22 @@ int32 IdentityPicRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"uid_", &uid_);
-      LOG_IF(ERROR, !r) << "IdentityPicRecv::uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("IdentityPicRecv::uid_ parse error");
+	  }
       r = dic->GetString(L"front_pic_", &front_pic_);
-      LOG_IF(ERROR, !r) << "IdentityPicRecv::front_pic_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("IdentityPicRecv::front_pic_ parse error");
+	  }
       r = dic->GetString(L"back_pic_", &back_pic_);
-      LOG_IF(ERROR, !r) << "IdentityPicRecv::back_pic_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("IdentityPicRecv::back_pic_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "IdentityPicRecv Deserialize error";
+	  LOG_ERROR("IdentityPicRecv Deserialize error");
       err = IDENTITY_PIC_JSON_ERR;
       break;
     }
@@ -932,9 +1166,12 @@ int32 GuideDetailRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"uid_", &uid_);
-      LOG_IF(ERROR, !r) << "GuideDetailRecv::uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("GuideDetailRecv::uid_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "GuideDetailRecv Deserialize error";
+	  LOG_ERROR("GuideDetailRecv Deserialize error");
       err = GUIDE_DETAIL_JSON_ERR;
       break;
     }
@@ -961,9 +1198,12 @@ int32 IdentityStatusRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"uid_", &uid_);
-      LOG_IF(ERROR, !r) << "IdentityStatusRecv::uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("IdentityStatusRecv::uid_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "IdentityStatusRecv Deserialize error";
+	  LOG_ERROR("IdentityStatusRecv Deserialize error");
       err = IDENTITY_STATUS_JSON_ERR;
       break;
     }
@@ -991,15 +1231,24 @@ int32 PaggingRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"last_id_", &last_id_);
-      LOG_IF(ERROR, !r) << "PaggingRecv::last_id_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("PaggingRecv::last_id_ error");
+	  }
       r = dic->GetBigInteger(L"count_", &count_);
-      LOG_IF(ERROR, !r) << "PaggingRecv::count_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("PaggingRecv::count_ error");
+	  }
       r = dic->GetBigInteger(L"page_type_", &page_type_);
-      LOG_IF(ERROR, !r) << "PaggingRecv::page_type_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("PaggingRecv::page_type_ error");
+	  }
       if (count_ <= 0 || count_ > 10)
         count_ = 10;
     } else {
-      LOG(ERROR)<< "PaggingRecv Deserialize error";
+	  LOG_ERROR("PaggingRecv Deserialize error");
       err = SHARE_PAGING_JSON_ERR;
       break;
     }
@@ -1025,9 +1274,12 @@ int32 ShareTourismDetailRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"share_id_", &share_id_);
-      LOG_IF(ERROR, !r) << "ShareTourismDetailRecv::share_id_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("ShareTourismDetailRecv::share_id_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "ShareTourismDetailRecv Deserialize error";
+	  LOG_ERROR("ShareTourismDetailRecv Deserialize error");
       err = SHARE_TOURISM_DETAILS_JSON_ERR;
       break;
     }
@@ -1053,9 +1305,12 @@ int32 ShareSkillDetailRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"share_id_", &share_id_);
-      LOG_IF(ERROR, !r) << "ShareSkillDetailRecv::share_id_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("ShareSkillDetailRecv::share_id_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "ShareSkillDetailRecv Deserialize error";
+	  LOG_ERROR("ShareSkillDetailRecv Deserialize error");
       err = SHARE_SKILL_DETAILS_JSON_ERR;
       break;
     }
@@ -1083,15 +1338,24 @@ int32 ShareSkillDiscussRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"share_id_", &share_id_);
-      LOG_IF(ERROR, !r) << "ShareSkillDiscussRecv::share_id_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("ShareSkillDiscussRecv::share_id_ parse error");
+	  }
       r = dic->GetBigInteger(L"last_id_", &last_id_);
-      LOG_IF(ERROR, !r) << "ShareSkillDiscussRecv::last_id_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("ShareSkillDiscussRecv::last_id_ parse error");
+	  }
       r = dic->GetBigInteger(L"count_", &count_);
-      LOG_IF(ERROR, !r) << "ShareSkillDiscussRecv::share_id_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("ShareSkillDiscussRecv::count_ parse error");
+	  }
       if (count_ <= 0 || count_ > 50)
         count_ = 50;
     } else {
-      LOG(ERROR)<< "ShareSkillDiscussRecv Deserialize error";
+	  LOG_ERROR("ShareSkillDiscussRecv Deserialize error");
       err = SHARE_SKILL_DISCUSS_JSON_ERR;
       break;
     }
@@ -1118,11 +1382,17 @@ int32 EntryShareSkillRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"share_id_", &share_id_);
-      LOG_IF(ERROR, !r) << "EntryShareSkillRecv::share_id_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("EntryShareSkillRecv::share_id_ parse error");
+	  }
       r = dic->GetBigInteger(L"uid_", &uid_);
-      LOG_IF(ERROR, !r) << "EntryShareSkillRecv::uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("EntryShareSkillRecv::uid_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "EntryShareSkillRecv Deserialize error";
+	  LOG_ERROR("EntryShareSkillRecv Deserialize error");
       err = ENTRY_SHARE_SKILL_JSON_ERR;
       break;
     }
@@ -1148,9 +1418,12 @@ int32 UserCashRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"uid_", &uid_);
-      LOG_IF(ERROR, !r) << "UserCashRecv::uid_ parse error";
-    } else {
-      LOG(ERROR)<< "UserCashRecv Deserialize error";
+	  if (!r)
+	  {
+		  LOG_ERROR("UserCashRecv::uid_ parse error");
+	  }
+    } else{
+	  LOG_ERROR("UserCashRecv Deserialize error");
       err = USER_CASH_JSON_ERR;
       break;
     }
@@ -1178,15 +1451,24 @@ int32 AppointmentRecordRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"uid_", &uid_);
-      LOG_IF(ERROR, !r) << "AppointmentRecordRecv::uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("AppointmentRecordRecv::uid_ parse error");
+	  }
       r = dic->GetBigInteger(L"last_id_", &last_id_);
-      LOG_IF(ERROR, !r) << "AppointmentRecordRecv::last_id_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("AppointmentRecordRecv::last_id_ parse error");
+	  }
       r = dic->GetBigInteger(L"count_", &count_);
-      LOG_IF(ERROR, !r) << "AppointmentRecordRecv::count_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("AppointmentRecordRecv::count_ parse error");
+	  }
       if (count_ > 20 || count_ < 0)
         count_ = 20;
     } else {
-      LOG(ERROR)<< "AppointmentRecordRecv Deserialize error";
+	  LOG_ERROR("AppointmentRecordRecv Deserialize error");
       err = APPOINTMENT_RECORD_JSON_ERR;
       break;
     }
@@ -1258,7 +1540,7 @@ int32 ChangeGuideServiceRecv::Deserialize() {
         }
       }
     } else {
-      LOG(ERROR)<< "AppointmentRecordRecv Deserialize error";
+	  LOG_ERROR("AppointmentRecordRecv Deserialize error");
       err = REQUEST_JSON_ERR;
       break;
     }
@@ -1285,11 +1567,17 @@ int32 OrderDetailRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"order_id_", &order_id_);
-      LOG_IF(ERROR, !r) << "OrderDetailRecv::order_id_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("OrderDetailRecv::order_id_ parse error");
+	  }
       r = dic->GetBigInteger(L"order_type_", &order_type_);
-      LOG_IF(ERROR, !r) << "OrderDetailRecv::order_type_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("OrderDetailRecv::order_type_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "OrderDetailRecv Deserialize error";
+	  LOG_ERROR("OrderDetailRecv Deserialize error");
       err = REQUEST_JSON_ERR;
       break;
     }
@@ -1316,17 +1604,26 @@ int32 VerifyPasswdRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"uid_", &uid_);
-      LOG_IF(ERROR, !r) << "VerifyPasswdRecv::uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("VerifyPasswdRecv::uid_ parse error");
+	  }
       r = dic->GetBigInteger(L"passwd_type_", &passwd_type_);
-      LOG_IF(ERROR, !r) << "VerifyPasswdRecv::passwd_type_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("VerifyPasswdRecv::passwd_type_ parse error");
+	  }
       r = dic->GetString(L"passwd_", &passwd_);
       if (r) {
         base::MD5Sum md5(passwd_);
         passwd_ = md5.GetHash();
       }
-      LOG_IF(ERROR, !r) << "VerifyPasswdRecv::passwd_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("VerifyPasswdRecv::passwd_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "VerifyPasswdRecv Deserialize error";
+	  LOG_ERROR("VerifyPasswdRecv Deserialize error");
       err = REQUEST_JSON_ERR;
       break;
     }
@@ -1354,25 +1651,40 @@ int32 ChangePayPasswdRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"uid_", &uid_);
-      LOG_IF(ERROR, !r) << "ChangePayPasswdRecv::uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("ChangePayPasswdRecv::uid_ parse error");
+	  }
       r = dic->GetBigInteger(L"change_type_", &change_type_);
-      LOG_IF(ERROR, !r) << "ChangePayPasswdRecv::change_type_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("ChangePayPasswdRecv::change_type_ parse error");
+	  }
       r = dic->GetBigInteger(L"passwd_type_", &passwd_type_);
-      LOG_IF(ERROR, !r) << "ChangePayPasswdRecv::passwd_type_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("ChangePayPasswdRecv::passwd_type_ parse error");
+	  }
       r = dic->GetString(L"new_passwd_", &new_passwd_);
       if (r) {
         base::MD5Sum md5(new_passwd_);
         new_passwd_ = md5.GetHash();
       }
-      LOG_IF(ERROR, !r) << "ChangePayPasswdRecv::new_passwd_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("ChangePayPasswdRecv::new_passwd_ parse error");
+	  }
       r = dic->GetString(L"old_passwd_", &old_passwd_);
       if (r) {
         base::MD5Sum md5(old_passwd_);
         old_passwd_ = md5.GetHash();
       }
-      LOG_IF(ERROR, !r) << "ChangePayPasswdRecv::old_passwd_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("ChangePayPasswdRecv::old_passwd_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "ChangePayPasswdRecv Deserialize error";
+	  LOG_ERROR("ChangePayPasswdRecv Deserialize error");
       err = REQUEST_JSON_ERR;
       break;
     }
@@ -1400,13 +1712,22 @@ int32 GuideOrderRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"uid_", &uid_);
-      LOG_IF(ERROR, !r) << "GuideOrderRecv::uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("GuideOrderRecv::uid_ parse error");
+	  }
       r = dic->GetBigInteger(L"last_id_", &last_id_);
-      LOG_IF(ERROR, !r) << "GuideOrderRecv::last_id_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("GuideOrderRecv::last_id_ parse error");
+	  }
       r = dic->GetBigInteger(L"count_", &count_);
-      LOG_IF(ERROR, !r) << "GuideOrderRecv::count_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("GuideOrderRecv::count_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "GuideOrderRecv Deserialize error";
+	  LOG_ERROR("GuideOrderRecv Deserialize error");
       err = REQUEST_JSON_ERR;
       break;
     }
@@ -1432,11 +1753,17 @@ int32 VerifyVleaderHeadRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"uid_", &uid_);
-      LOG_IF(ERROR, !r) << "VerifyVleaderHeadRecv::uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("VerifyVleaderHeadRecv::uid_ parse error");
+	  }
       r = dic->GetString(L"head_url_", &head_url_);
-      LOG_IF(ERROR, !r) << "VerifyVleaderHeadRecv::head_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("VerifyVleaderHeadRecv::head_url_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "VerifyVleaderHeadRecv Deserialize error";
+	  LOG_ERROR("VerifyVleaderHeadRecv Deserialize error");
       err = REQUEST_JSON_ERR;
       break;
     }
@@ -1463,15 +1790,27 @@ int32 ChangeUserInfoRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"uid_", &uid_);
-      LOG_IF(ERROR, !r) << "ChangUserInfoRecv::uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("ChangUserInfoRecv::uid_ parse error");
+	  }
       r = dic->GetString(L"nickname_", &nickname_);
-      LOG_IF(ERROR, !r) << "ChangUserInfoRecv::nickname_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("ChangUserInfoRecv::nickname_ parse error");
+	  }
       r = dic->GetBigInteger(L"gender_", &gender_);
-      LOG_IF(ERROR, !r) << "ChangUserInfoRecv::gender_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("ChangUserInfoRecv::gender_ parse error");
+	  }
       r = dic->GetString(L"address_", &address_);
-      LOG_IF(ERROR, !r) << "ChangUserInfoRecv::address_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("ChangUserInfoRecv::address_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "ChangUserInfoRecv Deserialize error";
+	  LOG_ERROR("ChangUserInfoRecv Deserialize error");
       err = REQUEST_JSON_ERR;
       break;
     }
@@ -1499,18 +1838,32 @@ int32 ChangeBankCardRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"uid_", &uid_);
-      LOG_IF(ERROR, !r) << "ChangeBankCardRecv::uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("ChangeBankCardRecv::uid_ parse error");
+	  }
       r = dic->GetBigInteger(L"type_", &type_);
+	  if (!r)
+	  {
+		  LOG_ERROR("ChangeBankCardRecv::type_ parse error");
+	  }
       r = dic->GetString(L"account_", &account_);
-      LOG_IF(ERROR, !r) << "ChangeBankCardRecv::account_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("ChangeBankCardRecv::account_ parse error");
+	  }
       r = dic->GetString(L"bank_username_", &bank_username_);
-      LOG_IF(ERROR, !r && type_ == CHANGE_BANK_CARD_ADD_UPDATE)
-				<< "ChangeBankCardRecv::bank_username_ parse error";
+	  if (!r && type_ == CHANGE_BANK_CARD_ADD_UPDATE)
+	  {
+		  LOG_ERROR("ChangeBankCardRecv::bank_username_ parse error");
+	  }
       r = dic->GetBigInteger(L"bank_", &bank_);
-      LOG_IF(ERROR, !r && type_ == CHANGE_BANK_CARD_ADD_UPDATE)
-				<< "ChangeBankCardRecv::bank_ parse error";
+	  if (!r && type_ == CHANGE_BANK_CARD_ADD_UPDATE)
+	  {
+		  LOG_ERROR("ChangeBankCardRecv::bank_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "ChangeBankCardRecv Deserialize error";
+	  LOG_ERROR("ChangeBankCardRecv Deserialize error");
       err = REQUEST_JSON_ERR;
       break;
     }
@@ -1536,9 +1889,12 @@ int32 BankCardInfoRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"uid_", &uid_);
-      LOG_IF(ERROR, !r) << "BankCardInfoRecv::uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("BankCardInfoRecv::uid_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "BankCardInfoRecv Deserialize error";
+	  LOG_ERROR("BankCardInfoRecv Deserialize error");
       err = REQUEST_JSON_ERR;
       break;
     }
@@ -1565,11 +1921,17 @@ int32 ChangeDefaultBankCardRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"uid_", &uid_);
-      LOG_IF(ERROR, !r) << "ChangeDefaultBankCardRecv::uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("ChangeDefaultBankCardRecv::uid_ parse error");
+	  }
       r = dic->GetString(L"account_", &account_);
-      LOG_IF(ERROR, !r) << "ChangeDefaultBankCardRecv::account_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("ChangeDefaultBankCardRecv::account_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "ChangeDefaultBankCardRecv Deserialize error";
+	  LOG_ERROR("ChangeDefaultBankCardRecv Deserialize error");
       err = REQUEST_JSON_ERR;
       break;
     }
@@ -1595,9 +1957,12 @@ int32 GuideOrderDetailRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"order_id_", &order_id_);
-      LOG_IF(ERROR, !r) << "GuideOrderRecv::order_id_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("GuideOrderRecv::order_id_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "GuideOrderDetailRecv Deserialize error";
+	  LOG_ERROR("GuideOrderDetailRecv Deserialize error");
       err = REQUEST_JSON_ERR;
       break;
     }
@@ -1623,13 +1988,22 @@ int32 UserWithdrawRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"uid_", &uid_);
-      LOG_IF(ERROR, !r) << "UserWithdrawRecv::uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("UserWithdrawRecv::uid_ parse error");
+	  }
       r = dic->GetString(L"account_", &account_);
-      LOG_IF(ERROR, !r) << "UserWithdrawRecv::account_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("UserWithdrawRecv::account_ parse error");
+	  }
       r = dic->GetBigInteger(L"cash_", &cash_);
-      LOG_IF(ERROR, !r) << "UserWithdrawRecv::cash_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("UserWithdrawRecv::cash_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "UserWithdrawRecv Deserialize error";
+	  LOG_ERROR("UserWithdrawRecv Deserialize error");
       err = REQUEST_JSON_ERR;
       break;
     }
@@ -1657,17 +2031,26 @@ int32 UserWithdrawRecordRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"uid_", &uid_);
-      LOG_IF(ERROR, !r) << "UserWithdrawRecordRecv::uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("UserWithdrawRecordRecv::uid_ parse error");
+	  }
       r = dic->GetString(L"account_", &account_);
 	  if (!r)
 		  account_ = ""; 
       //LOG_IF(ERROR, !r) << "UserWithdrawRecordRecv::account_ parse error";
       r = dic->GetBigInteger(L"size_", &size_);
-      LOG_IF(ERROR, !r) << "UserWithdrawRecordRecv::size_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("UserWithdrawRecordRecv::size_ parse error");
+	  }
       r = dic->GetBigInteger(L"num_", &num_);
-      LOG_IF(ERROR, !r) << "UserWithdrawRecordRecv::num_ parse error";
+	  if(!r)
+	  {
+		  LOG_ERROR("UserWithdrawRecordRecv::num_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "UserWithdrawRecordRecv Deserialize error";
+	  LOG_ERROR("UserWithdrawRecordRecv Deserialize error");
       err = REQUEST_JSON_ERR;
       break;
     }
@@ -1695,17 +2078,32 @@ int32 CheckSMSCodeRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"timestamp_", &timestamp_);
-      LOG_IF(ERROR, !r) << "CheckSMSCodeRecv::timestamp_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("CheckSMSCodeRecv::timestamp_ parse error");
+	  }
       r = dic->GetBigInteger(L"verify_code_", &verify_code_);
-      LOG_IF(ERROR, !r) << "CheckSMSCodeRecv::verify_code_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("CheckSMSCodeRecv::verify_code_ parse error");
+	  }
       r = dic->GetBigInteger(L"verify_type_", &verify_type_);
-      LOG_IF(ERROR, !r) << "CheckSMSCodeRecv::verify_type_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("CheckSMSCodeRecv::verify_type_ parse error");
+	  }
       r = dic->GetString(L"phone_num_", &phone_num_);
-      LOG_IF(ERROR, !r) << "CheckSMSCodeRecv::phone_num_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("CheckSMSCodeRecv::phone_num_ parse error");
+	  }
       r = dic->GetString(L"token_", &token_);
-      LOG_IF(ERROR, !r) << "CheckSMSCodeRecv::token_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("CheckSMSCodeRecv::token_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "CheckSMSCodeRecv Deserialize error";
+	  LOG_ERROR("CheckSMSCodeRecv: Deserialize error");
       err = REQUEST_JSON_ERR;
       break;
     }
@@ -1743,10 +2141,16 @@ int32 UserUploadPhotoRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"uid_", &uid_);
-      LOG_IF(ERROR, !r) << "UserUploadPhotoRecv::uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("UserUploadPhotoRecv::uid_ parse error");
+	  }
       ListValue* list;
       r = dic->GetList(L"photo_list_", &list);
-      LOG_IF(ERROR, !r) << "UserUploadPhotoRecv::photo_list_ parse error:";
+	  if (!r)
+	  {
+		  LOG_ERROR("UserUploadPhotoRecv::photo_list_ parse error");
+	  }
 	  if (r && typeid(*list) == typeid(ListValue)) {
         int count = list->GetSize();
         for (int i = 0; i < count; i++) {
@@ -1766,7 +2170,7 @@ int32 UserUploadPhotoRecv::Deserialize() {
         }
       }
     } else {
-      LOG(ERROR)<< "UserUploadPhotoRecv Deserialize error";
+	  LOG_ERROR("UserUploadPhotoRecv Deserialize error");
       if (!r) {
         err = REQUEST_JSON_ERR;
         break;
@@ -1795,13 +2199,22 @@ int32 DefineGuideSkillsRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"uid_", &uid_);
-      LOG_IF(ERROR, !r) << "DefineGuideSkillsRecv::uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("DefineGuideSkillsRecv::uid_ parse error");
+	  }
       r = dic->GetBigInteger(L"change_type_", &change_type_);
-      LOG_IF(ERROR, !r) << "DefineGuideSkillsRecv::change_type_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("DefineGuideSkillsRecv::change_type_ parse error");
+	  }
       r = dic->GetString(L"skills_", &skills_);
-      LOG_IF(ERROR, !r) << "DefineGuideSkillsRecv::skills_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("DefineGuideSkillsRecv::skills_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "DefineGuideSkillsRecv Deserialize error";
+	  LOG_ERROR("DefineGuideSkillsRecv Deserialize error");
       err = REQUEST_JSON_ERR;
       break;
     }
@@ -1835,7 +2248,10 @@ int32 UploadContactsRecv::Deserialize() {
 	do {
 		if (dic != NULL) {
 			r = dic->GetBigInteger(L"uid", &uid_);
-			LOG_IF(ERROR, !r) << "UploadContactsRecv::uid_ parse error";
+			if (!r)
+			{
+				LOG_ERROR("UploadContactsRecv::uid_ parse error");
+			}
 			ListValue* list;
 			r = dic->GetList(L"contacts_list", &list);
 			if (!r) {
@@ -1854,14 +2270,13 @@ int32 UploadContactsRecv::Deserialize() {
 					std::stringstream ss;
 					ss << "call proc_UploadContactsInsert('" << name << "','" << phone_num
 						<< "'," << uid_ << ")";
-					LOG(INFO) << "call proc_UploadContactsInsert(" << name << ",'" << phone_num
-						<< "','" << uid_ << "')";
+					LOG_MSG(ss.str().c_str());
 					sql_list_.push_back(ss.str()); 
 				}
 			}
 		}
 		else {
-			LOG(ERROR) << "UploadContactsRecv Deserialize error";
+			LOG_ERROR("UploadContactsRecv Deserialize error");
 			err = REQUEST_JSON_ERR;
 			break;
 		}
@@ -1881,13 +2296,22 @@ int32 UserPhotoAlbumRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"uid_", &uid_);
-      LOG_IF(ERROR, !r) << "UserPhotoAlbumRecv::uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("UserPhotoAlbumRecv::uid_ parse error");
+	  }
       r = dic->GetBigInteger(L"size_", &size_);
-      LOG_IF(ERROR, !r) << "UserPhotoAlbumRecv::size_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("UserPhotoAlbumRecv::size_ parse error");
+	  }
       r = dic->GetBigInteger(L"num_", &num_);
-      LOG_IF(ERROR, !r) << "UserPhotoAlbumRecv::num_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("UserPhotoAlbumRecv::num_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "UserPhotoAlbumRecv Deserialize error";
+	  LOG_ERROR("UserPhotoAlbumRecv Deserialize error");
       err = REQUEST_JSON_ERR;
       break;
     }
@@ -1913,12 +2337,18 @@ int32 UserRegInvitationCodeRecv::Deserialize()
 	do {
 		if (dic != NULL) {
 			r = dic->GetString(L"phoneNum_", &phoneNum_);
-			LOG_IF(ERROR, !r) << "UserRegInvitationCodeRecv::uid_ parse error";
+			if (!r)
+			{
+				LOG_ERROR("UserRegInvitationCodeRecv::uid_ parse error");
+			}
 			r = dic->GetString(L"invitationCode_", &invitationCode_);
-			LOG_IF(ERROR, !r) << "UserRegInvitationCodeRecv::invitationCode_ parse error";
+			if (!r)
+			{
+				LOG_ERROR("UserRegInvitationCodeRecv::invitationCode_ parse error");
+			}
 		}
 		else {
-			LOG(ERROR) << "UserRegInvitationCodeRecv Deserialize error";
+			LOG_ERROR("UserRegInvitationCodeRecv Deserialize error");
 			err = REQUEST_JSON_ERR;
 			break;
 		}
@@ -1944,10 +2374,13 @@ int32 UserAppVersionInfoeRecv::Deserialize() {
 	do {
 		if (dic != NULL) {
 			r = dic->GetBigInteger(L"app_type_", &app_type_);
-			LOG_IF(ERROR, !r) << "UserAppVersionInfoeRecv::app_type_ parse error";
+			if (!r)
+			{
+				LOG_ERROR("UserAppVersionInfoeRecv::app_type_ parse error");
+			}
 		}
 		else {
-			LOG(ERROR) << "UserAppVersionInfoeRecv Deserialize error";
+			LOG_ERROR("UserAppVersionInfoeRecv Deserialize error");
 			err = REQUEST_JSON_ERR;
 			break;
 		}
@@ -1974,12 +2407,18 @@ int32 UserInsurancePriceRecv::Deserialize() {
 	do {
 		if (dic != NULL) {
 			r = dic->GetBigInteger(L"insurance_type_", &insurance_type_);
-			LOG_IF(ERROR, !r) << "UserInsurancePriceRecv::insurance_type_ parse error";
+			if (!r)
+			{
+				LOG_ERROR("UserInsurancePriceRecv::insurance_type_ parse error");
+			}
 			r = dic->GetBigInteger(L"order_price_", &order_price_);
-			LOG_IF(ERROR, !r) << "UserInsurancePriceRecv::order_price_ parse error";
+			if (!r)
+			{
+				LOG_ERROR("UserInsurancePriceRecv::order_price_ parse error");
+			}
 		}
 		else {
-			LOG(ERROR) << "UserInsurancePriceRecv Deserialize error";
+			LOG_ERROR("UserInsurancePriceRecv Deserialize error");
 			err = REQUEST_JSON_ERR;
 			break;
 		}
@@ -2005,12 +2444,18 @@ int32 UserInsurancePayRecv::Deserialize() {
 	do {
 		if (dic != NULL) {
 			r = dic->GetBigInteger(L"insurance_price_", &insurance_price_);
-			LOG_IF(ERROR, !r) << "UserInsurancePay::insurance_price_ parse error";
+			if (!r)
+			{
+				LOG_ERROR("UserInsurancePay::insurance_price_ parse error");
+			}
 			r = dic->GetString(L"insurance_username_", &insurance_username_);
-			LOG_IF(ERROR, !r) << "UserInsurancePay::insurance_username_ parse error";
+			if (!r)
+			{
+				LOG_ERROR("UserInsurancePay::insurance_username_ parse error");
+			}
 		}
 		else {
-			LOG(ERROR) << "UserInsurancePay Deserialize error";
+			LOG_ERROR("UserInsurancePay Deserialize error");
 			err = REQUEST_JSON_ERR;
 			break;
 		}
@@ -2036,16 +2481,28 @@ int32 UserIdCardInfoRecv::Deserialize() {
 	do {
 		if (dic != NULL) {
 			r = dic->GetString(L"idcard_num_", &IdCardNum_);
-			LOG_IF(ERROR, !r) << "UserIdCardInfoRecv::IdCardNum_ parse error";
+			if (!r)
+			{
+				LOG_ERROR("UserIdCardInfoRecv::idcard_num_ parse error");
+			}
 			r = dic->GetString(L"idcard_name_", &IdCardName_);
-			LOG_IF(ERROR, !r) << "UserIdCardInfoRecv::IdCardName_ parse error";
+			if (!r)
+			{
+				LOG_ERROR("UserIdCardInfoRecv::idcard_name_ parse error");
+			}
 			r = dic->GetString(L"idcard_urlname_", &IdCardUrlName_);
-			LOG_IF(ERROR, !r) << "UserIdCardInfoRecv::IdCardUrlName_ parse error";
+			if (!r)
+			{
+				LOG_ERROR("UserIdCardInfoRecv::idcard_urlname_ parse error");
+			}
 			r = dic->GetBigInteger(L"uid_", &uid_);
-			LOG_IF(ERROR, !r) << "UserIdCardInfoRecv::uid_ parse error";
+			if (!r)
+			{
+				LOG_ERROR("UserIdCardInfoRecv::uid_ parse error");
+			}
 		}
 		else {
-			LOG(ERROR) << "UserIdCardInfoRecv Deserialize error";
+			LOG_ERROR("UserIdCardInfoRecv Deserialize error");
 			err = REQUEST_JSON_ERR;
 			break;
 		}
