@@ -1727,6 +1727,7 @@ int32 UserInterface::NearbyGuide(const int32 socket, PacketHead* packet) {
       break;
     DicValue dic;
     double point[4];
+	LOG_MSG2("%ld %ld %ld\n", rev.longitude(), rev.latitude(), rev.distance());
     util::BonderOfCoordinate(rev.longitude(), rev.latitude(), rev.distance(),
                              point);
     err = user_mysql_->NearGuideSelect(point, &dic);
