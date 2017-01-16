@@ -6,10 +6,9 @@
 #include "user/user_mysql.h"
 
 #include <mysql/mysql.h>
-
+#include "logic/logic_comm.h"
 #include "pub/storage/data_engine.h"
 #include "pub/comm/comm_head.h"
-
 #include "glog/logging.h"
 
 namespace user {
@@ -32,7 +31,8 @@ int32 UserMysql::UserDetailSelect(std::string uids, DicValue* dic) {
   do {
     std::stringstream ss;
     ss << "call proc_UserDetailSelect('" << uids << "')";
-    LOG(INFO)<< "sql:" << ss.str();
+    //LOG_MSG2("sql: %s", ss.str());
+	LOG_MSG2("sql: %s", ss.str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallUserDetailSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -55,7 +55,7 @@ int32 UserMysql::ServiceInfoSelect(std::string oid_str, DicValue* dic) {
     ListValue* list = new ListValue();
     dic->Set(L"service_list_", list);
     ss << "call proc_ServiceInfoSelect('" << oid_str << "'," << 0 << ")";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallServiceInfoSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -65,7 +65,7 @@ int32 UserMysql::ServiceInfoSelect(std::string oid_str, DicValue* dic) {
     ss.str("");
     ss.clear();
     ss << "call proc_ServiceInfoSelect('" << oid_str << "'," << 1 << ")";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallBlackServiceInfoSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -75,7 +75,7 @@ int32 UserMysql::ServiceInfoSelect(std::string oid_str, DicValue* dic) {
     ss.str("");
     ss.clear();
     ss << "call proc_ServiceInfoSelect('" << oid_str << "'," << 2 << ")";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallServiceInfoSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -85,7 +85,7 @@ int32 UserMysql::ServiceInfoSelect(std::string oid_str, DicValue* dic) {
     ss.str("");
     ss.clear();
     ss << "call proc_ServiceInfoSelect('" << oid_str << "'," << 3 << ")";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallBlackBuyInfoSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -101,7 +101,7 @@ int32 UserMysql::GuideDetailSelect(int64 uid, DicValue* dic) {
   do {
     std::stringstream ss;
     ss << "call proc_GuideDetailSelect(" << uid << ");";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallGuideDetailSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -115,7 +115,7 @@ int32 UserMysql::GuideDetailSelect(int64 uid, DicValue* dic) {
 //    ss.str("");
 //    ss.clear();
 //    ss << "call proc_GuideServiceSelect(" << uid << ");";
-//    LOG(INFO)<< "sql:" << ss.str();
+//    LOG_MSG2("sql: %s", ss.str().c_str());
 //    r = mysql_engine_->ReadData(ss.str(), dic, CallGuideServiceSelect);
 //    if (!r) {
 //      err = SQL_EXEC_ERROR;
@@ -131,7 +131,7 @@ int32 UserMysql::GuideServiceSelect(int64 uid, DicValue* dic) {
   do {
     std::stringstream ss;
     ss << "call proc_GuideServiceSelect(" << uid << ");";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallGuideServiceSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -163,7 +163,7 @@ int32 UserMysql::RecommendGuideSelect(int64 city, int64 type, DicValue* dic) {
   do {
     std::stringstream ss;
     ss << "call proc_RecommendGuideSelect(" << city << "," << type << ");";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallRecommendGuideSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -183,7 +183,7 @@ int32 UserMysql::GuidesInfoSelect(std::string uids, DicValue* dic) {
   do {
     std::stringstream ss;
     ss << "call proc_GuidesInfoSelect('" << uids << "')";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallRecommendGuideSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -201,7 +201,7 @@ int32 UserMysql::RegisterInsertAndSelect(std::string phone, std::string pass,
     std::stringstream ss;
     ss << "call proc_RegisterInsertAndSelect('" << phone << "','" << pass
 		<< "'," << type <<")";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallRegisterInsertAndSelect);
     //注册一定有结果返回
     if (!r || dic->empty()) {
@@ -227,7 +227,7 @@ int32 UserMysql::InvoiceInfoInsert(int64 uid, std::string oids,
   do {
     std::stringstream ss;
     ss << "call proc_OrderStatusSelect('" << oids << "')";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallOrderStatusSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -245,7 +245,7 @@ int32 UserMysql::InvoiceInfoInsert(int64 uid, std::string oids,
        << title << "','" << num << "','" << comp << "'," << type << ",'" << name
        << "','" << phone << "','" << area << "','" << addr << "','" << remarks
        << "')";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallInvoiceInfoInsert);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -263,7 +263,7 @@ int32 UserMysql::InvoiceRecordSelect(int64 uid, int64 count, int64 iid,
     std::stringstream ss;
     ss << "call proc_InvoiceRecordSelect(" << uid << "," << count << "," << iid
        << ")";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallInvoiceRecordSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -279,7 +279,7 @@ int32 UserMysql::InvoiceDetailSelect(int64 iid, DicValue* dic) {
   do {
     std::stringstream ss;
     ss << "call proc_InvoiceDetailSelect(" << iid << ")";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallInvoiceDetailSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -295,7 +295,7 @@ int32 UserMysql::DeviceTokenUpdate(int64 uid, std::string dt) {
   do {
     std::stringstream ss;
     ss << "call proc_DeviceTokenUpdate(" << uid << ",'" << dt << "')";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->WriteData(ss.str());
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -315,7 +315,7 @@ int32 UserMysql::ImproveUserUpdate(int64 uid, int64 sex, std::string nickname,
     ss << "call proc_ImproveUserDataUpdate(" << uid << "," << sex << ",'"
        << nickname << "','" << headurl << "','" << addr << "'," << lon << ","
        << lat << ")";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->WriteData(ss.str());
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -335,7 +335,7 @@ int32 UserMysql::TripRecordSelect(int64 uid, int64 oid, int64 count,
     // 邀约
     ss << "call proc_TripRecordSelect(" << uid << "," << oid << "," << count
        << "," << 0 << ")";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallTripRecordSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -351,7 +351,7 @@ int32 UserMysql::ChangePwdUpdate(int64 uid, std::string pwd) {
   do {
     std::stringstream ss;
     ss << "call proc_ChangePwdUpdate(" << uid << ",'" << pwd << "');";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->WriteData(ss.str());
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -367,7 +367,7 @@ int32 UserMysql::ServiceCitySelect(DicValue* dic) {
   do {
     std::stringstream ss;
     ss << "call proc_ServiceCitySelect();";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallServiceCitySelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -388,7 +388,7 @@ int32 UserMysql::NearGuideSelect(double* point, DicValue* dic) {
     std::stringstream ss;
     ss << "call proc_NearGuideSelect(" << point[0] << "," << point[1] << ","
        << point[2] << "," << point[3] << ");";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallNearGuideSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -410,7 +410,8 @@ int32 UserMysql::UserLoginSelect(std::string phone, std::string pass,
     std::stringstream ss;
     ss << "call proc_UserLoginSelect('" << phone << "','" << pass << "',"
        << type << "," << time << ");";
-    LOG(INFO)<< "sql:" << ss.str();
+    //LOG_MSG2("sql: %s", ss.str());
+	LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallUserLoginSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -430,7 +431,7 @@ int32 UserMysql::BlackcardPrivilegeSelect(DicValue* dic) {
   do {
     std::stringstream ss;
     ss << "call proc_BlackcardPrivilegeSelect()";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallBlackcardPrivilegeSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -450,7 +451,7 @@ int32 UserMysql::BlackcardInfoSelect(int64 uid, DicValue* dic) {
   do {
     std::stringstream ss;
     ss << "call proc_BlackcardInfoSelect(" << uid << ")";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallBlackcardInfoSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -468,7 +469,7 @@ int32 UserMysql::BlackcardConsumeRecordSelect(int64 uid, DicValue* dic) {
     // 获取黑卡服务消费
     std::stringstream ss;
     ss << "call proc_BlackcardConsumeRecordSelect(" << uid << ")";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic,
                                 CallBlackcardConsumeRecordSelect);
     if (!r) {
@@ -479,7 +480,7 @@ int32 UserMysql::BlackcardConsumeRecordSelect(int64 uid, DicValue* dic) {
     ss.str("");
     ss.clear();
     ss << "call proc_BlackcardBuyOrderSelect(" << uid << ")";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallBlackcardBuyOrderSelect);
   } while (0);
   return err;
@@ -491,7 +492,7 @@ int32 UserMysql::BlackcardPriceInfoSelect(DicValue* dic) {
   do {
     std::stringstream ss;
     ss << "call proc_BlackcardPriceInfoSelect()";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallBlackcardPriceInfoSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -509,7 +510,7 @@ int32 UserMysql::BlackcardPlaceOrderInsertAndSelect(int64 uid, int64 lv,
     std::stringstream ss;
     ss << "call proc_BlackcardPlaceOrderInsertAndSelect(" << uid << "," << lv
        << ")";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic,
                                 CallBlackcardPlaceOrderInsertAndSelect);
     if (!r) {
@@ -526,7 +527,7 @@ int32 UserMysql::SkillsInfoSelect(DicValue* dic) {
   do {
     std::stringstream ss;
     ss << "call proc_SkillsInfoSelect()";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallSkillsInfoSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -542,7 +543,7 @@ int32 UserMysql::ImgTokenSelect(DicValue* dic) {
   do {
     std::stringstream ss;
     ss << "call proc_ImgTokenSelect()";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallImgTokenSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -560,7 +561,7 @@ int32 UserMysql::RechargeInfoInsertAndSelect(int64 uid, int64 price,
     std::stringstream ss;
     ss << "call proc_RechargeInfoInsertAndSelect(" << uid << "," << price
        << ")";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallRechargeInfoInsertAndSelect);
     if (!r || dic->empty()) {
       err = SQL_EXEC_ERROR;
@@ -578,7 +579,7 @@ int32 UserMysql::ChangeRechargeStatusAndSelect(int64 rid, int64 result,
     std::stringstream ss;
     ss << "call proc_ChangeRechargeStatusAndSelect(" << rid << "," << result
        << ")";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic,
                                 CallChangeRechargeStatusAndSelect);
     if (!r || dic->empty()) {
@@ -597,7 +598,7 @@ int32 UserMysql::IdentityInfoInsertAndSelect(int64 uid, std::string front,
     std::stringstream ss;
     ss << "call proc_IdentityInfoInsertAndSelect(" << uid << ",'" << front
        << "','" << back << "')";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallIdentityInfoInsertAndSelect);
     if (!r || dic->empty()) {
       err = SQL_EXEC_ERROR;
@@ -613,7 +614,7 @@ int32 UserMysql::IdentityReviewStatusSelect(int64 uid, DicValue* dic) {
   do {
     std::stringstream ss;
     ss << "call proc_IdentityReviewStatusSelect(" << uid << ")";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallIdentityReviewStatusSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -629,7 +630,7 @@ int32 UserMysql::ShareTourismDetailsSelect(DicValue* dic) {
   do {
     std::stringstream ss;
     ss << "call proc_ShareTourismDetailsSelect()";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallShareTourismDetailsSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -645,7 +646,7 @@ int32 UserMysql::ShareSkillDetailsSelect(DicValue* dic) {
   do {
     std::stringstream ss;
     ss << "call proc_ShareSkillDetailsSelect()";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallShareSkillDetailsSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -661,7 +662,7 @@ int32 UserMysql::ShareSkillEntrySelect(int64 share_id, DicValue* dic) {
   do {
     std::stringstream ss;
     ss << "call proc_ShareSkillEntrySelect(" << share_id << ")";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallShareSkillEntrySelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -679,7 +680,7 @@ int32 UserMysql::ShareSkillDiscussSelect(int64 share_id, int64 lastid,
     std::stringstream ss;
     ss << "call proc_ShareSkillDiscussSelect(" << share_id << "," << lastid
        << "," << count << ")";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallShareSkillDiscussSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -696,7 +697,7 @@ int32 UserMysql::EntryShareSkillInsert(int64 share_id, int64 uid,
   do {
     std::stringstream ss;
     ss << "call proc_EntryShareSkillInsert(" << share_id << "," << uid << ")";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallEntryShareSkillInsert);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -712,7 +713,7 @@ int32 UserMysql::ShareTourismTypeSelect(DicValue* dic) {
   do {
     std::stringstream ss;
     ss << "call proc_ShareTourismTypeSelect()";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallShareTourismTypeSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -728,7 +729,7 @@ int32 UserMysql::UserCashSelect(int64 uid, DicValue* dic) {
   do {
     std::stringstream ss;
     ss << "call proc_UserCashSelect(" << uid << ")";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallUserCashSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -744,7 +745,7 @@ int32 UserMysql::OrderDetailsSelect(int64 oid, int64 type, DicValue* dic) {
   do {
     std::stringstream ss;
     ss << "call proc_OrderDetailsSelect(" << oid << "," << type << ")";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     dic->SetBigInteger(L"order_type_", type);
     r = mysql_engine_->ReadData(ss.str(), dic, CallOrderDetailsSelect);
     if (!r) {
@@ -761,7 +762,7 @@ int32 UserMysql::CancelOrderStatusUpdate() {
   do {
     std::stringstream ss;
     ss << "call proc_CancelOrderStatusUpdate()";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->WriteData(ss.str());
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -783,7 +784,7 @@ int32 UserMysql::NewAppointmentInsert(int64 uid, int64 city, int64 start,
     ss << "call proc_NewAppointmentInsert(" << uid << "," << city << ","
        << start << "," << end << ",'" << skill << "'," << other << ",'" << name
        << "'," << gender << ",'" << phone << "','" << remark << "')";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallNewAppointmentInsert);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -799,7 +800,7 @@ int32 UserMysql::VerifyVleaderHeadInsert(int64 uid, std::string head_url, DicVal
   do {
 	std::stringstream ss;
     ss << "call proc_VerifyVleaderHeadInsert(" << uid << ",'" << head_url << "')";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->WriteData(ss.str());
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -815,7 +816,7 @@ int32 UserMysql::ChangeUserInfoUpdate(int64 uid, std::string nickname, int64 gen
   do {
 	std::stringstream ss;
     ss << "call proc_ChangeUserInfoUpdate(" << uid << ",'" << nickname << "'," << gender << ",'" << address <<  "')";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->WriteData(ss.str());
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -833,7 +834,7 @@ int32 UserMysql::ChangeBankCardInsertOrDelete(int64 type, int64 uid, std::string
     std::stringstream ss;
     ss << "call proc_ChangeBankCardInsertOrDelete(" << type << "," << uid
 				<< ",'" <<  account << "','" << bank_username << "'," << bank << ")";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->WriteData(ss.str());
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -849,7 +850,7 @@ int32 UserMysql::BankCardInfoSelect(int64 uid, DicValue* dic) {
   do {
     std::stringstream ss;
     ss << "call proc_BankCardInfoSelect(" << uid << ")";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallBankCardInfoSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -865,7 +866,7 @@ int32 UserMysql::ChangeDefaultBankCardUpdate(int64 uid, std::string account, Dic
   do {
     std::stringstream ss;
     ss << "call proc_ChangeDefaultBankCardUpdate(" << uid << ",'" << account << "')";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->WriteData(ss.str());
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -881,7 +882,7 @@ int32 UserMysql::UserWithdrawInsertAndSelect(int64 uid, std::string account, int
   do {
     std::stringstream ss;
     ss << "call proc_UserWithdrawInsertAndSelect(" << uid << ",'" << account << "'," << cash << ")";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallUserWithdrawInsertAndSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -902,7 +903,7 @@ int32 UserMysql::UserWithdrawRecordSelect(int64 uid, std::string account, int64 
 
     std::stringstream ss;
     ss << "call proc_UserWithdrawRecordSelect(" << uid << ",'" << account << "'," << size << "," << num << ")";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallUserWithdrawRecordSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -936,7 +937,7 @@ int32 UserMysql::UserPhotoAlbumSelect(int64 uid, int64 size, int64 num, DicValue
 
     std::stringstream ss;
     ss << "call proc_UserPhotoAlbumSelect(" << uid << ","  << size << "," << num << ")";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallUserPhotoAlbumSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -969,7 +970,8 @@ int32 UserMysql::UserInvitationCodeUpDate(std::string phoneNum, std::string invi
 
 		std::stringstream ss;
 		ss << "call proc_RegInvitationCode('" << phoneNum << "','" << invitationCode << "'," << invitationDate << ")";
-		LOG(INFO) << "sql:" << ss.str();
+		//LOG(INFO) << "sql:" << ss.str();
+		LOG_MSG2("sql: %s", ss.str());
 		r = mysql_engine_->ReadData(ss.str(), dic, CallUserInvitationCodeUpDate);
 		//注册一定有结果返回
 		if (!r || dic->empty()) {
@@ -990,7 +992,8 @@ int32 UserMysql::UserAppVersionInfo(int64 appType, DicValue* dic)
 	do {
 		std::stringstream ss;
 		ss << "call proc_UserAppVersionInfo(" << appType <<")";
-		LOG(INFO) << "sql:" << ss.str();
+		//LOG(INFO) << "sql:" << ss.str();
+		LOG_MSG2("sql: %s", ss.str());
 		r = mysql_engine_->ReadData(ss.str(), dic, CallUserAppVersionInfo);
 		if (!r) {
 			err = SQL_EXEC_ERROR;
@@ -1007,7 +1010,8 @@ int32 UserMysql::UserIdCardInfo(std::string IdCardNum, std::string IdCardName, s
 	do {
 		std::stringstream ss;
 		ss << "call proc_IdCardIdentificatInsert('" << IdCardNum << "','" << IdCardName << "','" << IdCardUrlName << "'," << uid << ")";
-		LOG(INFO) << "sql:" << ss.str();
+		//LOG(INFO) << "sql:" << ss.str();
+		LOG_MSG2("sql: %s", ss.str());
 		r = mysql_engine_->WriteData(ss.str());
 		if (!r) {
 			err = SQL_EXEC_ERROR;
@@ -1025,7 +1029,7 @@ int32 UserMysql::CheckPasswdSelect(int64 uid, std::string pass, int64 type,
     std::stringstream ss;
     ss << "call proc_CheckPasswdSelect(" << uid << ",'" << pass << "'," << type
        << ")";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallCheckPasswdSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -1044,7 +1048,7 @@ int32 UserMysql::ChangePasswdSelect(int64 uid, std::string oldpass,
     std::stringstream ss;
     ss << "call proc_ChangePasswdSelect(" << uid << ",'" << oldpass << "','"
        << newpass << "'," << ctype << "," << ptype << ")";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallChangePasswdSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -1060,7 +1064,7 @@ int32 UserMysql::GuideOrderDetailSelect(int64 oid, DicValue* dic) {
   do {
     std::stringstream ss;
     ss << "call proc_GuideOrderDetailSelect(" << oid << ")";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallGuideOrderDetailSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -1079,7 +1083,7 @@ int32 UserMysql::DefineGuideSkillsUpdateSelect(int64 uid, int64 type,
     std::stringstream ss;
     ss << "call proc_DefineGuideSkillsUpdateSelect(" << uid << "," << type
        << ",'" << skills << "')";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic,
                                 CallDefineGuideSkillsUpdateSelect);
     if (!r) {
@@ -1101,7 +1105,7 @@ int32 UserMysql::GuideOrderSelect(int64 uid, int64 lastid, int64 count,
     std::stringstream ss;
     ss << "call proc_GuideOrderSelect(" << uid << "," << lastid << "," << count
        << "," << 2 << ")";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallGuideOrderSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -1112,7 +1116,7 @@ int32 UserMysql::GuideOrderSelect(int64 uid, int64 lastid, int64 count,
     // 邀约
     ss << "call proc_GuideOrderSelect(" << uid << "," << lastid << "," << count
        << "," << 0 << ")";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallGuideOrderSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -1130,7 +1134,7 @@ int32 UserMysql::AppointmentRecordSelect(int64 uid, int64 lastid, int64 count,
     std::stringstream ss;
     ss << "call proc_AppointmentRecordSelect(" << uid << "," << lastid << ","
        << count << ")";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallAppointmentRecordSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -1165,7 +1169,8 @@ void UserMysql::CallServiceCitySelect(void* param, Value* value) {
     }
     info->Set(L"service_city_", list);
   } else {
-    LOG(WARNING)<< "CallGuideServiceSelect count < 0";
+    //LOG(WARNING)<< "CallGuideServiceSelect count < 0";
+	  LOG_WARN("CallGuideServiceSelect count < 0");
   }
 }
 
@@ -1195,7 +1200,8 @@ void UserMysql::CallGuideServiceSelect(void* param, Value* value) {
     }
     info->Set(L"service_list_", list);
   } else {
-    LOG(WARNING)<< "CallGuideServiceSelect count < 0";
+    //LOG(WARNING)<< "CallGuideServiceSelect count < 0";
+	  LOG_WARN("CallGuideServiceSelect count < 0");
   }
 }
 
@@ -1217,7 +1223,8 @@ void UserMysql::CallGuideDetailSelect(void* param, Value* value) {
         dict->SetString(L"heag_bg_url_", rows[3]);
     }
   } else {
-    LOG(WARNING)<< "CallUserLoginSelect count < 0";
+    //LOG(WARNING)<< "CallUserLoginSelect count < 0";
+	  LOG_WARN("CallUserLoginSelect count < 0");
   }
 }
 
@@ -1255,7 +1262,8 @@ void UserMysql::CallNearGuideSelect(void* param, Value* value) {
     }
     info->Set(L"guide_list_", list);
   } else {
-    LOG(WARNING)<< "CallNearGuideSelect count < 0";
+    //LOG(WARNING)<< "CallNearGuideSelect count < 0";
+	  LOG_WARN("CallNearGuideSelect count < 0");
   }
 }
 
@@ -1299,7 +1307,8 @@ void UserMysql::CallRecommendGuideSelect(void* param, Value* value) {
     }
     info->Set(L"recommend_guide_", list);
   } else {
-    LOG(WARNING)<< "CallRecommendGuideSelect count < 0";
+    //LOG(WARNING)<< "CallRecommendGuideSelect count < 0";
+	  LOG_WARN("CallRecommendGuideSelect count < 0");
   }
 }
 
@@ -1339,7 +1348,8 @@ void UserMysql::CallUserLoginSelect(void* param, Value* value) {
         dict->SetBigInteger(L"has_recharged_", atoll(rows[12]));
     }
   } else {
-    LOG(WARNING)<< "CallUserLoginSelect count < 0";
+    //LOG(WARNING)<< "CallUserLoginSelect count < 0";
+	  LOG_WARN("CallUserLoginSelect count < 0");
   }
 }
 
@@ -1381,7 +1391,8 @@ void UserMysql::CallUserDetailSelect(void* param, Value* value) {
     }
     info->Set(L"userinfo_list_", list);
   } else {
-    LOG(WARNING)<< "CallUserDetailSelect count < 0";
+    //LOG(WARNING)<< "CallUserDetailSelect count < 0";
+	  LOG_WARN("CallUserDetailSelect count < 0");
   }
 }
 
@@ -1403,7 +1414,8 @@ void UserMysql::CallRegisterInsertAndSelect(void* param, Value* value) {
         dict->SetBigInteger(L"uid_", atoll(rows[1]));
     }
   } else {
-    LOG(WARNING)<< "CallRegisterInsertAndSelect count < 0";
+    //LOG(WARNING)<< "CallRegisterInsertAndSelect count < 0";
+	  LOG_WARN("CallRegisterInsertAndSelect count < 0");
   }
 }
 
@@ -1453,7 +1465,8 @@ void UserMysql::CallTripRecordSelect(void* param, Value* value) {
     }
     info->Set(L"trip_list_", list);
   } else {
-    LOG(WARNING)<< "CallTripRecordSelect count < 0";
+    //LOG(WARNING)<< "CallTripRecordSelect count < 0";
+	  LOG_WARN("CallTripRecordSelect count < 0");
   }
 }
 
@@ -1466,7 +1479,8 @@ void UserMysql::CallServiceInfoSelect(void* param, Value* value) {
   ListValue* list = NULL;
   info->GetList(L"service_list_", &list);
   if (list == NULL) {
-    LOG(ERROR)<< "CallServiceInfoSelect service_list_ NULL";
+    //LOG(ERROR)<< "CallServiceInfoSelect service_list_ NULL";
+	  LOG_ERROR("CallServiceInfoSelect service_list_ NULL");
     return;
   }
   if (num > 0) {
@@ -1489,7 +1503,8 @@ void UserMysql::CallServiceInfoSelect(void* param, Value* value) {
       list->Append(dict);
     }
   } else {
-    LOG(WARNING)<< "CallServiceInfoSelect count < 0";
+    //LOG(WARNING)<< "CallServiceInfoSelect count < 0";
+	  LOG_WARN("CallServiceInfoSelect count < 0");
   }
 }
 
@@ -1518,7 +1533,8 @@ void UserMysql::CallBlackServiceInfoSelect(void* param, Value* value) {
       list->Append(dict);
     }
   } else {
-    LOG(WARNING)<< "CallBlackServiceInfoSelect count < 0";
+    //LOG(WARNING)<< "CallBlackServiceInfoSelect count < 0";
+	  LOG_WARN("CallBlackServiceInfoSelect count < 0");
   }
   info->Set(L"black_list_", list);
 }
@@ -1548,7 +1564,8 @@ void UserMysql::CallBlackBuyInfoSelect(void* param, Value* value) {
       list->Append(dict);
     }
   } else {
-    LOG(WARNING)<< "CallBlackServiceInfoSelect count < 0";
+    //LOG(WARNING)<< "CallBlackServiceInfoSelect count < 0";
+	  LOG_WARN("CallBlackServiceInfoSelect count < 0");
   }
   info->Set(L"black_buy_list_", list);
 }
@@ -1566,7 +1583,7 @@ void UserMysql::CallInvoiceInfoInsert(void* param, Value* value) {
       }
     }
   } else {
-    LOG(WARNING)<<"CallInvoiceInfoInsert count < 0";
+	LOG_WARN("CallInvoiceInfoInsert count < 0");
   }
 }
 
@@ -1582,10 +1599,12 @@ void UserMysql::CallOrderStatusSelect(void* param, Value* value) {
         if (atoll(rows[0]) != 7) {
           if (atoll(rows[0]) == 9 || atoll(rows[0]) == 8) {  //已记录开票
             dict->SetBigInteger(L"result_", -2);
-            LOG(ERROR)<< "CallOrderStatusSelect result -2:订单已开票";
+            //LOG(ERROR)<< "CallOrderStatusSelect result -2:订单已开票";
+			LOG_ERROR("CallOrderStatusSelect result -2:订单已开票");
           } else {
             dict->SetBigInteger(L"result_",-3);
-            LOG(ERROR) << "CallOrderStatusSelect result -3:服务未完成";
+            //LOG(ERROR) << "CallOrderStatusSelect result -3:服务未完成";
+			LOG_ERROR("CallOrderStatusSelect result -3:服务未完成");
           }
           break;
         } else {  //订单状态均为7
@@ -1595,7 +1614,8 @@ void UserMysql::CallOrderStatusSelect(void* param, Value* value) {
     }
   } else {
     dict->SetBigInteger(L"result_", 0);
-    LOG(ERROR) << "CallOrderStatusSelect result 0:订单号不存在";
+    //LOG(ERROR) << "CallOrderStatusSelect result 0:订单号不存在";
+	LOG_ERROR("CallOrderStatusSelect result 0:订单号不存在");
   }
 }
 
@@ -1623,7 +1643,8 @@ void UserMysql::CallInvoiceRecordSelect(void* param, Value* value) {
     }
     info->Set(L"invoice_list_", list);
   } else {
-    LOG(WARNING)<<"CallInvoiceRecordSelect count < 0";
+    //LOG(WARNING)<<"CallInvoiceRecordSelect count < 0";
+	  LOG_WARN("CallInvoiceRecordSelect count < 0");
   }
 }
 
@@ -1663,7 +1684,8 @@ void UserMysql::CallInvoiceDetailSelect(void* param, Value* value) {
         dict->SetBigInteger(L"final_time_", atoll(rows[12]));
     }
   } else {
-    LOG(WARNING)<<"CallInvoiceDetailSelect count < 0";
+    //LOG(WARNING)<<"CallInvoiceDetailSelect count < 0";
+	  LOG_WARN("CallInvoiceDetailSelect count < 0");
   }
 }
 
@@ -1697,7 +1719,8 @@ void UserMysql::CallBlackcardPrivilegeSelect(void* param, Value* value) {
     }
     info->Set(L"privilege_list_", list);
   } else {
-    LOG(WARNING)<< "CallBlackcardPrivilegeSelect count < 0";
+    //LOG(WARNING)<< "CallBlackcardPrivilegeSelect count < 0";
+	  LOG_WARN("CallBlackcardPrivilegeSelect count < 0");
   }
 }
 
@@ -1728,7 +1751,8 @@ void UserMysql::CallBlackcardInfoSelect(void* param, Value* value) {
 
     }
   } else {
-    LOG(WARNING)<<"CallBlackcardInfoSelect count < 0";
+    //LOG(WARNING)<<"CallBlackcardInfoSelect count < 0";
+	  LOG_WARN("CallBlackcardInfoSelect count < 0");
   }
 }
 
@@ -1761,7 +1785,8 @@ void UserMysql::CallBlackcardConsumeRecordSelect(void* param, Value* value) {
       list->Append(dict);
     }
   } else {
-    LOG(WARNING)<<"CallBlackcardConsumeRecordSelect count < 0";
+    //LOG(WARNING)<<"CallBlackcardConsumeRecordSelect count < 0";
+	  LOG_WARN("CallBlackcardConsumeRecordSelect count < 0");
   }
   info->Set(L"blackcard_consume_record_", list);
 }
@@ -1802,7 +1827,8 @@ void UserMysql::CallBlackcardBuyOrderSelect(void* param, Value* value) {
       list->Append(dict);
     }
   } else {
-    LOG(WARNING)<<"CallBlackcardConsumeRecordSelect count < 0";
+    //LOG(WARNING)<<"CallBlackcardConsumeRecordSelect count < 0";
+	  LOG_WARN("CallBlackcardConsumeRecordSelect count < 0");
   }
 }
 
@@ -1826,7 +1852,8 @@ void UserMysql::CallSkillsInfoSelect(void* param, Value* value) {
     }
     info->Set(L"skills_list_", list);
   } else {
-    LOG(WARNING)<<"CallSkillsInfoSelect count < 0";
+    //LOG(WARNING)<<"CallSkillsInfoSelect count < 0";
+	  LOG_WARN("CallSkillsInfoSelect count < 0");
   }
 }
 
@@ -1846,7 +1873,8 @@ void UserMysql::CallImgTokenSelect(void* param, Value* value) {
       }
     }
   } else {
-    LOG(WARNING)<<"CallImgTokenSelect count < 0";
+    //LOG(WARNING)<<"CallImgTokenSelect count < 0";
+	  LOG_WARN("CallImgTokenSelect count < 0");
   }
 }
 
@@ -1863,7 +1891,8 @@ void UserMysql::CallRechargeInfoInsertAndSelect(void* param, Value* value) {
       }
     }
   } else {
-    LOG(WARNING)<<"CallRechargeInfoInsertAndSelect count < 0";
+    //LOG(WARNING)<<"CallRechargeInfoInsertAndSelect count < 0";
+	  LOG_WARN("CallRechargeInfoInsertAndSelect count < 0");
   }
 }
 
@@ -1886,7 +1915,8 @@ void UserMysql::CallChangeRechargeStatusAndSelect(void* param, Value* value) {
       }
     }
   } else {
-    LOG(WARNING)<<"CallChangeRechargeStatusAndSelect count < 0";
+    //LOG(WARNING)<<"CallChangeRechargeStatusAndSelect count < 0";
+	  LOG_WARN("CallChangeRechargeStatusAndSelect count < 0");
   }
 }
 
@@ -1903,7 +1933,8 @@ void UserMysql::CallIdentityInfoInsertAndSelect(void* param, Value* value) {
       }
     }
   } else {
-    LOG(WARNING)<<"CallIdentityInfoInsertAndSelect count < 0";
+    //LOG(WARNING)<<"CallIdentityInfoInsertAndSelect count < 0";
+	  LOG_WARN("CallIdentityInfoInsertAndSelect count < 0");
   }
 }
 
@@ -1927,7 +1958,8 @@ void UserMysql::CallIdentityReviewStatusSelect(void* param, Value* value) {
       }
     }
   } else {
-    LOG(WARNING)<<"CallIdentityReviewStatusSelect count < 0";
+    //LOG(WARNING)<<"CallIdentityReviewStatusSelect count < 0";
+	  LOG_WARN("CallIdentityReviewStatusSelect count < 0");
     dict->SetBigInteger(L"review_status_", -1);
     dict->SetString(L"failed_reason_", "");
   }
@@ -1971,7 +2003,8 @@ void UserMysql::CallShareTourismDetailsSelect(void* param, Value* value) {
     }
     info->Set(L"data_list_", list);
   } else {
-    LOG(WARNING)<<"CallShareTourismDetailsSelect count < 0";
+    //LOG(WARNING)<<"CallShareTourismDetailsSelect count < 0";
+	  LOG_WARN("CallShareTourismDetailsSelect count < 0");
   }
 }
 
@@ -2017,7 +2050,8 @@ void UserMysql::CallShareSkillDetailsSelect(void* param, Value* value) {
     }
     info->Set(L"data_list_", list);
   } else {
-    LOG(WARNING)<<"CallShareSkillDetailsSelect count < 0";
+    //LOG(WARNING)<<"CallShareSkillDetailsSelect count < 0";
+	  LOG_WARN("CallShareSkillDetailsSelect count < 0");
   }
 }
 
@@ -2041,7 +2075,8 @@ void UserMysql::CallShareTourismTypeSelect(void* param, Value* value) {
     }
     info->Set(L"data_list_", list);
   } else {
-    LOG(WARNING)<<"CallShareTourismTypeSelect count < 0";
+    //LOG(WARNING)<<"CallShareTourismTypeSelect count < 0";
+	  LOG_WARN("CallShareTourismTypeSelect count < 0");
   }
 }
 
@@ -2064,7 +2099,8 @@ void UserMysql::CallShareSkillEntrySelect(void* param, Value* value) {
     info->Set(L"user_list_", list);
   } else {
     info->Set(L"user_list_", list);
-    LOG(WARNING)<<"CallShareSkillEntrySelect count < 0";
+    //LOG(WARNING)<<"CallShareSkillEntrySelect count < 0";
+	LOG_WARN("CallShareSkillEntrySelect count < 0");
   }
 }
 
@@ -2092,7 +2128,8 @@ void UserMysql::CallShareSkillDiscussSelect(void* param, Value* value) {
     }
     info->Set(L"data_list_", list);
   } else {
-    LOG(WARNING)<<"CallShareSkillDiscussSelect count < 0";
+    //LOG(WARNING)<<"CallShareSkillDiscussSelect count < 0";
+	  LOG_WARN("CallShareSkillDiscussSelect count < 0");
   }
 }
 
@@ -2109,7 +2146,8 @@ void UserMysql::CallEntryShareSkillInsert(void* param, Value* value) {
       }
     }
   } else {
-    LOG(WARNING)<<"CallEntryShareSkillInsert count < 0";
+    //LOG(WARNING)<<"CallEntryShareSkillInsert count < 0";
+	  LOG_WARN("CallEntryShareSkillInsert count < 0");
   }
 }
 
@@ -2133,7 +2171,8 @@ void UserMysql::CallUserCashSelect(void* param, Value* value) {
       }
     }
   } else {
-    LOG(WARNING)<<"CallUserCashSelect count < 0";
+    //LOG(WARNING)<<"CallUserCashSelect count < 0";
+	  LOG_WARN("CallUserCashSelect count < 0");
     dict->SetBigInteger(L"user_cash_", 0);
     dict->SetBigInteger(L"has_passwd_", -1);
   }
@@ -2152,7 +2191,8 @@ void UserMysql::CallNewAppointmentInsert(void* param, Value* value) {
       }
     }
   } else {
-    LOG(WARNING)<<"CallNewAppointmentInsert count < 0";
+    //LOG(WARNING)<<"CallNewAppointmentInsert count < 0";
+	  LOG_WARN("CallNewAppointmentInsert count < 0");
   }
 }
 
@@ -2176,7 +2216,8 @@ void UserMysql::CallBlackcardPriceInfoSelect(void* param, Value* value) {
     }
     info->Set(L"data_list_", list);
   } else {
-    LOG(WARNING)<<"CallBlackcardPriceInfoSelect count < 0";
+    //LOG(WARNING)<<"CallBlackcardPriceInfoSelect count < 0";
+	  LOG_WARN("CallBlackcardPriceInfoSelect count < 0");
   }
 }
 
@@ -2220,7 +2261,8 @@ void UserMysql::CallOrderDetailsSelect(void* param, Value* value) {
       }
     }
   } else {
-    LOG(WARNING)<<"CallNewAppointmentInsert count < 0";
+    //LOG(WARNING)<<"CallNewAppointmentInsert count < 0";
+	  LOG_WARN("CallNewAppointmentInsert count < 0");
   }
 }
 
@@ -2249,7 +2291,8 @@ void UserMysql::CallBlackcardPlaceOrderInsertAndSelect(void* param,
         dict->SetBigInteger(L"start_", atoll(rows[3]));
     }
   } else {
-    LOG(WARNING)<<"CallNewAppointmentInsert count < 0";
+    //LOG(WARNING)<<"CallNewAppointmentInsert count < 0";
+	  LOG_WARN("CallNewAppointmentInsert count < 0");
   }
 }
 
@@ -2266,7 +2309,8 @@ void UserMysql::CallCheckPasswdSelect(void* param, Value* value) {
       }
     }
   } else {
-    LOG(WARNING)<<"CallCheckPasswdSelect count < 0";
+    //LOG(WARNING)<<"CallCheckPasswdSelect count < 0";
+	  LOG_WARN("CallCheckPasswdSelect count < 0");
   }
 }
 
@@ -2283,7 +2327,8 @@ void UserMysql::CallChangePasswdSelect(void* param, Value* value) {
       }
     }
   } else {
-    LOG(WARNING)<<"CallChangePasswdSelect count < 0";
+    //LOG(WARNING)<<"CallChangePasswdSelect count < 0";
+	  LOG_WARN("CallChangePasswdSelect count < 0");
   }
 }
 
@@ -2364,7 +2409,8 @@ void UserMysql::CallGuideOrderDetailSelect(void* param, Value* value) {
       }
     }
   } else {
-    LOG(WARNING)<<"CallGuideOrderDetailSelect count < 0";
+    //LOG(WARNING)<<"CallGuideOrderDetailSelect count < 0";
+	  LOG_WARN("CallGuideOrderDetailSelect count < 0");
   }
 }
 
@@ -2424,7 +2470,8 @@ void UserMysql::CallAppointmentRecordSelect(void* param, Value* value) {
     }
     info->Set(L"data_list_", list);
   } else {
-    LOG(WARNING)<<"CallAppointmentRecordSelect count < 0";
+    //LOG(WARNING)<<"CallAppointmentRecordSelect count < 0";
+	  LOG_WARN("CallAppointmentRecordSelect count < 0");
   }
 }
 void UserMysql::CallDefineGuideSkillsUpdateSelect(void* param, Value* value) {
@@ -2439,7 +2486,8 @@ void UserMysql::CallDefineGuideSkillsUpdateSelect(void* param, Value* value) {
         dict->SetString(L"skills_", rows[0]);
     }
   } else {
-    LOG(WARNING)<<"CallDefineGuideSkillsUpdateSelect count < 0";
+    //LOG(WARNING)<<"CallDefineGuideSkillsUpdateSelect count < 0";
+	  LOG_WARN("CallDefineGuideSkillsUpdateSelect count < 0");
   }
 }
 
@@ -2489,7 +2537,8 @@ void UserMysql::CallGuideOrderSelect(void* param, Value* value) {
       list->Append(dict);
     }
   } else {
-    LOG(WARNING)<<"CallGuideOrderSelect count < 0";
+    //LOG(WARNING)<<"CallGuideOrderSelect count < 0";
+	  LOG_WARN("CallGuideOrderSelect count < 0");
   }
 }
 
@@ -2515,7 +2564,8 @@ void UserMysql::CallBankCardInfoSelect(void* param, Value* value) {
     }
 	info->Set("bank_card_list_", list);
   } else {
-    LOG(WARNING)<<"CallBankInfoSelect count < 0";
+    //LOG(WARNING)<<"CallBankInfoSelect count < 0";
+	  LOG_WARN("CallBankInfoSelect count < 0");
   }
 }
 
@@ -2532,7 +2582,8 @@ void UserMysql::CallUserWithdrawInsertAndSelect(void* param, Value* value) {
       }
     }
   } else {
-    LOG(WARNING)<<"CallUserWithdrawInsertAndSelect count < 0";
+    //LOG(WARNING)<<"CallUserWithdrawInsertAndSelect count < 0";
+	  LOG_WARN("CallUserWithdrawInsertAndSelect count < 0");
   }
 }
 
@@ -2566,7 +2617,8 @@ void UserMysql::CallUserWithdrawRecordSelect(void* param, Value* value) {
     }
     info->Set("withdraw_record_", list);
   } else {
-    LOG(WARNING)<<"CallUserWithdrawRecordSelect count < 0";
+    //LOG(WARNING)<<"CallUserWithdrawRecordSelect count < 0";.
+	  LOG_WARN("CallUserWithdrawRecordSelect count < 0");
   }
 }
 
@@ -2590,7 +2642,8 @@ void UserMysql::CallUserPhotoAlbumSelect(void* param, Value* value) {
     }
     info->Set("photo_list_", list);
   } else {
-    LOG(WARNING)<<"CallUserPhotoAlbumSelect count < 0";
+    //LOG(WARNING)<<"CallUserPhotoAlbumSelect count < 0";
+	  LOG_WARN("CallUserPhotoAlbumSelect count < 0");
   }
 }
 
@@ -2616,7 +2669,8 @@ void UserMysql::CallUserInvitationCodeUpDate(void* param, Value* value)
 		}
 	}
 	else {
-		LOG(WARNING) << "CallUserInvitationCodeUpDate count < 0";
+		//LOG(WARNING) << "CallUserInvitationCodeUpDate count < 0";
+		LOG_WARN("CallUserInvitationCodeUpDate count < 0");
 	}
 }
 void UserMysql::CallUserAppVersionInfo(void* param, Value* value)
@@ -2655,8 +2709,8 @@ void UserMysql::CallUserAppVersionInfo(void* param, Value* value)
 		}
 	}
 	else {
-		LOG(WARNING) << "CallUserAppVersionInfo count < 0";
+		//LOG(WARNING) << "CallUserAppVersionInfo count < 0";
+		LOG_WARN("CallUserAppVersionInfo count < 0");
 	}
 }
 } // namespace user
-

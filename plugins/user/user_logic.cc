@@ -21,6 +21,7 @@
 #include "user/user_interface.h"
 #include "user/user_opcode.h"
 #include "pub/comm/comm_head.h"
+#include "logic/logic_comm.h"
 
 
 #define DEFAULT_CONFIG_PATH "./plugins/user/user_config.xml"
@@ -43,18 +44,21 @@ bool Userlogic::Init() {
   bool r = false;
   Result res = pushInit(host, appKey, masterSecret, "编码");
    if(res!=SUCCESS){
-     LOG(ERROR) << "DataShareMgr pushInit err";
+     //LOG(ERROR) << "DataShareMgr pushInit err";
+	 LOG_ERROR("DataShareMgr pushInit err");
    }
   user_manager_ = UserManager::GetInstance();
   config::FileConfig* config = config::FileConfig::GetFileConfig();
   std::string path = DEFAULT_CONFIG_PATH;
   if (config == NULL) {
-    LOG(ERROR) << "Userlogic config init error";
+    //LOG(ERROR) << "Userlogic config init error";
+	  LOG_ERROR("Userlogic config init error");
     return false;
   }
   r = config->LoadConfig(path);
   if (!r) {
-    LOG(ERROR) << "user config load error";
+    //LOG(ERROR) << "user config load error";
+	  LOG_ERROR("user config load error");
     return false;
   }
   UserInterface::GetInstance()->InitConfig(config);
@@ -66,13 +70,16 @@ bool Userlogic::InitShareData() {
   basic::libhandle  handle = NULL;
   handle = basic::load_native_library("./data.so");
   if (handle==NULL){
-    LOG(ERROR) << "Can't load path data.so\n";
+    //LOG(ERROR) << "Can't load path data.so\n";
+	  LOG_ERROR("Can't load path data.so\n");
   }
-  LOG(INFO) << "load data.so success";
+  //LOG(INFO) << "load data.so success";
+  LOG_MSG("load data.so success");
   share::DataShareMgr* (*pengine) (void);
   pengine = (share::DataShareMgr *(*)(void))basic::get_function_pointer(handle, "GetDataShareMgr");
   if(pengine==NULL){
-    LOG(ERROR) << "Can't find GetDataShareMgr\n";
+    //LOG(ERROR) << "Can't find GetDataShareMgr\n";
+	  LOG_ERROR("Can't find GetDataShareMgr\n");
     return false;
   }
   share::DataShareMgr* data_engine_ = (*pengine)();
@@ -92,7 +99,8 @@ void Userlogic::FreeInstance() {
 }
 
 bool Userlogic::OnUserConnect(struct server *srv, const int socket) {
-  LOG(INFO) << "socket has be connected:" << socket;
+  //LOG(INFO) << "socket has be connected:" << socket;
+	LOG_MSG2("socket has be connected:%d\n", socket);
   return true;
 }
 
@@ -103,7 +111,8 @@ bool Userlogic::OnUserMessage(struct server *srv, const int socket,
   char* msg_c = new char[len + 1];
   memset(msg_c, 0, len+1);
   memcpy(msg_c, msg, len);
-  LOG(INFO) << "OnUserMessage:len-" << len;
+  //LOG(INFO) << "OnUserMessage:len-" << len;
+  LOG_MSG2("OnUserMessage:len-%d\n", len);
   PacketHead packet_head(msg_c);
   delete[] msg_c;
   msg_c = NULL;
@@ -115,9 +124,11 @@ bool Userlogic::OnUserMessage(struct server *srv, const int socket,
 }
 
 bool Userlogic::OnUserClose(struct server *srv, const int socket) {
-  LOG(INFO) << "socket has be closed:" << socket;
+  //LOG(INFO) << "socket has be closed:" << socket;
+	LOG_MSG2("socket has be closed:%d\n", socket);
   user_manager_->OnSockClose(socket);
-  LOG(INFO) << "OnSockClose:" << socket;
+  //LOG(INFO) << "OnSockClose:" << socket;
+  LOG_MSG2("OnSockClose:%d\n", socket);
   return true;
 }
 
