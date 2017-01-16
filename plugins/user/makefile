@@ -3,7 +3,7 @@
 OUT_PUT = ${SO_DIR}/user/user.so 
 
 SRC_DIR = ../../
-LIB_DIR = ./../../../baselib
+LIB_DIR = ./../../../mylib
 SRC_PLUGINS = ${SRC_DIR}plugins
 SO_DIR = ${SRC_DIR}bin/plugins
 SRC_PUB_NET = ${SRC_DIR}pub/net
@@ -13,11 +13,12 @@ SRC_PUB_SHARE = ${SRC_DIR}pub/share
 SRC_PUB_COMM = ${SRC_DIR}pub/comm
 SRC_PUB_PAY = ${SRC_DIR}pub/pay
 
+
 LINK_DYNAMIC = -Wl,-Bdynamic -lpthread
 LINK_STATIC = -Wl,-Bstatic -L${LIB_DIR}/third_party/glog/lib/libglog.a
 LINK_PATH = -L/usr/lib64/mysql
 
-CXXFLAGS += -g -O0 -Wextra -w -shared -fPIC 
+CXXFLAGS += -g -O0 -Wextra -w -shared -fPIC -D USR_LOG_MSG -D USR_LOG_WARN -D USR_LOG_ERROR
 
 INCLUDE_PATHS = -I${LIB_DIR} \
 		-I${SRC_PLUGINS} \

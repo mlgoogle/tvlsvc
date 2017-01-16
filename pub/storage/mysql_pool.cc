@@ -40,20 +40,20 @@ void MYSQL_Pool::DBConnectionPush(base_storage::DBStorageEngine* engine) {
 base_storage::DBStorageEngine* MYSQL_Pool::DBConnectionPop() {
   base_logic::WLockGd lk(db_pool_lock_);
   if (db_conn_pool_.empty()) {
-    LOG(ERROR)<< "db_conn_pool_ empty";
+	LOG_ERROR("db_conn_pool_ empty");
     return NULL;
   }
   base_storage::DBStorageEngine* engine = NULL;
   engine = db_conn_pool_.front();
   db_conn_pool_.pop_front();
   if (engine == NULL) {
-    LOG(ERROR)<< "DBConnectionPop engine NULL";
+	LOG_ERROR("DBConnectionPop engine NULL");
     engine = base_storage::DBStorageEngine::Create(base_storage::IMPL_MYSQL);
     engine->Connections(addrlist_);
   }
   if (!engine->CheckConnect()) {
     engine->Release();
-    LOG(WARNING)<< "reconnect ";
+	LOG_WARN("reconnect");
     int reconnects = 3;
     do {
       if (engine->Connections(addrlist_))

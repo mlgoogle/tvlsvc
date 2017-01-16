@@ -10,7 +10,7 @@
 #include "pub/storage/data_engine.h"
 #include "pub/comm/comm_head.h"
 #include "pub/util/util.h"
-
+#include "logic/logic_comm.h"
 #include "glog/logging.h"
 
 namespace chat {
@@ -34,7 +34,7 @@ int32 ChatMysql::ChatRecordInsert(int64 from, int64 to, std::string msg,
     std::stringstream ss;
     ss << "call proc_ChatRecordInsert(" << from << "," << to << ",'" << msg
 		<< "'," << time << "," << is_push << "," << type << ");";
-    LOG(INFO)<< "sql:" << ss.str();
+    LOG_MSG2("sql:%s\n",ss.str().c_str());
     r = mysql_engine_->WriteData(ss.str());
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -65,7 +65,7 @@ int32 ChatMysql::ChatRecordQuery(int64 from, int64 to, int64 count, int64 id,
     std::stringstream ss;
     ss << "call proc_ChatRecordQuery(" << from << "," << to << "," << count
        << "," << id << ")";
-    LOG(INFO)<< "sql:" << ss.str();
+     LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallChatRecordQuery);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -85,7 +85,7 @@ int32 ChatMysql::UserNickSelect(int64 uid, DicValue* dic) {
   do {
     std::stringstream ss;
     ss << "call proc_UserNickSelect(" << uid << ")";
-    LOG(INFO)<< "sql:" << ss.str();
+     LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallUserNickSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -106,7 +106,7 @@ int32 ChatMysql::DeviceTokenSelect(int64 uid, std::string* token) {
     std::stringstream ss;
     ss << "call proc_DeviceTokenSelect(" << uid << ")";
     DicValue dic;
-    LOG(INFO)<< "sql:" << ss.str();
+     LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), &dic, CallDeviceTokenSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -128,7 +128,7 @@ int32 ChatMysql::EvaluateInfoSelect(int64 oid, DicValue* dic) {
   do {
     std::stringstream ss;
     ss << "call proc_EvaluateInfoSelect(" << oid << ")";
-    LOG(INFO)<< "sql:" << ss.str();
+     LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallEvaluateInfoSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -148,7 +148,7 @@ int32 ChatMysql::PullPushMsgSelect(int64 uid, DicValue* dic) {
   do {
     std::stringstream ss;
     ss << "call proc_PullPushMsgSelect(" << uid << ")";
-    LOG(INFO)<< "sql:" << ss.str();
+     LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallPullPushMsgSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -166,7 +166,7 @@ int32 ChatMysql::EvaluateTripInsert(int64 oid, int64 s_score, int64 u_score,
     std::stringstream ss;
     ss << "call proc_EvaluateTripInsert(" << oid << "," << s_score << ","
        << u_score << ",'" << remarks << "'," << from << "," << to << ")";
-    LOG(INFO)<< "sql:" << ss.str();
+     LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->WriteData(ss.str());
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -182,7 +182,7 @@ int32 ChatMysql::UpDateTripCommission(int64 orderId) {
 	do {
 		std::stringstream ss;
 		ss << "call proc_UserInvitationInfo(" << orderId <<")";
-		LOG(INFO) << "sql:" << ss.str();
+		LOG_MSG2("sql:%s\n",ss.str().c_str());
 		DicValue dic;
 		r = mysql_engine_->ReadData(ss.str(), &dic, CallGetUserInvitationInfo);
 		if (!r) {
@@ -205,13 +205,15 @@ int32 ChatMysql::UpDateTripCommission(int64 orderId) {
 			timep = timep - nInvitationUserTime * 24 * 60 * 60;
 			p = localtime(&timep);
 			int nInvitationTime = (p->tm_year + 1900) * 10000 + (p->tm_mon + 1) * 100 + p->tm_mday;
-			LOG(INFO) << "Invitation time  is  " << nInvitationTime << '\n';			
+			//LOG(INFO) << "Invitation time  is  " << nInvitationTime << '\n';	
+			LOG_MSG2("Invitation time  is %d \n", nInvitationTime);
 
 			tm tmStartTime;
 			time(&timep);
 			strptime(strUserRegTime.c_str(), "%Y-%m-%d %H:%M:%S", &tmStartTime); //将字符串转换为tm时间 
 			int nRegTime = (tmStartTime.tm_year + 1900) * 10000 + (tmStartTime.tm_mon + 1) * 100 + tmStartTime.tm_mday;
-			LOG(INFO) << "Reg time  is  " << nRegTime << '\n';
+			//LOG(INFO) << "Reg time  is  " << nRegTime << '\n';
+			LOG_MSG2("Reg time  is %d \n", nRegTime);
 
 			if (nRegTime >= nInvitationTime)
 			{				
@@ -219,7 +221,8 @@ int32 ChatMysql::UpDateTripCommission(int64 orderId) {
 				{
 					std::stringstream sSql;
 					sSql << "call proc_UpdateCommission(" << orderId << "," << nUserId << ")";
-					LOG(INFO) << sSql.str() << '\n';
+					//LOG(INFO) << sSql.str() << '\n';
+					LOG_MSG2("Reg time  is %s \n", sSql.str().c_str());
 					r = mysql_engine_->WriteData(sSql.str());
 
 					if (!r) {
@@ -240,7 +243,7 @@ int32 ChatMysql::GuideOrderStatusUpdate(int64 oid, int64 o_status) {
   do {
     std::stringstream ss;
     ss << "call proc_GuideOrderStatusUpdate(" << oid << "," << o_status << ")";
-    LOG(INFO)<< "sql:" << ss.str();
+     LOG_MSG2("sql: %s", ss.str().c_str());
     DicValue dic;
     r = mysql_engine_->ReadData(ss.str(), &dic, CallGuideOrderStatusUpdate);
     if (!r) {
@@ -263,7 +266,7 @@ int32 ChatMysql::SpentCashUpdate(int64 uid, int64 oid, std::string pwd,
     std::stringstream ss;
     ss << "call proc_SpentCashUpdate(" << uid << "," << oid << ",'" << pwd
        << "')";
-    LOG(INFO)<< "sql:" << ss.str();
+     LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallSpentCashUpdate);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -279,7 +282,7 @@ int32 ChatMysql::CancelOrderPayUpdate(int64 oid, int64 otype, DicValue* dic) {
   do {
     std::stringstream ss;
     ss << "call proc_CancelOrderPayUpdate(" << oid << "," << otype << ")";
-    LOG(INFO)<< "sql:" << ss.str();
+     LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallCancelOrderPayUpdate);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -299,7 +302,7 @@ int32 ChatMysql::NewOrderInsertAndSelect(int64 from, int64 to, int64 sid,
     //0-邀约订单 1-预约订单
     ss << "call proc_NewOrderInsertAndSelect(" << from << "," << to << ","
        << sid << "," << day << "," << 0 << ")";
-    LOG(INFO)<< "sql:" << ss.str();
+     LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallNewOrderInsertAndSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -325,7 +328,7 @@ int32 ChatMysql::NewAppointmentOrderInsertAndSelect(int64 from, int64 to,
     //0-邀约订单 1-预约订单
     ss << "call proc_NewAppointmentOrderInsertAndSelect(" << from << "," << to
        << "," << sid << "," << aid << ")";
-    LOG(INFO)<< "sql:" << ss.str();
+     LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallNewOrderInsertAndSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -356,7 +359,8 @@ void ChatMysql::CallNewOrderInsertAndSelect(void* param, Value* value) {
         dict->SetBigInteger(L"is_asked_", atoll(rows[3]));
     }
   } else {
-    LOG(WARNING)<< "Call NewOrderInsertAndSelect count < 0";
+    //LOG(WARNING)<< "Call NewOrderInsertAndSelect count < 0";
+	  LOG_WARN("Call NewOrderInsertAndSelect count < 0");
   }
 }
 
@@ -384,7 +388,8 @@ void ChatMysql::CallChatRecordQuery(void* param, Value* value) {
     }
     info->Set(L"chat_list_", list);
   } else {
-    LOG(WARNING)<< "Call ChatRecordQuery count < 0";
+    //LOG(WARNING)<< "Call ChatRecordQuery count < 0";
+	  LOG_WARN("Call ChatRecordQuery count < 0");
   }
 }
 
@@ -400,7 +405,8 @@ void ChatMysql::CallDeviceTokenSelect(void* param, Value* value) {
         dict->SetString(L"device_token_", rows[0]);
     }
   } else {
-    LOG(WARNING)<< "Call DeviceTokenSelect count < 0";
+    //LOG(WARNING)<< "Call DeviceTokenSelect count < 0";
+	  LOG_WARN("Call DeviceTokenSelect count < 0");
   }
 }
 
@@ -416,7 +422,8 @@ void ChatMysql::CallUserNickSelect(void* param, Value* value) {
         dict->SetString(L"nickname_", rows[0]);
     }
   } else {
-    LOG(WARNING)<< "Call UserNickSelect count < 0";
+    //LOG(WARNING)<< "Call UserNickSelect count < 0";
+	  LOG_WARN("Call UserNickSelect count < 0");
   }
 }
 
@@ -438,7 +445,8 @@ void ChatMysql::CallEvaluateInfoSelect(void* param, Value* value) {
         dict->SetString(L"remarks_", rows[3]);
     }
   } else {
-    LOG(WARNING)<<"Call CallEvaluateInfoSelect count < 0";
+    //LOG(WARNING)<<"Call CallEvaluateInfoSelect count < 0";
+	  LOG_WARN("Call UserNickSelect count < 0");
   }
 }
 
@@ -462,7 +470,8 @@ void ChatMysql::CallSpentCashUpdate(void* param, Value* value) {
         dict->SetBigInteger(L"order_status_", atoll(rows[4]));
     }
   } else {
-    LOG(WARNING)<<"Call CallSpentCashUpdate count < 0";
+    //LOG(WARNING)<<"Call CallSpentCashUpdate count < 0";
+	  LOG_WARN("Call CallSpentCashUpdate count < 0");
   }
 }
 
@@ -482,7 +491,8 @@ void ChatMysql::CallCancelOrderPayUpdate(void* param, Value* value) {
         dict->SetBigInteger(L"order_type_", atoll(rows[2]));
     }
   } else {
-    LOG(WARNING)<<"Call CallCancelOrderPayUpdate count < 0";
+    //LOG(WARNING)<<"Call CallCancelOrderPayUpdate count < 0";
+	  LOG_WARN("Call CallCancelOrderPayUpdate count < 0");
   }
 }
 
@@ -498,7 +508,8 @@ void ChatMysql::CallGuideOrderStatusUpdate(void* param, Value* value) {
         dict->SetBigInteger(L"result_", atoll(rows[0]));
     }
   } else {
-    LOG(WARNING)<<"Call CallGuideOrderStatusUpdate count < 0";
+    //LOG(WARNING)<<"Call CallGuideOrderStatusUpdate count < 0";
+	  LOG_WARN("Call CallGuideOrderStatusUpdate count < 0");
   }
 }
 
@@ -533,7 +544,8 @@ void ChatMysql::CallGetUserInvitationInfo(void* param, Value* value) {
 		}
 	}
 	else {
-		LOG(WARNING) << "Call CallGuideOrderStatusUpdate count < 0";
+		//LOG(WARNING) << "Call CallGuideOrderStatusUpdate count < 0";
+		LOG_WARN("Call CallGuideOrderStatusUpdate count < 0");
 	}
 }
 
@@ -560,7 +572,8 @@ void ChatMysql::CallPullPushMsgSelect(void* param, Value* value) {
       list->Append(dict);
     }
   } else {
-    LOG(WARNING)<<"Call CallPullPushMsgSelect count < 0";
+    //LOG(WARNING)<<"Call CallPullPushMsgSelect count < 0";
+	  LOG_WARN("Call CallPullPushMsgSelect count < 0");
   }
   info->Set(L"msg_list_", list);
 }
