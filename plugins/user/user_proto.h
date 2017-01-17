@@ -798,6 +798,23 @@ private:
 	int64 insurance_price_;
 	std::string insurance_username_;
 };
+
+class UserIdCardInfoRecv :public PacketHead {
+public:
+	UserIdCardInfoRecv(PacketHead packet);
+	int32 Deserialize();
+
+	inline std::string IdCardNum() { return IdCardNum_; }
+	inline std::string IdCardName() { return IdCardName_; }
+	inline std::string IdCardUrlName() { return IdCardUrlName_; }
+	inline int64 Uid() { return uid_; }
+
+private:
+	int64 uid_;
+	std::string IdCardNum_;
+	std::string IdCardName_;
+	std::string IdCardUrlName_;
+};
 }  // namespace user
 
 #endif  // PLUGINS_USER_USER_PROTO_H_
