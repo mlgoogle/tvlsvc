@@ -116,7 +116,6 @@ void BonderOfCoordinate(double lon, double lat, double dis, double* out) {
   }
   //最后置换成角度进行输出
   out[0] = lon_min * 180 / PI;
-  ;
   out[1] = lon_max * 180 / PI;
   out[2] = lat_min * 180 / PI;
   out[3] = lat_max * 180 / PI;
@@ -177,11 +176,12 @@ int PushApnChatMsg(char* dt, int unreadcount, char* title, char* body,
   IPushResult result = { 0 };
 
   result = pushAPNMessageToSingle((char*) APPKEY, &templ, APPID, dt);
-  LOG(INFO)<< "print result:-------------";
+  LOG_MSG("print result:-------------\n");
   for (int i = 0; i < result.size; i++) {
-    LOG(INFO)<< result.entry[i].key << ": " << result.entry[i].value;
+    //LOG(INFO)<< result.entry[i].key << ": " << result.entry[i].value;
+	  LOG_MSG2("%d:%s\n", result.entry[i].key, result.entry[i].value);
   }
-  LOG(INFO)<< "print end:----------------";
+  LOG_MSG("print end:-------------\n");
   //打印结果
 //  printResult(result);
   return 0;
@@ -217,6 +217,5 @@ std::string GetWxpayXmlValue(std::string value) {
   int npos2 = value.find("]]>");
   return value.substr(npos1 + 9, npos2 - npos1 - 9);
 }
-
 }  // namespace util
 
