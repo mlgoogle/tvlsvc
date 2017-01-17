@@ -683,10 +683,10 @@ int32 UserInterface::UploadContacts(const int32 socket, PacketHead* packet) {
 		err = user_mysql_->WriteDatas(rev.sql_list());
 		if (err < 0)
 			break;
-		SendMsg(socket, packet, NULL, UPLOAD_CONTACTS_REQ);
+		SendMsg(socket, packet, NULL, UPLOAD_CONTACTS_RLY);
 	} while (0);
 	if (err < 0)
-		SendError(socket, packet, err, UPLOAD_CONTACTS_REQ);
+		SendError(socket, packet, err, UPLOAD_CONTACTS_RLY);
 	return err;
 }
 
@@ -1727,6 +1727,7 @@ int32 UserInterface::NearbyGuide(const int32 socket, PacketHead* packet) {
       break;
     DicValue dic;
     double point[4];
+	LOG_MSG2("%ld %ld %ld\n", rev.longitude(), rev.latitude(), rev.distance());
     util::BonderOfCoordinate(rev.longitude(), rev.latitude(), rev.distance(),
                              point);
     err = user_mysql_->NearGuideSelect(point, &dic);

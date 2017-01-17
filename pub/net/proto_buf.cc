@@ -4,6 +4,7 @@
 // Author: Paco.
 
 #include "pub/net/proto_buf.h"
+#include "base/logic/logic_comm.h"
 
 #include <string.h>
 
@@ -48,22 +49,32 @@ std::string PacketHead::Serialize(DicValue* dic) {
 
 void PacketHead::set_body_str(char* packet) {
   if (packet_length() != data_length() + HEAD_LENGTH) {
-    LOG(ERROR) << "something wrong with packet set_body";
-    LOG(ERROR) << "type:" << type() << "-operate_code:" \
+    //LOG(ERROR) << "something wrong with packet set_body";
+	std::stringstream strlog;
+	strlog << "type:" << type() << "-operate_code:" \
         << operate_code() << "-packet_length:" << packet_length() \
         << "-data_length:" << data_length();
+
+	LOG_ERROR("something wrong with packet set_body");
+	LOG_ERROR(strlog.str().c_str());
     return;
   }
-  LOG(INFO) << "type:" << (int)type() << "-operate_code:" \
+  std::stringstream strlog;
+  strlog << "type:" << (int)type() << "-operate_code:" \
       << operate_code() << "-packet_length:" << packet_length() \
       << "-data_length:" << data_length();
-  LOG(INFO) << "is_zip_encrypt:" << (int)is_zip_encrypt() << "-signature:" \
+  LOG_ERROR(strlog.str().c_str());
+
+  std::stringstream strlog2;
+  strlog2 << "is_zip_encrypt:" << (int)is_zip_encrypt() << "-signature:" \
       << signature() << "-timestamp:" << timestamp();
+  LOG_MSG2("%s\n", strlog2.str().c_str());
 //  char* data = new char[data_length()+1];
 //  memset(data, 0, data_length()+1);
 //  memcpy(data, packet, data_length());
   body_str_ = packet;
-  LOG(INFO) << "body_str:" << body_str_;
+  //LOG(INFO) << "body_str:" << body_str_;
+  LOG_MSG2("body_str%s\n", body_str_.c_str());
 //  delete[] data;
 }
 
