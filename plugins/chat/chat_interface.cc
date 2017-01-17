@@ -8,7 +8,6 @@
 #include <stdio.h>
 #include <time.h>
 #include <sys/socket.h>
-
 #include "glog/logging.h"
 #include "base/logic/logic_comm.h"
 #include "public/basic/basic_util.h"
@@ -75,14 +74,17 @@ int32 ChatInterface::AnswerInvitation(const int32 socket, PacketHead* packet) {
   int32 err = 0;
   do {
     AnswerInvitationRecv rev(*packet);
-    LOG(INFO) << "AnswerInvitation";
+    //LOG(INFO) << "AnswerInvitation";
+	LOG_MSG("AnswerInvitation");
     err = rev.Deserialize();
     if (err < 0)
       break;
     //更新订单状态
-    LOG(INFO) << "before GuideOrderStatusUpdate";
+    //LOG(INFO) << "before GuideOrderStatusUpdate";
+	LOG_MSG("before GuideOrderStatusUpdate");
     err = chat_mysql_->GuideOrderStatusUpdate(rev.order_id(), rev.order_status());
-    LOG(INFO) << "after GuideOrderStatusUpdate";
+    //LOG(INFO) << "after GuideOrderStatusUpdate";
+	LOG_MSG("after GuideOrderStatusUpdate");
     if (err < 0)
       break;
     rev.set_operate_code(ANSWER_INVITATION_RLY);
@@ -140,15 +142,17 @@ int32 ChatInterface::AskInvitation(const int32 socket, PacketHead* packet) {
     int64 oid;
     int64 oid_status;
     dic.GetBigInteger(L"order_id_", &oid);
-    LOG(INFO)<< "change order status oid:" << oid;
+    //LOG(INFO)<< "change order status oid:" << oid;s
     chat_mysql_->OrderStatusUpdate(oid, 3);
     ============================*/
     if (u == NULL || !u->is_login()) {
-      LOG(INFO)<< "invitate to user is not login";
+      //LOG(INFO)<< "invitate to user is not login";
+		LOG_MSG("invitate to user is not login");
       // 回复被邀请者
       PushGtMsg(rev.from_uid(), rev.to_uid(), rev.body_str(), " 邀你同游",
           ASK_INVITATION_RLY);
-      LOG(INFO) << "PushGtMsg";
+      //LOG(INFO) << "PushGtMsg";
+	  LOG_MSG("PushGtMsg");
       break;
     } else {
       //     rev.set_operate_code(ASK_INVITATION_RLY);
@@ -196,11 +200,13 @@ int32 ChatInterface::AppointMentGuide(const int32 socket, PacketHead* packet) {
     chat_mysql_->OrderStatusUpdate(oid, 3);
     ============================*/
     if (u == NULL || !u->is_login()) {
-      LOG(INFO)<< "appointment to user is not login";
+      //LOG(INFO)<< "appointment to user is not login";
+		LOG_MSG("appointment to user is not login");
       // 回复被邀请者
       PushGtMsg(rev.from_uid(), rev.to_uid(), rev.body_str(), " 邀你同游",
           APPOINTMENT_GUIDE_RLY);
-      LOG(INFO) << "PushGtMsg";
+      //LOG(INFO) << "PushGtMsg";
+	  LOG_MSG("PushGtMsg");
       break;
     } else {
       //     rev.set_operate_code(ASK_INVITATION_RLY);
@@ -223,13 +229,15 @@ int32 ChatInterface::ChatMessage(const int32 socket, PacketHead* packet) {
       break;
     UserInfo* u = data_share_mgr_->GetUser(rev.to_uid());
     if (u != NULL) {
-      LOG(INFO)<< "chat to user is not null uid:" << u->uid() << "is login:" <<
+      //LOG(INFO)<< "chat to user is not null uid:" << u->uid() << "is login:" <<
       u->is_login();
+		LOG_MSG2("chat to user is not null uid: %d  is login: %d", u->uid(), u->is_login());
     }
     if (u == NULL || !u->is_login()) {
       // to_id 为-1 表示意见反馈
       if (rev.to_uid() == -1) {
-        LOG(INFO)<< "chat to user -1";
+       // LOG(INFO)<< "chat to user -1";
+		LOG_MSG("chat to user -1");
         err = chat_mysql_->ChatRecordInsert(rev.from_uid(), rev.to_uid(),
             rev.content(), rev.msg_time(), 0, rev.msg_type());
         break;
@@ -252,17 +260,20 @@ int32 ChatInterface::ChatMessage(const int32 socket, PacketHead* packet) {
          << ",'" << rev.content() << "'," << rev.msg_time() << "," << 0 << ",msg_type" << rev.msg_type() <<")";
       msg_list_.push_back(ss.str());
       if (msg_list_.size() > 10) {
-        LOG(INFO)<< "msg_list > 10";
+        //LOG(INFO)<< "msg_list > 10";
+		  LOG_MSG("msg_list > 10\n");
         std::list<std::string> new_list_;
         {
           base_logic::RLockGd lk(lock_);
           new_list_.splice(new_list_.begin(), msg_list_);
         }
-        LOG(INFO) << "new_list size:" << new_list_.size();
+        //LOG(INFO) << "new_list size:" << new_list_.size();
+		LOG_MSG2("new_list size: %d\n", new_list_.size());
         err = chat_mysql_->ChatRecordInsert(new_list_);
         if (err < 0) {
           {
-            LOG(INFO) << "new_list insert mysql err:";
+            //LOG(INFO) << "new_list insert mysql err:";
+			  LOG_MSG("new_list insert mysql err:");
             base_logic::RLockGd lk(lock_);
             msg_list_.splice(msg_list_.begin(), new_list_);
           }
@@ -463,7 +474,8 @@ int32 ChatInterface::EvaluateInfo(const int32 socket, PacketHead* packet) {
 int32 ChatInterface::PushGtMsg(int64 from, int64 to, std::string category,
                                std::string content, int64 type) {
   int32 err = 0;
-  LOG(INFO)<< "ChatInterface::PushAskMsg";
+  //LOG(INFO)<< "ChatInterface::PushAskMsg";
+  LOG_MSG("ChatInterface::PushAskMsg");
   do {
     std::string token = data_share_mgr_->GetDeviceToken(to);
     if (token == "") {
@@ -485,8 +497,10 @@ int32 ChatInterface::PushGtMsg(int64 from, int64 to, std::string category,
       nick = dic.GetString(L"nickname_", &nick);
       data_share_mgr_->AddNick(from, nick);
     }
-    LOG(INFO)<< "token::" << token;
-    LOG(INFO)<< "content::" << category;
+    //LOG(INFO)<< "token::" << token;
+	LOG_MSG2("token::%s\n", token.c_str());
+    //LOG(INFO)<< "content::" << category;
+	LOG_MSG2("content::%s\n", category.c_str());
     util::PushApnChatMsg((char*) token.c_str(),
                          data_share_mgr_->AddUnReadCount(to),
 						 (char*)nick.c_str(), (char*)content.c_str(),
@@ -497,7 +511,8 @@ int32 ChatInterface::PushGtMsg(int64 from, int64 to, std::string category,
 
 int32 ChatInterface::PushAskMsg(AskInvitationRecv rev) {
   int32 err = 0;
-  LOG(INFO)<< "ChatInterface::PushAskMsg";
+  //LOG(INFO)<< "ChatInterface::PushAskMsg";
+  LOG_MSG("ChatInterface::PushAskMsg");
   do {
     std::string token = data_share_mgr_->GetDeviceToken(rev.to_uid());
     if (token == "") {
@@ -518,8 +533,10 @@ int32 ChatInterface::PushAskMsg(AskInvitationRecv rev) {
       nick = dic.GetString(L"nickname_", &nick);
       data_share_mgr_->AddNick(rev.from_uid(), nick);
     }
-    LOG(INFO)<< "token::" << token;
-    LOG(INFO)<< "category::" << rev.body_str();
+    //LOG(INFO)<< "token::" << token;
+    //LOG(INFO)<< "category::" << rev.body_str();
+	LOG_MSG2("token::%s\n", token.c_str());
+	LOG_MSG2("category::%s\n", rev.body_str().c_str());
     util::PushApnChatMsg((char*) token.c_str(),
                          data_share_mgr_->AddUnReadCount(rev.to_uid()),
                          (char*) nick.c_str(), " 邀你同游！",
@@ -530,7 +547,8 @@ int32 ChatInterface::PushAskMsg(AskInvitationRecv rev) {
 //废弃的
 int32 ChatInterface::PushChatMsg(ChatPacket rev) {
   int32 err = 0;
-  LOG(INFO)<< "ChatInterface::PushChatMsg";
+  //LOG(INFO)<< "ChatInterface::PushChatMsg";
+  LOG_MSG("ChatInterface::PushChatMsg");
   std::string token = data_share_mgr_->GetDeviceToken(rev.to_uid());
   do {
     if (token == "") {
@@ -551,8 +569,10 @@ int32 ChatInterface::PushChatMsg(ChatPacket rev) {
       nick = dic.GetString(L"nickname_", &nick);
       data_share_mgr_->AddNick(rev.from_uid(), nick);
     }
-    LOG(INFO)<< "token::" << token;
-    LOG(INFO)<< "content::" << rev.body_str();
+    //LOG(INFO)<< "token::" << token;
+    //LOG(INFO)<< "content::" << rev.body_str();
+	LOG_MSG2("token::%s\n", token.c_str());
+	LOG_MSG2("category::%s\n", rev.body_str().c_str());
     util::PushApnChatMsg((char*) token.c_str(),
                          data_share_mgr_->AddUnReadCount(rev.to_uid()),
                          (char*) nick.c_str(), (char*) rev.content().c_str(),
@@ -573,7 +593,8 @@ std::string ChatInterface::SpliceGtPushBody(std::string json, int64 type) {
     serializer->Serialize(*dic, &str);
   } else {
     str = "{\"push_msg_type:\",-1}";
-    LOG(ERROR)<< "SpliceGtPushBody json error";
+    //LOG(ERROR)<< "SpliceGtPushBody json error";
+	LOG_ERROR("SpliceGtPushBody json error");
   }
   base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
                                                 serializer);
@@ -588,7 +609,8 @@ int32 ChatInterface::CloseSocket(const int fd) {
 void ChatInterface::SendPacket(const int socket, PacketHead* packet) {
 
   char* s = new char[packet->packet_length()];
-  LOG(INFO)<< "packet body:" << packet->body_str();
+  //LOG(INFO)<< "packet body:" << packet->body_str();
+  LOG_MSG2("packet body:%s \n", packet->body_str().c_str());
   memset(s, 0, packet->packet_length());
   memcpy(s, &packet->head(), HEAD_LENGTH);
   memcpy(s + HEAD_LENGTH, packet->body_str().c_str(),

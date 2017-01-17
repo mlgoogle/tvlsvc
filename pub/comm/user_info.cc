@@ -5,6 +5,7 @@
 
 #include "pub/comm/user_info.h"
 #include "glog/logging.h"
+#include "base/logic/logic_comm.h"
 
 UserInfo::UserInfo() {
   data_ = new UserData();
@@ -16,7 +17,7 @@ UserInfo::UserInfo(const UserInfo& user) : data_(user.data_) {
 }
 
 UserInfo::~UserInfo() {
-  LOG(INFO) << "delete ~UserInfo()";
+  LOG_MSG("delete ~UserInfo()");
   if (data_ != NULL) {
     data_->DelRef();
   }
