@@ -1950,7 +1950,14 @@ void UserMysql::CallIdentityReviewStatusSelect(void* param, Value* value) {
         dict->SetBigInteger(L"review_status_", atoll(rows[0]));
 		if (atoll(rows[0]) == 2)
 		{
-			dict->SetString(L"failed_reason_","身份证姓名不匹配");
+			if (rows[1] != NULL)
+			{
+				dict->SetString(L"failed_reason_", rows[1]);
+			}
+			else
+			{
+				dict->SetString(L"failed_reason_", "身份证姓名和号码不匹配！");
+			}
 		}
       } else {
         //没有查到用户

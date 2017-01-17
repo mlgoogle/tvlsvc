@@ -686,7 +686,7 @@ int32 UserInterface::UploadContacts(const int32 socket, PacketHead* packet) {
 		SendMsg(socket, packet, NULL, UPLOAD_CONTACTS_RLY);
 	} while (0);
 	if (err < 0)
-		SendError(socket, packet, err, UPLOAD_CONTACTS_RLY);
+		SendError(socket, packet, err, UPLOAD_CONTACTS_RLY );
 	return err;
 }
 
