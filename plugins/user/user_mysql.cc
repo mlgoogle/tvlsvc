@@ -1952,11 +1952,13 @@ void UserMysql::CallIdentityReviewStatusSelect(void* param, Value* value) {
 		{
 			if (rows[1] != NULL)
 			{
+				std::string strError = rows[1];
+				LOG_MSG2("sadasdasddddddddddddddddddddd%s", strError.c_str());
 				dict->SetString(L"failed_reason_", rows[1]);
 			}
 			else
 			{
-				dict->SetString(L"failed_reason_", "身份证姓名和号码不匹配！");
+				dict->SetString(L"failed_reason_",  "身份证号码姓名和名字不匹配!");
 			}
 		}
       } else {
