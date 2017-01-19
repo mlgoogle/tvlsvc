@@ -6,6 +6,7 @@
 #include "chat/chat_manager.h"
 
 #include "glog/logging.h"
+#include "logic/logic_comm.h"
 
 #include "chat/chat_opcode.h"
 #include "chat/chat_interface.h"
@@ -38,7 +39,8 @@ ChatManager::~ChatManager() {
 int32 ChatManager::AssignPacket(const int32 socket, PacketHead* packet) {
   int32 err = 0;
   ChatInterface* interface = ChatInterface::GetInterface();
-  LOG(INFO) << "AssignPacket opcode" << (int)packet->operate_code();
+  //LOG(INFO) << "AssignPacket opcode" << (int)packet->operate_code();
+  LOG_MSG2("AssignPacket opcode:%d\n", (int)packet->operate_code());
   switch (packet->operate_code()) {
     case ASK_INVITATION_REQ: {
       interface->AskInvitation(socket, packet);
