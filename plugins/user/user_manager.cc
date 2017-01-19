@@ -8,6 +8,7 @@
 #include <stdio.h>
 
 #include "glog/logging.h"
+#include "logic/logic_comm.h"
 
 #include "user/user_opcode.h"
 #include "user/user_interface.h"
@@ -39,7 +40,8 @@ UserManager::~UserManager() {
 int32 UserManager::AssignPacket(const int32 socket, PacketHead* packet) {
   int32 err = 0;
   UserInterface* interface = UserInterface::GetInstance();
-  LOG(INFO)<< "AssignPacket opcode" << (int)packet->operate_code();
+  //LOG(INFO)<< "AssignPacket opcode" << (int)packet->operate_code();
+  LOG_MSG2("AssignPacket opcode %d\n", (int)packet->operate_code());
   switch (packet->operate_code()) {
     case USER_LOGIN_REQ: {
       interface->UserLogin(socket, packet);
@@ -273,6 +275,10 @@ int32 UserManager::AssignPacket(const int32 socket, PacketHead* packet) {
       interface->UserRegInvitationCode(socket, packet);
       break;
 	}
+	case USER_APP_VERSION_INFO_REQ: {
+       interface->UserAppVersionInfo(socket, packet);
+       break;
+	}
 	case USER_INSURANCE_PRICE_REQ: {
       interface->UserInsurancePrice(socket, packet);
       break;
@@ -280,6 +286,10 @@ int32 UserManager::AssignPacket(const int32 socket, PacketHead* packet) {
 	case USER_INSURANCE_PAY_REQ: {
       interface->UserInsurancePay(socket, packet);
       break;
+	}
+	case USER_IDCARD_INFO_REQ: {
+        interface->UserIdCardInfo(socket, packet);
+		break;
 	}
     case GUIDE_SERVICE_LIST_REQ: {
       interface->GuideServiceList(socket, packet);

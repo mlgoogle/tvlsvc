@@ -11,6 +11,7 @@
 #include "glog/logging.h"
 #include "gtpush/IGtPush.h"
 #include "public/config/config.h"
+#include "base/logic/logic_comm.h"
 #include "public/basic/native_library.h"
 
 #include "pub/net/proto_buf.h"
@@ -39,23 +40,28 @@ bool Chatlogic::Init() {
   bool r = false;
   Result res = pushInit(host, appKey, masterSecret, "编码");
    if(res!=SUCCESS){
-     LOG(ERROR) << "DataShareMgr pushInit err";
+     //LOG(ERROR) << "DataShareMgr pushInit err";
+	   LOG_ERROR("DataShareMgr pushInit err");
    }
   chat_manager_ = ChatManager::GetInstance();
   config::FileConfig* config = config::FileConfig::GetFileConfig();
   std::string path = DEFAULT_CONFIG_PATH;
   if (config == NULL) {
-    LOG(ERROR) << "Chatlogic config init error";
+    //LOG(ERROR) << "Chatlogic config init error";
+	  LOG_ERROR("Chatlogic config init error");
     return false;
   }
   r = config->LoadConfig(path);
   if (!r) {
-    LOG(ERROR) << "chat config load error";
+    //LOG(ERROR) << "chat config load error";
+	  LOG_ERROR("chat config load error");
     return false;
   }
-  LOG(INFO) << "chat plugin init 111";
+  //LOG(INFO) << "chat plugin init 111";
+  LOG_MSG("chat plugin init 111");
   ChatInterface::GetInterface()->InitConfig(config);
-  LOG(INFO) << "chat plugin init over";
+  //LOG(INFO) << "chat plugin init over";
+  LOG_MSG("chat plugin init over");
   InitShareData();
   return true;
 }
@@ -64,13 +70,16 @@ bool Chatlogic::InitShareData() {
   basic::libhandle  handle = NULL;
   handle = basic::load_native_library("./data.so");
   if (handle==NULL){
-    LOG(ERROR) << "Can't load path data.so\n";
+    //LOG(ERROR) << "Can't load path data.so\n";
+	  LOG_ERROR("Can't load path data.so\n");
   }
-  LOG(INFO) << "load data.so success";
+  //LOG(INFO) << "load data.so success";
+  LOG_MSG("load data.so success\n");
   share::DataShareMgr* (*pengine) (void);
   pengine = (share::DataShareMgr *(*)(void))basic::get_function_pointer(handle, "GetDataShareMgr");
   if(pengine == NULL){
-    LOG(ERROR) << "Can't find GetDataShareMgr\n";
+    //LOG(ERROR) << "Can't find GetDataShareMgr\n";
+	  LOG_ERROR("Can't find GetDataShareMgr\n");
     return false;
   }
 
@@ -97,7 +106,8 @@ bool Chatlogic::OnChatConnect(struct server *srv, const int socket) {
 bool Chatlogic::OnChatMessage(struct server *srv, const int socket,
                               const void *msg, const int len) {
   int32 err = 0;
-  LOG(INFO) << "OnChatMessage:len-" << len;
+  //LOG(INFO) << "OnChatMessage:len-" << len;
+  LOG_MSG2("OnChatMessage:len-%d\n", len);
 
   char* msg_c = new char[len + 1];
   memset(msg_c, 0, len+1);
@@ -114,9 +124,11 @@ bool Chatlogic::OnChatMessage(struct server *srv, const int socket,
 }
 
 bool Chatlogic::OnChatClose(struct server *srv, const int socket) {
-  LOG(INFO) << "OnChatClose:socket-" << socket;
+  //LOG(INFO) << "OnChatClose:socket-" << socket;
+	LOG_MSG2("OnChatClose:socket-%d\n", socket);
   chat_manager_->OnSockClose(socket);
-  LOG(INFO) << "OnSockClose:socket-" << socket;
+  //LOG(INFO) << "OnSockClose:socket-" << socket;
+  LOG_MSG2("OnChatClose:socket-%d\n", socket);
   return true;
 }
 

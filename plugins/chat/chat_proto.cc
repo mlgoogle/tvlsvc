@@ -5,6 +5,7 @@
 #include "chat/chat_proto.h"
 
 #include "glog/logging.h"
+#include "logic/logic_comm.h"
 #include "base/logic/base_values.h"
 #include "public/basic/basic_util.h"
 #include "public/basic/md5sum.h"
@@ -32,15 +33,27 @@ int32 AskInvitationRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"from_uid_", &from_uid_);
-      LOG_IF(ERROR, !r) << "AskInvitationRecv::from_uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("AskInvitationRecv::from_uid_ parse error");
+	  }
       r = dic->GetBigInteger(L"to_uid_", &to_uid_);
-      LOG_IF(ERROR, !r) << "AskInvitationRecv::to_uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("AskInvitationRecv::to_uid_ parse error");
+	  }
       r = dic->GetBigInteger(L"service_id_", &service_id_);
-      LOG_IF(ERROR, !r) << "AskInvitationRecv::service_id_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("AskInvitationRecv::service_id_ parse error");
+	  }
       r = dic->GetBigInteger(L"day_count_", &day_count_);
-      LOG_IF(ERROR, !r) << "AskInvitationRecv::day_count_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("AskInvitationRecv::day_count_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "AskInvitationRecv Deserialize error";
+	  LOG_ERROR("AskInvitationRecv Deserialize error");
       err = ASK_INVITATION_JSON_ERR;
       break;
     }
@@ -69,15 +82,27 @@ int32 AppointMentGuideRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"from_uid_", &from_uid_);
-      LOG_IF(ERROR, !r) << "AppointMentGuideRecv::from_uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("AppointMentGuideRecv::from_uid_ parse error");
+	  }
       r = dic->GetBigInteger(L"to_uid_", &to_uid_);
-      LOG_IF(ERROR, !r) << "AppointMentGuideRecv::to_uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("AppointMentGuideRecv::to_uid_ parse error");
+	  }
       r = dic->GetBigInteger(L"service_id_", &service_id_);
-      LOG_IF(ERROR, !r) << "AppointMentGuideRecv::service_id_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("AppointMentGuideRecv::service_id_ parse error");
+	  }
       r = dic->GetBigInteger(L"appointment_id_", &appointment_id_);
-      LOG_IF(ERROR, !r) << "AppointMentGuideRecv::appointment_id_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("AppointMentGuideRecv::appointment_id_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "AskInvitationRecv Deserialize error";
+	  LOG_ERROR("AppointMentGuideRecv Deserialize error");
       err = REQUEST_JSON_ERR;
       break;
     }
@@ -106,15 +131,27 @@ int32 AnswerInvitationRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"from_uid_", &from_uid_);
-      LOG_IF(ERROR, !r) << "AnswerInvitationRecv::from_uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("AnswerInvitationRecv::from_uid_ parse error");
+	  }
       r = dic->GetBigInteger(L"to_uid_", &to_uid_);
-      LOG_IF(ERROR, !r) << "AnswerInvitationRecv::to_uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("AnswerInvitationRecv::to_uid_ parse error");
+	  }
       r = dic->GetBigInteger(L"order_id_", &order_id_);
-      LOG_IF(ERROR, !r) << "AnswerInvitationRecv::order_id_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("AnswerInvitationRecv::order_id_ parse error");
+	  }
       r = dic->GetBigInteger(L"order_status_", &order_status_);
-      LOG_IF(ERROR, !r) << "AnswerInvitationRecv::order_status_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("AnswerInvitationRecv::order_status_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "AnswerInvitationRecv Deserialize error";
+	  LOG_ERROR("AnswerInvitationRecv Deserialize error");
       err = ANSWER_INVITATION_JSON_ERR;
       break;
     }
@@ -142,20 +179,37 @@ int32 ChatPacket::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"from_uid_", &from_uid_);
-      LOG_IF(ERROR, !r) << "ChatPacket::from_uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("ChatPacket::from_uid_ parse error");
+	  }
       r = dic->GetBigInteger(L"to_uid_", &to_uid_);
-      LOG_IF(ERROR, !r) << "ChatPacket::to_uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("ChatPacket::to_uid_ parse error");
+	  }
       r = dic->GetBigInteger(L"msg_time_", &msg_time_);
-      LOG_IF(ERROR, !r) << "ChatPacket::msg_time_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("ChatPacket::msg_time_ parse error");
+	  }
       r = dic->GetString(L"content_", &content_);
-      LOG_IF(ERROR, !r) << "ChatPacket::content_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("ChatPacket::content_ parse error");
+	  }
 	  r = dic->GetBigInteger(L"msg_type_", &msg_type_);
-	  LOG_IF(ERROR, !r) << "ChatPacket::msg_type_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("ChatPacket::msg_type_ parse error");
+	  }
 //      base::BasicUtil::UrlDecode(content_, content_);
-      LOG(INFO)<< "from:" << from_uid_ << " to:" << to_uid_ << " content:"
-		  << content_ << "msg_type" << msg_type_;
+     // LOG(INFO)<< "from:" << from_uid_ << " to:" << to_uid_ << " content:"
+	//	  << content_ << "msg_type" << msg_type_;
+	  LOG_MSG2("from:%d to: %d content; %s msg_type:%d\n", from_uid_, to_uid_, content_.c_str(), msg_type_);
     } else {
-      LOG(ERROR) << "ChatPacket Deserialize error";
+      //LOG(ERROR) << "ChatPacket Deserialize error";
+		LOG_ERROR("ChatPacket Deserialize error");
       err = CHAT_PACKET_JSON_ERR;
       break;
     }
@@ -184,15 +238,28 @@ int32 ChatRecordRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"from_uid_", &from_uid_);
-      LOG_IF(ERROR, !r) << "ChatRecordRecv::from_uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("ChatRecordRecv::from_uid_ parse error");
+	  }
       r = dic->GetBigInteger(L"to_uid_", &to_uid_);
-      LOG_IF(ERROR, !r) << "ChatRecordRecv::to_uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("ChatRecordRecv::to_uid_ parse error");
+	  }
       r = dic->GetBigInteger(L"count_", &count_);
-      LOG_IF(ERROR, !r) << "ChatRecordRecv::count_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("ChatRecordRecv::count_ parse error");
+	  }
       r = dic->GetBigInteger(L"last_chat_id_", &last_chat_id_);
-      LOG_IF(ERROR, !r) << "ChatRecordRecv::last_chat_id_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("ChatRecordRecv::last_chat_id_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "ChatRecordRecv Deserialize error";
+      //LOG(ERROR)<< "ChatRecordRecv Deserialize error";
+	  LOG_ERROR("ChatRecordRecv Deserialize error");
       err = CHAT_RECORD_JSON_ERR;
       break;
     }
@@ -219,11 +286,18 @@ int32 PushMsgReadRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"uid_", &uid_);
-      LOG_IF(ERROR, !r) << "PushMsgReadRecv::uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("PushMsgReadRecv::uid_ parse error");
+	  }
       r = dic->GetBigInteger(L"count_", &count_);
-      LOG_IF(ERROR, !r) << "PushMsgReadRecv::count_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("PushMsgReadRecv::count_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "PushMsgReadRecv Deserialize error";
+      //LOG(ERROR)<< "PushMsgReadRecv Deserialize error";
+	  LOG_ERROR("PushMsgReadRecv Deserialize error");
       err = MSG_READ_JSON_ERR;
       break;
     }
@@ -253,19 +327,38 @@ int32 EvaluateTripRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"from_uid_", &from_uid_);
-      LOG_IF(ERROR, !r) << "EvaluateTripRecv::from_uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("EvaluateTripRecv::from_uid_ parse error");
+	  }
       r = dic->GetBigInteger(L"to_uid_", &to_uid_);
-      LOG_IF(ERROR, !r) << "EvaluateTripRecv::to_uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("EvaluateTripRecv::to_uid_ parse error");
+	  }
       r = dic->GetBigInteger(L"order_id_", &order_id_);
-      LOG_IF(ERROR, !r) << "EvaluateTripRecv::order_id_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("EvaluateTripRecv::order_id_ parse error");
+	  }
       r = dic->GetBigInteger(L"service_score_", &service_score_);
-      LOG_IF(ERROR, !r) << "EvaluateTripRecv::service_score_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("EvaluateTripRecv::service_score_ parse error");
+	  }
       r = dic->GetBigInteger(L"user_score_", &user_score_);
-      LOG_IF(ERROR, !r) << "EvaluateTripRecv::user_score_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("EvaluateTripRecv::user_score_ parse error");
+	  }
       r = dic->GetString(L"remarks_", &remarks_);
-      LOG_IF(ERROR, !r) << "EvaluateTripRecv::remarks_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("EvaluateTripRecv::remarks_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "EvaluateTripRecv Deserialize error";
+      //LOG(ERROR)<< "EvaluateTripRecv Deserialize error";
+	  LOG_ERROR("EvaluateTripRecv Deserialize error");
       err = EVALUATE_TRIP_JSON_ERR;
       break;
     }
@@ -291,9 +384,12 @@ int32 EvaluateInfoRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"order_id_", &order_id_);
-      LOG_IF(ERROR, !r) << "EvaluateInfoRecv::order_id_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("EvaluateInfoRecv::order_id_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "EvaluateInfoRecv Deserialize error";
+		LOG_ERROR("EvaluateInfoRecv Deserialize error");
       err = EVALUATE_INFO_JSON_ERR;
       break;
     }
@@ -320,17 +416,27 @@ int32 SpentCashRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"order_id_", &order_id_);
-      LOG_IF(ERROR, !r) << "SpentCashRecv::order_id_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("SpentCashRecv::order_id_ parse error");
+	  }
       r = dic->GetBigInteger(L"uid_", &uid_);
-      LOG_IF(ERROR, !r) << "SpentCashRecv::uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("SpentCashRecv::uid_ parse error");
+	  }
       r = dic->GetString(L"passwd_", &passwd_);
       if (r) {
         base::MD5Sum md5(passwd_);
         passwd_ = md5.GetHash();
       }
-      LOG_IF(ERROR, !r) << "SpentCashRecv::passwd_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("SpentCashRecv::passwd_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "SpentCashRecv Deserialize error";
+      //LOG(ERROR)<< "SpentCashRecv Deserialize error";
+		LOG_ERROR("SpentCashRecv Deserialize error");
       err = REQUEST_JSON_ERR;
       break;
     }
@@ -357,11 +463,18 @@ int32 CancelOrderRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"order_id_", &order_id_);
-      LOG_IF(ERROR, !r) << "CancelOrderRecv::order_id_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("CancelOrderRecv::order_id_ parse error");
+	  }
       r = dic->GetBigInteger(L"order_type_", &order_type_);
-      LOG_IF(ERROR, !r) << "CancelOrderRecv::order_type_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("CancelOrderRecv::order_type_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "CancelOrderRecv Deserialize error";
+      //LOG(ERROR)<< "CancelOrderRecv Deserialize error";
+	  LOG_ERROR("CancelOrderRecv Deserialize error");
       err = REQUEST_JSON_ERR;
       break;
     }
@@ -389,16 +502,31 @@ int32 GtPushCommRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"from_uid_", &from_uid_);
-      LOG_IF(ERROR, !r) << "GtPushCommRecv::from_uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("GtPushCommRecv::from_uid_ parse error");
+	  }
       r = dic->GetBigInteger(L"to_uid_", &to_uid_);
-      LOG_IF(ERROR, !r) << "GtPushCommRecv::to_uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("GtPushCommRecv::to_uid_ parse error");
+	  }
       r = dic->GetBigInteger(L"msg_type_", &msg_type_);
-      LOG_IF(ERROR, !r) << "GtPushCommRecv::msg_type_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("GtPushCommRecv::msg_type_ parse error");
+	  }
       r = dic->GetString(L"content_", &content_);
-      LOG_IF(ERROR, !r) << "GtPushCommRecv::content_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("GtPushCommRecv::content_ parse error");
+	  }
       DicValue* msg_dic = NULL;
       r = dic->GetDictionary(L"msg_body_", &msg_dic);
-      LOG_IF(ERROR, !r) << "GtPushCommRecv::msg_dic parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("GtPushCommRecv::msg_body_ parse error");
+	  }
       if (r) {
         base_logic::ValueSerializer* seri = base_logic::ValueSerializer::Create(
             base_logic::IMPL_JSON);
@@ -407,7 +535,8 @@ int32 GtPushCommRecv::Deserialize() {
                                                       seri);
       }
     } else {
-      LOG(ERROR)<< "GtPushCommRecv Deserialize error";
+      //LOG(ERROR)<< "GtPushCommRecv Deserialize error";
+	  LOG_ERROR("GtPushCommRecv Deserialize error");
       err = REQUEST_JSON_ERR;
       break;
     }
@@ -433,9 +562,12 @@ int32 PulledPushmsgRecv::Deserialize() {
   do {
     if (dic != NULL) {
       r = dic->GetBigInteger(L"uid_", &uid_);
-      LOG_IF(ERROR, !r) << "PulledPushmsgRecv::uid_ parse error";
+	  if (!r)
+	  {
+		  LOG_ERROR("PulledPushmsgRecv::uid_ parse error");
+	  }
     } else {
-      LOG(ERROR)<< "GtPushCommRecv Deserialize error";
+	  LOG_ERROR("GtPushCommRecv Deserialize error");
       err = REQUEST_JSON_ERR;
       break;
     }
