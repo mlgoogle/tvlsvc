@@ -42,7 +42,7 @@ base_logic::DataEngine* mysql_engine_;
 vector<ChatInfo> vecChatInfo;
 vector<int64> vecSuccessPushMsgId;
 //apn单推
-bool toapnsingletest(char* dt, char* chMsgTitle, char* MsgText){
+bool toapnsingletest(char* dt, char* chMsgTitle, char* MsgText, int nMsgCount){
 	//准备数据
 	LOG(INFO) << dt <<'    ' << chMsgTitle << "    "  <<MsgText << endl;;
 	Message msg = { 0 };
@@ -66,7 +66,7 @@ bool toapnsingletest(char* dt, char* chMsgTitle, char* MsgText){
 	APNTemplate templ = { 0 };
 	templ.t.appId = appId;
 	templ.t.appKey = appKey;
-	templ.t.pushInfo.badge = 1;
+	templ.t.pushInfo.badge = nMsgCount;
 	templ.t.pushInfo.body = MsgText;
 	templ.t.pushInfo.title = chMsgTitle;
 	IPushResult result = { 0 };
@@ -165,6 +165,7 @@ int main(){
 		{
 			sleep(60);
 		}
+		int nMsgCount = vecChatInfo.size();
 		while (vecChatInfo.size() != 0)
 		{
 			vector<ChatInfo>::iterator _lit = vecChatInfo.begin();
@@ -173,7 +174,7 @@ int main(){
 			char* msgFromName = const_cast<char*>(_lit->msgFromName.c_str());
 			char* msgText = const_cast<char*>(_lit->msgText.c_str());
 
-			toapnsingletest(dtNo, msgFromName, msgText);
+			toapnsingletest(dtNo, msgFromName, msgText, nMsgCount);
 			vecChatInfo.erase(_lit);
 		}
 

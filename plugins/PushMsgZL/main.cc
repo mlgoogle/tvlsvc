@@ -165,6 +165,7 @@ int main(){
 		{
 			sleep(60);
 		}
+		int nMsgCount = vecChatInfo.size();
 		while (vecChatInfo.size() != 0)
 		{
 			vector<ChatInfo>::iterator _lit = vecChatInfo.begin();
@@ -173,7 +174,7 @@ int main(){
 			char* msgFromName = const_cast<char*>(_lit->msgFromName.c_str());
 			char* msgText = const_cast<char*>(_lit->msgText.c_str());
 
-			toapnsingletest(dtNo, msgFromName, msgText);
+			toapnsingletest(dtNo, msgFromName, msgText, nMsgCount);
 			vecChatInfo.erase(_lit);
 		}
 
