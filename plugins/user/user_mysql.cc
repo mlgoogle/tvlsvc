@@ -31,8 +31,8 @@ int32 UserMysql::UserDetailSelect(std::string uids, DicValue* dic) {
   do {
     std::stringstream ss;
     ss << "call proc_UserDetailSelect('" << uids << "')";
-    //LOG_MSG2("sql: %s", ss.str());
-	LOG_MSG2("sql: %s", ss.str());
+    //LOG_MSG2("sql: %s", ss.str().c_str());
+	LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallUserDetailSelect);
     if (!r) {
       err = SQL_EXEC_ERROR;
@@ -410,7 +410,7 @@ int32 UserMysql::UserLoginSelect(std::string phone, std::string pass,
     std::stringstream ss;
     ss << "call proc_UserLoginSelect('" << phone << "','" << pass << "',"
        << type << "," << time << ");";
-    //LOG_MSG2("sql: %s", ss.str());
+    //LOG_MSG2("sql: %s", ss.str().c_str());
 	LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallUserLoginSelect);
     if (!r) {
@@ -971,7 +971,7 @@ int32 UserMysql::UserInvitationCodeUpDate(std::string phoneNum, std::string invi
 		std::stringstream ss;
 		ss << "call proc_RegInvitationCode('" << phoneNum << "','" << invitationCode << "'," << invitationDate << ")";
 		//LOG(INFO) << "sql:" << ss.str();
-		LOG_MSG2("sql: %s", ss.str());
+		LOG_MSG2("sql: %s", ss.str().c_str());
 		r = mysql_engine_->ReadData(ss.str(), dic, CallUserInvitationCodeUpDate);
 		//注册一定有结果返回
 		if (!r || dic->empty()) {
@@ -993,7 +993,7 @@ int32 UserMysql::UserAppVersionInfo(int64 appType, DicValue* dic)
 		std::stringstream ss;
 		ss << "call proc_UserAppVersionInfo(" << appType <<")";
 		//LOG(INFO) << "sql:" << ss.str();
-		LOG_MSG2("sql: %s", ss.str());
+		LOG_MSG2("sql: %s", ss.str().c_str());
 		r = mysql_engine_->ReadData(ss.str(), dic, CallUserAppVersionInfo);
 		if (!r) {
 			err = SQL_EXEC_ERROR;
@@ -1011,7 +1011,7 @@ int32 UserMysql::UserIdCardInfo(std::string IdCardNum, std::string IdCardName, s
 		std::stringstream ss;
 		ss << "call proc_IdCardIdentificatInsert('" << IdCardNum << "','" << IdCardName << "','" << IdCardUrlName << "'," << uid << ")";
 		//LOG(INFO) << "sql:" << ss.str();
-		LOG_MSG2("sql: %s", ss.str());
+		LOG_MSG2("sql: %s", ss.str().c_str());
 		r = mysql_engine_->WriteData(ss.str());
 		if (!r) {
 			err = SQL_EXEC_ERROR;
