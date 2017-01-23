@@ -32,7 +32,7 @@ int32 ChatMysql::ChatRecordInsert(int64 from, int64 to, std::string msg,
   bool r = false;
   do {
     std::stringstream ss;
-    ss << "call proc_ChatRecordInsert(" << from << "," << to << ",'" << msg
+    ss << "call proc_ChatRecordInsertV1(" << from << "," << to << ",'" << msg
 		<< "'," << time << "," << is_push << "," << type << ");";
     LOG_MSG2("sql:%s\n",ss.str().c_str());
     r = mysql_engine_->WriteData(ss.str());
@@ -147,7 +147,7 @@ int32 ChatMysql::PullPushMsgSelect(int64 uid, DicValue* dic) {
   bool r = false;
   do {
     std::stringstream ss;
-    ss << "call proc_PullPushMsgSelect(" << uid << ")";
+    ss << "call proc_PullPushMsgSelectV1(" << uid << ")";
      LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallPullPushMsgSelect);
     if (!r) {

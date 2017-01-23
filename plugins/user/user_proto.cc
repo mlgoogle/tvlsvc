@@ -2270,7 +2270,7 @@ int32 UploadContactsRecv::Deserialize() {
 					std::stringstream ss;
 					ss << "call proc_UploadContactsInsert('" << name << "','" << phone_num
 						<< "'," << uid_ << ")";
-					LOG_MSG(ss.str().c_str());
+					//LOG_MSG(ss.str().c_str());
 					sql_list_.push_back(ss.str()); 
 				}
 			}
