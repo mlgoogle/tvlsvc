@@ -40,7 +40,7 @@ void CallIdCardIdentificatSelect(void* param, Value* value)
 				myIdCardInfo.strIdName = rows[1];
 			if (rows[2] != NULL)
 				myIdCardInfo.strIdUrlName = rows[2];
-			if (rows[2] != NULL)
+			if (rows[3] != NULL)
 				myIdCardInfo.IdCardId = atoi(rows[3]);
 			if (myIdCardInfo.strIdName != "")
 			{
