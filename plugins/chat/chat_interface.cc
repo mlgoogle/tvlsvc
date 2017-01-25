@@ -256,7 +256,7 @@ int32 ChatInterface::ChatMessage(const int32 socket, PacketHead* packet) {
       SendPacket(u->socket_fd(), &rev);
       //保存及时消息
       std::stringstream ss;
-      ss << "call proc_ChatRecordInsert(" << rev.from_uid() << "," << rev.to_uid()
+      ss << "call proc_ChatRecordInsertV1(" << rev.from_uid() << "," << rev.to_uid()
          << ",'" << rev.content() << "'," << rev.msg_time() << "," << 0 << ",msg_type" << rev.msg_type() <<")";
       msg_list_.push_back(ss.str());
       if (msg_list_.size() > 10) {
