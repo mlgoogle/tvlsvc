@@ -199,7 +199,7 @@ int32 UserMysql::RegisterInsertAndSelect(std::string phone, std::string pass,
   bool r = false;
   do {
     std::stringstream ss;
-    ss << "call proc_RegisterInsertAndSelect('" << phone << "','" << pass
+    ss << "call proc_RegisterInsertAndSelectV1('" << phone << "','" << pass
 		<< "'," << type <<")";
     LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallRegisterInsertAndSelect);
@@ -386,7 +386,7 @@ int32 UserMysql::NearGuideSelect(double* point, DicValue* dic) {
   bool r = false;
   do {
     std::stringstream ss;
-    ss << "call proc_NearGuideSelect(" << point[0] << "," << point[1] << ","
+    ss << "call proc_NearGuideSelectV1(" << point[0] << "," << point[1] << ","
        << point[2] << "," << point[3] << ");";
     LOG_MSG2("sql: %s", ss.str().c_str());
     r = mysql_engine_->ReadData(ss.str(), dic, CallNearGuideSelect);

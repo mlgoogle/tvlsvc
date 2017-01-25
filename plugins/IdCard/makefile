@@ -42,7 +42,7 @@ clean :
 main.o : ./main.cc
 	${CXX} ${CXXFLAGS} -c ./main.cc ${INCLUDE_PATHS}
 
-	util.o : ${SRC_PUB_UTIL}/util.cc  ${SRC_PUB_UTIL}/util.h 
+util.o : ${SRC_PUB_UTIL}/util.cc  ${SRC_PUB_UTIL}/util.h 
 	${CXX} ${CXXFLAGS} -c ${SRC_PUB_UTIL}/util.cc ${INCLUDE_PATHS}
 
 data_engine.o : ${SRC_PUB_STORAGE}/data_engine.cc  ${SRC_PUB_STORAGE}/data_engine.h 
@@ -62,5 +62,8 @@ ${OUT_PUT} : main.o data_engine.o mysql_pool.o data_mysql_engine.o
 	${CXX} ${CXXFLAGS} $^ -o ${OUT_PUT} ${LINK_PATH} -lpthread -lmysqlclient -lcurl\
 		${LIB_DIR}/third_party/glog/lib/libglog.a \
 		${LIB_DIR}/third_party/gtpush/lib/libgtpushsdk_gcc4.1.2_64.a \
-		${LIB_DIR}/base/lib/mybase.a -lexpat -lmemcached -lmemcachedutil\
-		${LIB_DIR}/third_party/dmg_fp/lib/dmg_fp.a ${LIB_DIR}/third_party/lib/libhiredis.a
+		${LIB_DIR}/base/lib/mybase.a\
+		${LIB_DIR}/third_party/dmg_fp/lib/dmg_fp.a ${LIB_DIR}/third_party/lib/libhiredis.a\
+		/usr/lib64/libexpat.a\
+		/usr/local/libmemcached/lib/libmemcached.a\
+		/usr/local/libmemcached/lib/libmemcachedutil.a
