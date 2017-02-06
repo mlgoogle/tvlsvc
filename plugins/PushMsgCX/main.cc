@@ -25,9 +25,9 @@ static void printResult(IPushResult &result);
 static char *host = "http://sdk.open.api.getui.net/apiex.htm";
 
 //定义常量, appId、appKey、masterSecret 采用本文档 "第二步 获取访问凭证 "中获得的应用配置
-static char *appId = "rx572izgdt5Sdfomxbel1";
-static char *appKey = "LBW2Ex5cT79VIHunoC6Zg6";
-static char *masterSecret = "ryvaqPpiXR96pYQgrLaJj7";
+static char *appId = "ym6gRyDFK08iP0seFqYmm3";
+static char *appKey = "Ut4rL2IDMP8Gj0biBFc3UA";
+static char *masterSecret = "zuoDKEcIheAaIs2Pr0GCr8";
 
 struct ChatInfo
 {
@@ -163,7 +163,7 @@ int main(){
 
 		if (vecChatInfo.size() == 0)
 		{
-			sleep(60);
+			sleep(30);
 		}
 		int nMsgCount = vecChatInfo.size();
 		while (vecChatInfo.size() != 0)

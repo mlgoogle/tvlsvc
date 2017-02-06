@@ -246,8 +246,7 @@ int32 ChatInterface::ChatMessage(const int32 socket, PacketHead* packet) {
       std::string temp;
       std::string temp_content = rev.content();
       base::BasicUtil::UrlDecode(temp_content, temp);
-      PushGtMsg(rev.from_uid(), rev.to_uid(), rev.body_str(), temp,
-          CHAT_MESSAGE_RLY);
+      //PushGtMsg(rev.from_uid(), rev.to_uid(), rev.body_str(), temp,CHAT_MESSAGE_RLY);
       err = chat_mysql_->ChatRecordInsert(rev.from_uid(), rev.to_uid(),
 		  rev.content(), rev.msg_time(), 1, rev.msg_type());
       break;
