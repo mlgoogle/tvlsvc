@@ -37,6 +37,8 @@ class ChatMysql {
 
   int32 UpDateTripCommission(int64 rederId);
 
+  int32 UpDateGtPushComm(int64 from_uid, int64 to_uid, int64 msg_type, int64 msg_time, std::string servants_id, int64 appointment_id, std::string content);
+
   int32 PullPushMsgSelect(int64 uid, DicValue* dic);
 
   int32 EvaluateInfoSelect(int64 oid, DicValue* dic);

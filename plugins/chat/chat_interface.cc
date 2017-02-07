@@ -393,8 +393,10 @@ int32 ChatInterface::GtPushComm(const int32 socket, PacketHead* packet) {
     if (err < 0)
       break;
     //推送消息
-    PushGtMsg(recv.from_uid(), recv.to_uid(), recv.body_str(), recv.content(),
-              recv.msg_type());
+    //PushGtMsg(recv.from_uid(), recv.to_uid(), recv.body_str(), recv.content(),recv.msg_type());
+	err = chat_mysql_->UpDateGtPushComm(recv.from_uid(), recv.to_uid(), recv.msg_type(), recv.msg_time(), recv.servant_id(), recv.appointment_id(), recv.content());
+	if(err <0)
+		break;
     SendMsg(socket, packet, NULL, COMM_GEPUSH_RLY);
   } while (0);
   if (err < 0) {

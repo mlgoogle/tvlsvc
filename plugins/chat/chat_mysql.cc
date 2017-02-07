@@ -237,6 +237,23 @@ int32 ChatMysql::UpDateTripCommission(int64 orderId) {
 	return err;
 }
 
+int32 ChatMysql::UpDateGtPushComm(int64 from_uid, int64 to_uid, int64 msg_type, int64 msg_time, std::string servants_id, int64 appointment_id, std::string content){
+	int32 err = 0;
+	bool r = false;
+	do 
+	{
+		std::stringstream ss;
+		ss << "call proc_OrderMsgInsert(" << from_uid << "," << to_uid << "," << msg_type << "," << msg_time << ",'" << servants_id << "'," << appointment_id << ",'" << content << "')";
+		LOG_MSG2("sql %s \n", ss.str().c_str());
+		r = mysql_engine_->WriteData(ss.str());
+		if (!r) {
+			err = SQL_EXEC_ERROR;
+			break;
+		}
+	} while (0);
+	return err;
+}
+
 int32 ChatMysql::GuideOrderStatusUpdate(int64 oid, int64 o_status) {
   int32 err = 0;
   bool r = false;

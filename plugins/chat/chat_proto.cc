@@ -516,12 +516,27 @@ int32 GtPushCommRecv::Deserialize() {
 	  {
 		  LOG_ERROR("GtPushCommRecv::msg_type_ parse error");
 	  }
+	  r = dic->GetBigInteger(L"msg_time_", &msg_time_);
+	  if (!r)
+	  {
+		  LOG_ERROR("GtPushCommRecv::msg_time_ parse error");
+	  }
       r = dic->GetString(L"content_", &content_);
 	  if (!r)
 	  {
 		  LOG_ERROR("GtPushCommRecv::content_ parse error");
 	  }
-      DicValue* msg_dic = NULL;
+	  r = dic->GetString(L"servant_id_", &servant_id_);
+	  if (!r)
+	  {
+		  LOG_ERROR("GtPushCommRecv::servant_id_ parse error");
+	  }
+	  r = dic->GetBigInteger(L"appointment_id_", &appointment_id_);
+	  if (!r)
+	  {
+		  LOG_ERROR("GtPushCommRecv::appointment_id_ parse error");
+	  }
+      /*DicValue* msg_dic = NULL;
       r = dic->GetDictionary(L"msg_body_", &msg_dic);
 	  if (!r)
 	  {
@@ -533,7 +548,7 @@ int32 GtPushCommRecv::Deserialize() {
         seri->Serialize(*msg_dic, &msg_body_);
         base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
                                                       seri);
-      }
+      }*/
     } else {
       //LOG(ERROR)<< "GtPushCommRecv Deserialize error";
 	  LOG_ERROR("GtPushCommRecv Deserialize error");
