@@ -149,8 +149,12 @@ int32 ChatInterface::AskInvitation(const int32 socket, PacketHead* packet) {
       //LOG(INFO)<< "invitate to user is not login";
 		LOG_MSG("invitate to user is not login");
       // 回复被邀请者
-      PushGtMsg(rev.from_uid(), rev.to_uid(), rev.body_str(), " 邀你同游",
-          ASK_INVITATION_RLY);
+      //PushGtMsg(rev.from_uid(), rev.to_uid(), rev.body_str(), " 邀你同游",  ASK_INVITATION_RLY);
+		std::stringstream stream;
+		stream << rev.service_id();
+		err = chat_mysql_->UpDateGtPushComm(rev.from_uid(), rev.to_uid(), 0, 0, stream.str(), 0, "您收到一个邀约");
+	  if (err < 0)
+		  break;
       //LOG(INFO) << "PushGtMsg";
 	  LOG_MSG("PushGtMsg");
       break;
@@ -203,8 +207,11 @@ int32 ChatInterface::AppointMentGuide(const int32 socket, PacketHead* packet) {
       //LOG(INFO)<< "appointment to user is not login";
 		LOG_MSG("appointment to user is not login");
       // 回复被邀请者
-      PushGtMsg(rev.from_uid(), rev.to_uid(), rev.body_str(), " 邀你同游",
-          APPOINTMENT_GUIDE_RLY);
+      //PushGtMsg(rev.from_uid(), rev.to_uid(), rev.body_str(), " 邀你同游",APPOINTMENT_GUIDE_RLY);
+	  //发到离线推送数据库里
+		std::stringstream stream;
+		stream << rev.service_id();
+		int err = chat_mysql_->UpDateGtPushComm(rev.from_uid(), rev.to_uid(), 0, 0, stream.str(), rev.appointment_id(), "您收到一个邀约");
       //LOG(INFO) << "PushGtMsg";
 	  LOG_MSG("PushGtMsg");
       break;

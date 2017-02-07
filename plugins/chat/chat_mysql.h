@@ -54,6 +54,8 @@ class ChatMysql {
 
   int32 CancelOrderPayUpdate(int64 oid, int64 otype, DicValue* dic);
 
+  int32 OrderMsgRecordInster(int64 oid, int64 otype, DicValue* dic);
+
   static void CallNewOrderInsertAndSelect(void* param, Value* value);
   static void CallChatRecordQuery(void* param, Value* value);
   static void CallDeviceTokenSelect(void* param, Value* value);

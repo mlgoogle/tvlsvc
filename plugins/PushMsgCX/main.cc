@@ -56,7 +56,7 @@ vector<ChatInfo> vecChatInfo;
 vector<OrderMsgInfo> vecOrderMsgInfo;
 vector<int64> vecSuccessPushMsgId;
 //apn单推
-bool toapnsingletest(std::string Indt, int64 nMsgId, std::string chInMsgTitle, std::string chInMsgText, int nMsgCount, std::string strCategory){
+bool toapnsingletest(std::string Indt, int64 nMsgId, std::string strInMsgTitle, std::string strInMsgText, int nMsgCount, std::string strCategory){
 	//准备数据
 	Message msg = { 0 };
 	msg.isOffline = 1;//是否离线下发
@@ -80,8 +80,8 @@ bool toapnsingletest(std::string Indt, int64 nMsgId, std::string chInMsgTitle, s
 	templ.t.appId = appId;
 	templ.t.appKey = appKey;
 	templ.t.pushInfo.badge = nMsgCount;
-	templ.t.pushInfo.body = const_cast<char*>(chInMsgText.c_str());
-	templ.t.pushInfo.title = const_cast<char*>(chInMsgTitle.c_str());
+	templ.t.pushInfo.body = const_cast<char*>(strInMsgText.c_str());
+	templ.t.pushInfo.title = const_cast<char*>(strInMsgText.c_str());
 	templ.t.pushInfo.category = const_cast<char*>(strCategory.c_str());
 	IPushResult result = { 0 };
 

@@ -57,7 +57,7 @@ vector<ChatInfo> vecChatInfo;
 vector<OrderMsgInfo> vecOrderMsgInfo;
 vector<int64> vecSuccessPushMsgId;
 //apn单推
-bool toapnsingletest(std::string Indt, int64 nMsgId, std::string chInMsgTitle, std::string chInMsgText, int nMsgCount, std::string strCategory){
+bool toapnsingletest(std::string Indt, int64 nMsgId, std::string strInMsgTitle, std::string strInMsgText, int nMsgCount, std::string strCategory){
 	//准备数据
 	Message msg = { 0 };
 	msg.isOffline = 1;//是否离线下发
@@ -81,8 +81,8 @@ bool toapnsingletest(std::string Indt, int64 nMsgId, std::string chInMsgTitle, s
 	templ.t.appId = appId;
 	templ.t.appKey = appKey;
 	templ.t.pushInfo.badge = nMsgCount;
-	templ.t.pushInfo.body = const_cast<char*>(chInMsgText.c_str());
-	templ.t.pushInfo.title = const_cast<char*>(chInMsgTitle.c_str());
+	templ.t.pushInfo.body = const_cast<char*>(strInMsgText.c_str());
+	templ.t.pushInfo.title = const_cast<char*>(strInMsgText.c_str());
 	templ.t.pushInfo.category = const_cast<char*>(strCategory.c_str());
 	IPushResult result = { 0 };
 
@@ -233,7 +233,7 @@ void OrderMsgPushed(){
 	{
 		sleep(30);
 	}
-	int nMsgCount = vecOrderMsgInfo.size();
+	//int nMsgCount = vecOrderMsgInfo.size();
 	while (vecOrderMsgInfo.size() != 0)
 	{
 		vector<OrderMsgInfo>::iterator _lit = vecOrderMsgInfo.begin();
@@ -244,11 +244,8 @@ void OrderMsgPushed(){
 
 		//cout << "设备编号" << _lit->dtNo << endl;
 		//APN单推			
-		char* dtNo = const_cast<char*>(_lit->dtNo.c_str());
-		std::string strName = "订单状态更新";
-		char* msgFromName = const_cast<char*>(strName.c_str());
-		char* msgText = const_cast<char*>(_lit->content_.c_str());
-		toapnsingletest(dtNo, _lit->nMsgId, msgFromName, msgText, nMsgCount, strBody.str());
+		std::string strName = "邀约信息";
+		toapnsingletest(_lit->dtNo, _lit->nMsgId, strName, _lit->content_, 1, strBody.str());
 		vecOrderMsgInfo.erase(_lit);
 	}
 
