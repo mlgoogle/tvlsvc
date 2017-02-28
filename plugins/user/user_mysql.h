@@ -138,6 +138,8 @@ class UserMysql {
 
   int32 UserIdCardInfo(std::string IdCardNum, std::string IdCardName, std::string IdCardUrlName, int64 uid, DicValue* dic);
 
+  int32 UserServicrPrice(DicValue* dic);
+
   int32 CheckPasswdSelect(int64 uid, std::string pass, int64 type,
                           DicValue* dic);
 
@@ -202,6 +204,7 @@ class UserMysql {
   static void CallDefineGuideSkillsUpdateSelect(void* param, Value* value);
   static void CallUserInvitationCodeUpDate(void* param, Value* value);
   static void CallUserAppVersionInfo(void* param, Value* value);
+  static void CallUserServicrPrice(void* param, Value* value);
  private:
   base_logic::DataEngine* mysql_engine_;
 };

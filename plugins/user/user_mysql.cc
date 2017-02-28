@@ -1021,6 +1021,23 @@ int32 UserMysql::UserIdCardInfo(std::string IdCardNum, std::string IdCardName, s
 	return err;
 }
 
+int32 UserMysql::UserServicrPrice(DicValue* dic)
+{
+	int32 err = 0;
+	bool r = false;
+	do {
+		std::stringstream ss;
+		ss << "call proc_ServicrPriceSelect()";
+		LOG_MSG2("sql: %s", ss.str().c_str());
+		r = mysql_engine_->ReadData(ss.str(), dic, CallUserServicrPrice);
+		if (!r) {
+			err = SQL_EXEC_ERROR;
+			break;
+		}
+	} while (0);
+	return err;
+}
+
 int32 UserMysql::CheckPasswdSelect(int64 uid, std::string pass, int64 type,
                                    DicValue* dic) {
   int32 err = 0;
@@ -2711,6 +2728,30 @@ void UserMysql::CallUserAppVersionInfo(void* param, Value* value)
 	else {
 		//LOG(WARNING) << "CallUserAppVersionInfo count < 0";
 		LOG_WARN("CallUserAppVersionInfo count < 0");
+	}
+}
+
+void UserMysql::CallUserServicrPrice(void* param, Value* value)
+{
+	base_storage::DBStorageEngine* engine =
+		(base_storage::DBStorageEngine*) (param);
+	MYSQL_ROW rows;
+	int32 num = engine->RecordCount();
+	DicValue* info = reinterpret_cast<DicValue*>(value);
+	if (num > 0) {
+		ListValue* list = new ListValue();
+		while (rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)) {
+			DicValue* dict = new DicValue();
+			if (rows[0] != NULL)
+				dict->SetBigInteger(L"price_id_", atoll(rows[0]));
+			if (rows[1] != NULL)
+				dict->SetBigInteger(L"price_", atoll(rows[1]));
+			list->Append(dict);
+		}
+		info->Set(L"prince_list_", list);
+	}
+	else {
+		LOG_WARN("CallUserServicrPrice count < 0");
 	}
 }
 } // namespace user

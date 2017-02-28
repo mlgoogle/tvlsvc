@@ -146,6 +146,8 @@ class UserInterface {
 
   int32 UserIdCardInfo(const int32 socket, PacketHead* packet);
 
+  int32 UserServicrPrice(const int32 socket, PacketHead* packet);
+
   int32 UserAppVersionInfo(const int32 socket, PacketHead* packet);
 
   int32 VerifyPasswd(const int32 socket, PacketHead* packet);

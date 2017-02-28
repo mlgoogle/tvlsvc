@@ -81,7 +81,7 @@ bool toapnsingletest(std::string Indt, int64 nMsgId, std::string strInMsgTitle, 
 	templ.t.appKey = appKey;
 	templ.t.pushInfo.badge = nMsgCount;
 	templ.t.pushInfo.body = const_cast<char*>(strInMsgText.c_str());
-	templ.t.pushInfo.title = const_cast<char*>(strInMsgText.c_str());
+	templ.t.pushInfo.title = const_cast<char*>(strInMsgTitle.c_str());
 	templ.t.pushInfo.category = const_cast<char*>(strCategory.c_str());
 	IPushResult result = { 0 };
 
@@ -187,12 +187,8 @@ void UserMsgPush(){
 	while (vecChatInfo.size() != 0)
 	{
 		vector<ChatInfo>::iterator _lit = vecChatInfo.begin();
-		//APN单推			
-		char* dtNo = const_cast<char*>(_lit->dtNo.c_str());
-		char* msgFromName = const_cast<char*>(_lit->msgFromName.c_str());
-		char* msgText = const_cast<char*>(_lit->msgText.c_str());
-
-		toapnsingletest(dtNo, _lit->nChatNo, msgFromName, msgText, nMsgCount, "");
+		//APN单推
+		toapnsingletest(_lit->dtNo, _lit->nChatNo, _lit->msgFromName, _lit->msgText, nMsgCount, "");
 		vecChatInfo.erase(_lit);
 	}
 
@@ -242,12 +238,9 @@ void OrderMsgPushed(){
 		//cout << strBody.str().c_str() << endl;
 
 		//cout << "设备编号" << _lit->dtNo << endl;
-		//APN单推			
-		char* dtNo = const_cast<char*>(_lit->dtNo.c_str());
-		std::string strName = "订单状态更新";
-		char* msgFromName = const_cast<char*>(strName.c_str());
-		char* msgText = const_cast<char*>(_lit->content_.c_str());
-		toapnsingletest(dtNo, _lit->nMsgId, msgFromName, msgText, nMsgCount, strBody.str());
+		//APN单推	
+		std::string strName = "系统消息";
+		toapnsingletest(_lit->dtNo, _lit->nMsgId, strName, _lit->content_, nMsgCount, strBody.str());
 		vecOrderMsgInfo.erase(_lit);
 	}
 

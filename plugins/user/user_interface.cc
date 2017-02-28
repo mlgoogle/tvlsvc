@@ -778,6 +778,21 @@ int32 UserInterface::UserIdCardInfo(const int32 socket, PacketHead* packet)
 	return err;
 }
 
+int32 UserInterface::UserServicrPrice(const int32 socket, PacketHead* packet)
+{
+	int32 err = 0;
+	do {
+		DicValue dic;
+		err = user_mysql_->UserServicrPrice(&dic);
+		if (err < 0)
+			break;
+		SendMsg(socket, packet, &dic, USER_SERVICR_PRICE_RLY);
+	} while (0);
+	if (err < 0)
+		SendError(socket, packet, err, USER_SERVICR_PRICE_RLY);
+	return err;
+}
+
 int32 UserInterface::UserAppVersionInfo(const int32 socket, PacketHead* packet)
 {
 	int32 err = 0;
@@ -1618,8 +1633,8 @@ int32 UserInterface::ChangeGuideService(const int32 socket,
 //    ss_token << SMS_KEY << recv.timestamp() << recv.verify_code()
 //             << recv.phone_num();
 //    base::MD5Sum md5(ss_token.str());
-//    if (md5.GetHash() != recv.token()) {
-//      err = VERIFY_CODE_ERR;
+//    if (md5.GetHash() != recv.token()) {	
+//      err = VERIFY_CODE_ERR;  
 //      break;
 //    }
     std::list<ServiceData*> list = recv.service_list();

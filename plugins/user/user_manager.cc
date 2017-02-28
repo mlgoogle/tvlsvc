@@ -291,6 +291,10 @@ int32 UserManager::AssignPacket(const int32 socket, PacketHead* packet) {
         interface->UserIdCardInfo(socket, packet);
 		break;
 	}
+	case USER_SERVICR_PRICE_REQ: {
+		interface->UserServicrPrice(socket, packet);
+		break;
+	}
     case GUIDE_SERVICE_LIST_REQ: {
       interface->GuideServiceList(socket, packet);
       break;
