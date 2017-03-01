@@ -793,6 +793,26 @@ int32 UserInterface::UserServicrPrice(const int32 socket, PacketHead* packet)
 	return err;
 }
 
+int32 UserInterface::FollowType(const int32 socket, PacketHead* packet)
+{
+	int32 err = 0;
+	do {
+		FollowTypeRecv recv(*packet);
+		err = recv.Deserialize();
+		if (err < 0)
+			break;
+		DicValue dic;
+		err = user_mysql_->FollowType(recv.FollowFrom(),recv.FollowTo(), recv.FollowType(), &dic);
+		if (err < 0)
+			break;
+		SendMsg(socket, packet, &dic, USER_FOLLOW_TYPE_RLY);
+	} while (0);
+	if (err < 0) {
+		SendError(socket, packet, err, USER_FOLLOW_TYPE_RLY);
+	}
+	return err;
+}
+
 int32 UserInterface::UserAppVersionInfo(const int32 socket, PacketHead* packet)
 {
 	int32 err = 0;

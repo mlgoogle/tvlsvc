@@ -1038,6 +1038,23 @@ int32 UserMysql::UserServicrPrice(DicValue* dic)
 	return err;
 }
 
+int32 UserMysql::FollowType(int64 followFromId, int64 followToId, int64 followType, DicValue* dic)
+{
+	int32 err = 0;
+	bool r = false;
+	do {
+		std::stringstream ss;
+		ss << "call proc_FollowUpdate(" << followFromId << "," << followToId << "," << followType << ")";
+		LOG_MSG2("sql: %s", ss.str().c_str());
+		r = mysql_engine_->ReadData(ss.str(), dic, CallFollowTypeUpdate);
+		if (!r) {
+			err = SQL_EXEC_ERROR;
+			break;
+		}
+	} while (0);
+	return err;
+}
+
 int32 UserMysql::CheckPasswdSelect(int64 uid, std::string pass, int64 type,
                                    DicValue* dic) {
   int32 err = 0;
@@ -2754,4 +2771,24 @@ void UserMysql::CallUserServicrPrice(void* param, Value* value)
 		LOG_WARN("CallUserServicrPrice count < 0");
 	}
 }
+
+void UserMysql::CallFollowTypeUpdate(void* param, Value* value)
+{
+	base_storage::DBStorageEngine* engine =
+		(base_storage::DBStorageEngine*) (param);
+	MYSQL_ROW rows;
+	int32 num = engine->RecordCount();
+	DicValue* dict = reinterpret_cast<DicValue*>(value);
+	if (num > 0) {
+		while (rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)) {
+			if (rows[0] != NULL) {
+				dict->SetBigInteger(L"result_", atoll(rows[0]));
+			}
+		}
+	}
+	else {
+		LOG_WARN("CallFollowTypeUpdate count < 0");
+	}
+}
+
 } // namespace user

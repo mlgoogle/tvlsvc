@@ -815,6 +815,21 @@ private:
 	std::string IdCardName_;
 	std::string IdCardUrlName_;
 };
+
+class FollowTypeRecv :public PacketHead {
+public:
+	FollowTypeRecv(PacketHead packet);
+	int32 Deserialize();
+
+	inline int64 FollowFrom() { return follow_from_; }
+	inline int64 FollowTo() { return follow_to_; }
+	inline int64 FollowType() { return follow_type_; }
+
+private:
+	int64 follow_from_;
+	int64 follow_to_;
+	int64 follow_type_;
+};
 }  // namespace user
 
 #endif  // PLUGINS_USER_USER_PROTO_H_

@@ -2511,5 +2511,49 @@ int32 UserIdCardInfoRecv::Deserialize() {
 		serializer);
 	return err;
 }
+
+FollowTypeRecv::FollowTypeRecv(PacketHead packet) {
+	head_ = packet.head();
+	body_str_ = packet.body_str();
+	follow_from_ = 0;
+	follow_to_ = 0;
+	follow_type_ = 0;
+}
+
+int32 FollowTypeRecv::Deserialize() {
+	int32 err = 0;
+	bool r = false;
+	base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+		base_logic::IMPL_JSON, &body_str_, false);
+	std::string err_str;
+	DicValue* dic = (DicValue*)serializer->Deserialize(&err, &err_str);
+	do {
+		if (dic != NULL) {
+			r = dic->GetBigInteger(L"follow_from_", &follow_from_);
+			if (!r)
+			{
+				LOG_ERROR("FollowTypeRecv::follow_from_ parse error");
+			}
+			r = dic->GetBigInteger(L"follow_to_", &follow_to_);
+			if (!r)
+			{
+				LOG_ERROR("FollowTypeRecv::follow_to_ parse error");
+			}
+			r = dic->GetBigInteger(L"follow_type_", &follow_type_);
+			if (!r)
+			{
+				LOG_ERROR("FollowTypeRecv::follow_type_ parse error");
+			}
+		}
+		else {
+			LOG_ERROR("FollowTypeRecv Deserialize error");
+			err = REQUEST_JSON_ERR;
+			break;
+		}
+	} while (0);
+	base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+		serializer);
+	return err;
+}
 }  // namespace user
 
