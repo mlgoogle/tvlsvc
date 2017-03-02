@@ -57,6 +57,8 @@ class ChatInterface {
 
   int32 UnreadPushmsgRecord(const int32 socket, PacketHead* packet);
 
+  int32 OrderCreate(const int32 socket, PacketHead* packet);
+
   int32 PushChatMsg(ChatPacket rev);
 
   int32 PushAskMsg(AskInvitationRecv rev);

@@ -299,6 +299,14 @@ int32 UserManager::AssignPacket(const int32 socket, PacketHead* packet) {
 		interface->FollowType(socket, packet);
 		break;
 	}
+	case USER_FOLLOW_LIST_REQ: {
+		interface->FollowList(socket, packet);
+		break;
+	}
+	case USER_FOLLOW_NUMBER_REQ: {
+		interface->FollowNumber(socket, packet);
+		break;
+	}
     case GUIDE_SERVICE_LIST_REQ: {
       interface->GuideServiceList(socket, packet);
       break;

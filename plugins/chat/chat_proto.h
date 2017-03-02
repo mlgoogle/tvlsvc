@@ -275,6 +275,22 @@ class PulledPushmsgRecv : public PacketHead {
   }
  private:
   int64 uid_;
+}; 
+
+class OrderCreateRecv : public PacketHead {
+public:
+	OrderCreateRecv(PacketHead packet);
+	int32 Deserialize();
+
+	inline int64 fromUid() { return from_uid_; }
+	inline int64 toUid() { return to_uid_; }
+	inline int64 servicePrince() { return service_prince_; }
+	inline std::string wxId() { return wx_id_; }
+private:
+	int64 from_uid_;
+	int64 to_uid_;
+	int64 service_prince_;
+	std::string wx_id_;
 };
 
 }  // namespace chat

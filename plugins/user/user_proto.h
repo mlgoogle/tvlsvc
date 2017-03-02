@@ -830,6 +830,36 @@ private:
 	int64 follow_to_;
 	int64 follow_type_;
 };
+
+class FollowListRecv :public PacketHead {
+public:
+	FollowListRecv(PacketHead packet);
+	int32 Deserialize();
+
+	inline int64 uid() { return uid_; }
+	inline int64 followType() { return follow_type_; }
+	inline int64 page() { return page_num_; }
+	inline int64 page_count() { return page_count_; }
+
+private:
+	int64 uid_;
+	int64 follow_type_;
+	int64 page_num_;
+	int64 page_count_;
+}; 
+
+class FollowNumberRecv :public PacketHead {
+public:
+	FollowNumberRecv(PacketHead packet);
+	int32 Deserialize();
+
+	inline int64 uid() { return uid_; }
+	inline int64 type() { return type_; }
+
+private:
+	int64 uid_;
+	int64 type_;
+};
 }  // namespace user
 
 #endif  // PLUGINS_USER_USER_PROTO_H_

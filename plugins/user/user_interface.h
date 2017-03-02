@@ -150,6 +150,10 @@ class UserInterface {
 
   int32 FollowType(const int32 socket, PacketHead* packet);
 
+  int32 FollowList(const int32 socket, PacketHead* packet);
+
+  int32 FollowNumber(const int32 socket, PacketHead* packet);
+
   int32 UserAppVersionInfo(const int32 socket, PacketHead* packet);
 
   int32 VerifyPasswd(const int32 socket, PacketHead* packet);

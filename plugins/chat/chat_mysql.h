@@ -41,6 +41,8 @@ class ChatMysql {
 
   int32 PullPushMsgSelect(int64 uid, DicValue* dic);
 
+  int32 OrderCreateInsert(int64 from_uid, int64 to_uid, int64 service_prince, std::string wx_id, DicValue* dic);
+
   int32 EvaluateInfoSelect(int64 oid, DicValue* dic);
 
   int32 DeviceTokenSelect(int64 uid, std::string* token);

@@ -158,6 +158,23 @@ int32 ChatMysql::PullPushMsgSelect(int64 uid, DicValue* dic) {
   return err;
 }
 
+int32 ChatMysql::OrderCreateInsert(int64 from_uid, int64 to_uid, int64 service_prince, std::string wx_id, DicValue* dic)
+{
+	int32 err = 0;
+	bool r = false;
+	do {
+		std::stringstream ss;
+		ss << "call proc_OrderCreateInsertNew(" << from_uid << "," << to_uid << "," << service_prince << ",'" <<  wx_id << "')";
+		LOG_MSG2("sql: %s", ss.str().c_str());
+		r = mysql_engine_->WriteData(ss.str());
+		if (!r) {
+			err = SQL_EXEC_ERROR;
+			break;
+		}
+	} while (0);
+	return err;
+}
+
 int32 ChatMysql::EvaluateTripInsert(int64 oid, int64 s_score, int64 u_score,
                                     std::string remarks, int64 from, int64 to) {
   int32 err = 0;

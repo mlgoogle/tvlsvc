@@ -592,4 +592,53 @@ int32 PulledPushmsgRecv::Deserialize() {
   return err;
 }
 
+OrderCreateRecv::OrderCreateRecv(PacketHead packet) {
+	head_ = packet.head();
+	body_str_ = packet.body_str();
+	from_uid_ = 0;
+	to_uid_ = 0;
+	service_prince_ = 0;
+}
+
+int32 OrderCreateRecv::Deserialize() {
+	int32 err = 0;
+	bool r = false;
+	base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+		base_logic::IMPL_JSON, &body_str_, false);
+	std::string err_str;
+	DicValue* dic = (DicValue*)serializer->Deserialize(&err, &err_str);
+	do {
+		if (dic != NULL) {
+			r = dic->GetBigInteger(L"from_uid_", &from_uid_);
+			if (!r)
+			{
+				LOG_ERROR("OrderCreateRecv::from_uid_ parse error");
+			}
+			r = dic->GetBigInteger(L"to_uid_", &to_uid_);
+			if (!r)
+			{
+				LOG_ERROR("OrderCreateRecv::to_uid_ parse error");
+			}
+			r = dic->GetBigInteger(L"service_prince_", &service_prince_);
+			if (!r)
+			{
+				LOG_ERROR("OrderCreateRecv::service_prince_ parse error");
+			}
+			r = dic->GetString(L"wx_id_", &wx_id_);
+			if (!r)
+			{
+				LOG_ERROR("OrderCreateRecv::wx_id_ parse error");
+			}
+		}
+		else {
+			LOG_ERROR("OrderCreateRecv Deserialize error");
+			err = REQUEST_JSON_ERR;
+			break;
+		}
+	} while (0);
+	base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+		serializer);
+	return err;
+}
+
 }  // namespace chat

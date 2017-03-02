@@ -431,6 +431,25 @@ int32 ChatInterface::UnreadPushmsgRecord(const int32 socket, PacketHead* packet)
   return err;
 }
 
+int32 ChatInterface::OrderCreate(const int32 socket, PacketHead* packet)
+{
+	int32 err = 0;
+	do {
+		OrderCreateRecv recv(*packet);
+		err = recv.Deserialize();
+		if (err < 0)
+			break;
+		DicValue dic;
+		err = chat_mysql_->OrderCreateInsert(recv.fromUid(),recv.toUid(), recv.servicePrince(), recv.wxId(), &dic);
+		if (err < 0)
+			break;
+		SendMsg(socket, packet, &dic, ORDER_CREATE_RLY);
+	} while (0);
+	if (err < 0) {
+		SendError(socket, packet, err, ORDER_CREATE_RLY);
+	}
+	return err;
+}
 
 int32 ChatInterface::EvaluateTrip(const int32 socket, PacketHead* packet) {
   int32 err = 0;

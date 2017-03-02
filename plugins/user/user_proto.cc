@@ -2555,5 +2555,94 @@ int32 FollowTypeRecv::Deserialize() {
 		serializer);
 	return err;
 }
+
+FollowListRecv::FollowListRecv(PacketHead packet) {
+	head_ = packet.head();
+	body_str_ = packet.body_str();
+	uid_ = 0;
+	follow_type_ = 0;
+	page_num_ = 0;
+	page_count_ = 0;
+}
+
+int32 FollowListRecv::Deserialize() {
+	int32 err = 0;
+	bool r = false;
+	base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+		base_logic::IMPL_JSON, &body_str_, false);
+	std::string err_str;
+	DicValue* dic = (DicValue*)serializer->Deserialize(&err, &err_str);
+	do {
+		if (dic != NULL) {
+			r = dic->GetBigInteger(L"uid_", &uid_);
+			if (!r)
+			{
+				LOG_ERROR("FollowListRecv::uid_ parse error");
+			}
+			r = dic->GetBigInteger(L"follow_type_", &follow_type_);
+			if (!r)
+			{
+				LOG_ERROR("FollowListRecv::follow_type_ parse error");
+			}
+			r = dic->GetBigInteger(L"page_num_", &page_num_);
+			if (!r)
+			{
+				LOG_ERROR("FollowListRecv::page_num parse error");
+			}
+			r = dic->GetBigInteger(L"page_count_", &page_count_);
+			if (!r)
+			{
+				LOG_ERROR("FollowListRecv::page_count_ parse error");
+			}
+		}
+		else {
+			LOG_ERROR("FollowListRecv Deserialize error");
+			err = REQUEST_JSON_ERR;
+			break;
+		}
+	} while (0);
+	base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+		serializer);
+	return err;
+}
+
+
+FollowNumberRecv::FollowNumberRecv(PacketHead packet) {
+	head_ = packet.head();
+	body_str_ = packet.body_str();
+	uid_ = 0;
+	type_ = 0;
+}
+
+int32 FollowNumberRecv::Deserialize() {
+	int32 err = 0;
+	bool r = false;
+	base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+		base_logic::IMPL_JSON, &body_str_, false);
+	std::string err_str;
+	DicValue* dic = (DicValue*)serializer->Deserialize(&err, &err_str);
+	do {
+		if (dic != NULL) {
+			r = dic->GetBigInteger(L"uid_", &uid_);
+			if (!r)
+			{
+				LOG_ERROR("FollowNumber::uid_ parse error");
+			}
+			r = dic->GetBigInteger(L"type_", &type_);
+			if (!r)
+			{
+				LOG_ERROR("FollowNumber::type_ parse error");
+			}
+		}
+		else {
+			LOG_ERROR("FollowNumber Deserialize error");
+			err = REQUEST_JSON_ERR;
+			break;
+		}
+	} while (0);
+	base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+		serializer);
+	return err;
+}
 }  // namespace user
 
