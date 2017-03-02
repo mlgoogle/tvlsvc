@@ -2644,5 +2644,53 @@ int32 FollowNumberRecv::Deserialize() {
 		serializer);
 	return err;
 }
+
+UserUpdateWXNumRecv::UserUpdateWXNumRecv(PacketHead packet) {
+	head_ = packet.head();
+	body_str_ = packet.body_str();
+	uid_ = 0;
+	service_price_ = 0;
+}
+
+int32 UserUpdateWXNumRecv::Deserialize() {
+	int32 err = 0;
+	bool r = false;
+	base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+		base_logic::IMPL_JSON, &body_str_, false);
+	std::string err_str;
+	DicValue* dic = (DicValue*)serializer->Deserialize(&err, &err_str);
+	do {
+		if (dic != NULL) {
+			r = dic->GetBigInteger(L"uid_", &uid_);
+			if (!r)
+			{
+				LOG_ERROR("FollowNumber::uid_ parse error");
+			}
+			r = dic->GetString(L"wx_num_", &wx_num_);
+			if (!r)
+			{
+				LOG_ERROR("FollowNumber::wx_num_ parse error");
+			}
+			r = dic->GetString(L"wx_url_", &wx_url_);
+			if (!r)
+			{
+				LOG_ERROR("FollowNumber::wx_url_ parse error");
+			}
+			r = dic->GetBigInteger(L"service_price_", &service_price_);
+			if (!r)
+			{
+				LOG_ERROR("FollowNumber::service_price_ parse error");
+			}
+		}
+		else {
+			LOG_ERROR("FollowNumber Deserialize error");
+			err = REQUEST_JSON_ERR;
+			break;
+		}
+	} while (0);
+	base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+		serializer);
+	return err;
+}
 }  // namespace user
 

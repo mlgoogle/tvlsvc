@@ -860,6 +860,23 @@ private:
 	int64 uid_;
 	int64 type_;
 };
+
+class UserUpdateWXNumRecv :public PacketHead {
+public:
+	UserUpdateWXNumRecv(PacketHead packet);
+	int32 Deserialize();
+
+	inline int64 uid() { return uid_; }
+	inline int64 servicePrice() { return service_price_; }
+	inline std::string wxNum() { return wx_num_; }
+	inline std::string wxUrl() { return wx_url_; }
+
+private:
+	int64 uid_;
+	int64 service_price_;
+	std::string wx_num_;
+	std::string wx_url_;
+};
 }  // namespace user
 
 #endif  // PLUGINS_USER_USER_PROTO_H_

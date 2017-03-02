@@ -853,6 +853,26 @@ int32 UserInterface::FollowNumber(const int32 socket, PacketHead* packet)
 	return err;
 }
 
+int32 UserInterface::UserUpdateWXNum(const int32 socket, PacketHead* packet)
+{
+	int32 err = 0;
+	do {
+		UserUpdateWXNumRecv recv(*packet);
+		err = recv.Deserialize();
+		if (err < 0)
+			break;
+		DicValue dic;
+		err = user_mysql_->UserUpdateWXNum(recv.uid(), recv.wxNum(), recv.wxUrl(), recv.servicePrice(), &dic);
+		if (err < 0)
+			break;
+		SendMsg(socket, packet, &dic, USER_UPDATE_WXNUM_RLY);
+	} while (0);
+	if (err < 0) {
+		SendError(socket, packet, err, USER_UPDATE_WXNUM_RLY);
+	}
+	return err;
+}
+
 int32 UserInterface::UserAppVersionInfo(const int32 socket, PacketHead* packet)
 {
 	int32 err = 0;

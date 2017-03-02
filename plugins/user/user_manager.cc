@@ -307,6 +307,10 @@ int32 UserManager::AssignPacket(const int32 socket, PacketHead* packet) {
 		interface->FollowNumber(socket, packet);
 		break;
 	}
+	case USER_UPDATE_WXNUM_REQ: {
+		interface->UserUpdateWXNum(socket, packet);
+		break;
+	}
     case GUIDE_SERVICE_LIST_REQ: {
       interface->GuideServiceList(socket, packet);
       break;

@@ -1027,7 +1027,7 @@ int32 UserMysql::UserServicrPrice(DicValue* dic)
 	bool r = false;
 	do {
 		std::stringstream ss;
-		ss << "call proc_ServicrPriceSelect()";
+		ss << "call proc_UserServicrPriceSelect()";
 		LOG_MSG2("sql: %s", ss.str().c_str());
 		r = mysql_engine_->ReadData(ss.str(), dic, CallUserServicrPrice);
 		if (!r) {
@@ -1088,7 +1088,24 @@ int32 UserMysql::FollowNumber(int64 uid, int64 type, DicValue* dic)
 	} while (0);
 	return err;
 }
-	
+
+int32 UserMysql::UserUpdateWXNum(int64 uid, std::string wx_num, std::string wx_url, int64 service_price, DicValue* dic)
+{
+	int32 err = 0;
+	bool r = false;
+	do {
+		std::stringstream ss;
+		ss << "call proc_UserUpdateWXNum(" << uid << ",'" << wx_num << "','" << wx_url << "'," << service_price << ")";
+		LOG_MSG2("sql: %s", ss.str().c_str());
+		r = mysql_engine_->ReadData(ss.str(), dic, CallUserUpdateWXNum);
+		if (!r) {
+			err = SQL_EXEC_ERROR;
+			break;
+		}
+	} while (0);
+	return err;
+}
+
 int32 UserMysql::CheckPasswdSelect(int64 uid, std::string pass, int64 type,
                                    DicValue* dic) {
   int32 err = 0;
@@ -1327,9 +1344,9 @@ void UserMysql::CallNearGuideSelect(void* param, Value* value) {
 	  if (rows[9] != NULL)
 		  dict->SetBigInteger(L"servicetype_", atoll(rows[9]));
 	  if (rows[10] != NULL)
-		  dict->SetReal(L"service_score_", atof(rows[9]));
+		  dict->SetReal(L"service_score_", atof(rows[10]));
 	  if (rows[11] != NULL)
-		  dict->SetBigInteger(L"int64", atoll(rows[9]));
+		  dict->SetBigInteger(L"int64", atoll(rows[11]));
       list->Append(dict);
     }
     info->Set(L"guide_list_", list);
@@ -2803,7 +2820,7 @@ void UserMysql::CallUserServicrPrice(void* param, Value* value)
 				dict->SetBigInteger(L"price_", atoll(rows[1]));
 			list->Append(dict);
 		}
-		info->Set(L"prince_list_", list);
+		info->Set(L"price_list_", list);
 	}
 	else {
 		LOG_WARN("CallUserServicrPrice count < 0");
@@ -2877,6 +2894,25 @@ void UserMysql::CallFollowNumber(void* param, Value* value)
 	}
 	else {
 		LOG_WARN("CallFollowNumber count < 0");
+	}
+}
+
+void UserMysql::CallUserUpdateWXNum(void* param, Value* value)
+{
+	base_storage::DBStorageEngine* engine =
+		(base_storage::DBStorageEngine*) (param);
+	MYSQL_ROW rows;
+	int32 num = engine->RecordCount();
+	DicValue* dict = reinterpret_cast<DicValue*>(value);
+	if (num > 0) {
+		while (rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)) {
+			if (rows[0] != NULL) {
+				dict->SetBigInteger(L"result_", atoll(rows[0]));
+			}
+		}
+	}
+	else {
+		LOG_WARN("CallUserUpdateWXNum count < 0");
 	}
 }
 
