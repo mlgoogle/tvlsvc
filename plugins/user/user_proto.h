@@ -877,6 +877,22 @@ private:
 	std::string wx_num_;
 	std::string wx_url_;
 };
+
+class UserGetWXNumRecv :public PacketHead {
+public:
+	UserGetWXNumRecv(PacketHead packet);
+	int32 Deserialize();
+
+	inline int64 orderId() { return order_id_; }
+	inline int64 uidForm() { return uid_form_; }
+	inline int64 uidTo() { return uid_to_; }
+
+private:
+	int64 order_id_;
+	int64 uid_form_;
+	int64 uid_to_;
+};
+
 }  // namespace user
 
 #endif  // PLUGINS_USER_USER_PROTO_H_

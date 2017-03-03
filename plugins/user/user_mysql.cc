@@ -1106,6 +1106,23 @@ int32 UserMysql::UserUpdateWXNum(int64 uid, std::string wx_num, std::string wx_u
 	return err;
 }
 
+int32 UserMysql::UserGetWXNum(int64 order_id, int64 uid_from, int64 uid_to, DicValue* dic)
+{
+	int32 err = 0;
+	bool r = false;
+	do {
+		std::stringstream ss;
+		ss << "call proc_UserGetWXNum(" << order_id << "," << uid_from << "," << uid_to << ")";
+		LOG_MSG2("sql: %s", ss.str().c_str());
+		r = mysql_engine_->ReadData(ss.str(), dic, CallUserGetWXNum);
+		if (!r) {
+			err = SQL_EXEC_ERROR;
+			break;
+		}
+	} while (0);
+	return err;
+}
+
 int32 UserMysql::CheckPasswdSelect(int64 uid, std::string pass, int64 type,
                                    DicValue* dic) {
   int32 err = 0;
@@ -2913,6 +2930,28 @@ void UserMysql::CallUserUpdateWXNum(void* param, Value* value)
 	}
 	else {
 		LOG_WARN("CallUserUpdateWXNum count < 0");
+	}
+}
+
+void UserMysql::CallUserGetWXNum(void* param, Value* value)
+{
+	base_storage::DBStorageEngine* engine =
+		(base_storage::DBStorageEngine*) (param);
+	MYSQL_ROW rows;
+	int32 num = engine->RecordCount();
+	DicValue* dict = reinterpret_cast<DicValue*>(value);
+	if (num > 0) {
+		while (rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)) {
+			if (rows[0] != NULL) {
+				dict->SetBigInteger(L"result_", atoll(rows[0]));
+			}
+			if (rows[1] != NULL) {
+				dict->SetBigInteger(L"order_id_", atoll(rows[1]));
+			}
+		}
+	}
+	else {
+		LOG_WARN("CallUserGetWXNum count < 0");
 	}
 }
 

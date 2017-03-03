@@ -2692,5 +2692,50 @@ int32 UserUpdateWXNumRecv::Deserialize() {
 		serializer);
 	return err;
 }
+
+UserGetWXNumRecv::UserGetWXNumRecv(PacketHead packet) {
+	head_ = packet.head();
+	body_str_ = packet.body_str();
+	order_id_ = 0;
+	uid_form_ = 0;
+	uid_to_ = 0;
+}
+
+int32 UserGetWXNumRecv::Deserialize() {
+	int32 err = 0;
+	bool r = false;
+	base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+		base_logic::IMPL_JSON, &body_str_, false);
+	std::string err_str;
+	DicValue* dic = (DicValue*)serializer->Deserialize(&err, &err_str);
+	do {
+		if (dic != NULL) {
+			r = dic->GetBigInteger(L"order_id_", &order_id_);
+			if (!r)
+			{
+				LOG_ERROR("UserGetWXNumRecv::order_id_ parse error");
+			}
+			r = dic->GetBigInteger(L"uid_form_", &uid_form_);
+			if (!r)
+			{
+				LOG_ERROR("UserGetWXNumRecv::uid_form_ parse error");
+			}
+			r = dic->GetBigInteger(L"uid_to_", &uid_to_);
+			if (!r)
+			{
+				LOG_ERROR("UserGetWXNumRecv::uid_to_ parse error");
+			}
+		}
+		else {
+			LOG_ERROR("FollowNumber Deserialize error");
+			err = REQUEST_JSON_ERR;
+			break;
+		}
+	} while (0);
+	base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+		serializer);
+	return err;
+}
+
 }  // namespace user
 
