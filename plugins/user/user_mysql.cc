@@ -1123,6 +1123,23 @@ int32 UserMysql::UserGetWXNum(int64 order_id, int64 uid_from, int64 uid_to, DicV
 	return err;
 }
 
+int32 UserMysql::UpdateDynamicWall(int64 uid, std::string dynamic_text, std::string dynamic_url, DicValue* dic)
+{
+	int32 err = 0;
+	bool r = false;
+	do {
+		std::stringstream ss;
+		ss << "call proc_DynamicWallInsert(" << uid << ",'" << dynamic_text << "','" << dynamic_url << "')";
+		LOG_MSG2("sql: %s", ss.str().c_str());
+		r = mysql_engine_->ReadData(ss.str(), dic, CallUpdateDynamicWall);
+		if (!r) {
+			err = SQL_EXEC_ERROR;
+			break;
+		}
+	} while (0);
+	return err;
+}
+
 int32 UserMysql::CheckPasswdSelect(int64 uid, std::string pass, int64 type,
                                    DicValue* dic) {
   int32 err = 0;
@@ -2946,12 +2963,37 @@ void UserMysql::CallUserGetWXNum(void* param, Value* value)
 				dict->SetBigInteger(L"result_", atoll(rows[0]));
 			}
 			if (rows[1] != NULL) {
-				dict->SetBigInteger(L"order_id_", atoll(rows[1]));
+				dict->SetString(L"wx_url_", rows[1]);
+			}
+			if (rows[2] != NULL) {
+				dict->SetString(L"wx_num_", rows[2]);
 			}
 		}
 	}
 	else {
 		LOG_WARN("CallUserGetWXNum count < 0");
+	}
+}
+
+void UserMysql::CallUpdateDynamicWall(void* param, Value* value)
+{
+	base_storage::DBStorageEngine* engine =
+		(base_storage::DBStorageEngine*) (param);
+	MYSQL_ROW rows;
+	int32 num = engine->RecordCount();
+	DicValue* dict = reinterpret_cast<DicValue*>(value);
+	if (num > 0) {
+		while (rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)) {
+			if (rows[0] != NULL) {
+				dict->SetBigInteger(L"result_", atoll(rows[0]));
+			}
+			if (rows[1] != NULL) {
+				dict->SetBigInteger(L"dynamic_id", atoll(rows[0]));
+			}
+		}
+	}
+	else {
+		LOG_WARN("CallUpdateDynamicWall count < 0");
 	}
 }
 
