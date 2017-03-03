@@ -1123,7 +1123,7 @@ int32 UserMysql::UserGetWXNum(int64 order_id, int64 uid_from, int64 uid_to, DicV
 	return err;
 }
 
-int32 UserMysql::UpdateDynamicWall(int64 uid, std::string dynamic_text, std::string dynamic_url, DicValue* dic)
+int32 UserMysql::DynamicWallInsert(int64 uid, std::string dynamic_text, std::string dynamic_url, DicValue* dic)
 {
 	int32 err = 0;
 	bool r = false;

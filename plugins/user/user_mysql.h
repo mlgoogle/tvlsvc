@@ -150,7 +150,7 @@ class UserMysql {
 
   int32 UserGetWXNum(int64 order_id, int64 uid_from, int64 uid_to, DicValue* dic);
 
-  int32 UpdateDynamicWall(int64 uid, std::string dynamic_text, std::string dynamic_url, DicValue* dic);
+  int32 DynamicWallInsert(int64 uid, std::string dynamic_text, std::string dynamic_url, DicValue* dic);
 
   int32 CheckPasswdSelect(int64 uid, std::string pass, int64 type,
                           DicValue* dic);

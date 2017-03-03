@@ -158,7 +158,7 @@ class UserInterface {
 
   int32 UserGetWXNum(const int32 socket, PacketHead* packet);
 
-  int32 UpdateDynamicWall(const int32 socket, PacketHead* packet);
+  int32 DynamicWallInsert(const int32 socket, PacketHead* packet);
 
   int32 UserAppVersionInfo(const int32 socket, PacketHead* packet);
 

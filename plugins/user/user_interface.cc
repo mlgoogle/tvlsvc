@@ -893,7 +893,7 @@ int32 UserInterface::UserGetWXNum(const int32 socket, PacketHead* packet)
 	return err;
 }
 
-int32 UserInterface::UpdateDynamicWall(const int32 socket, PacketHead* packet)
+int32 UserInterface::DynamicWallInsert(const int32 socket, PacketHead* packet)
 {
 	int32 err = 0;
 	do {
@@ -902,7 +902,7 @@ int32 UserInterface::UpdateDynamicWall(const int32 socket, PacketHead* packet)
 		if (err < 0)
 			break;
 		DicValue dic;
-		err = user_mysql_->UpdateDynamicWall(recv.uid(),recv.dynamicText(), recv.dynamicUrl(), &dic);
+		err = user_mysql_->DynamicWallInsert(recv.uid(), recv.dynamicText(), recv.dynamicUrl(), &dic);
 		if (err < 0)
 			break;
 		SendMsg(socket, packet, &dic, DEFINE_UPDATE_DYNAMIC_WALL_RLY);
