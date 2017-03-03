@@ -68,6 +68,7 @@ class ChatMysql {
   static void CallGuideOrderStatusUpdate(void* param, Value* value);
   static void CallGetUserInvitationInfo(void* param, Value* value);
   static void CallPullPushMsgSelect(void* param, Value* value);
+  static void CallOrderCreateInsert(void* param, Value* value);
 
  private:
   base_logic::DataEngine* mysql_engine_;

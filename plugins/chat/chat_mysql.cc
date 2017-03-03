@@ -166,7 +166,7 @@ int32 ChatMysql::OrderCreateInsert(int64 from_uid, int64 to_uid, int64 service_p
 		std::stringstream ss;
 		ss << "call proc_OrderCreateInsertNew(" << from_uid << "," << to_uid << "," << service_prince << ",'" <<  wx_id << "')";
 		LOG_MSG2("sql: %s", ss.str().c_str());
-		r = mysql_engine_->WriteData(ss.str());
+		r = mysql_engine_->ReadData(ss.str(), dic, CallOrderCreateInsert);
 		if (!r) {
 			err = SQL_EXEC_ERROR;
 			break;
@@ -610,6 +610,26 @@ void ChatMysql::CallPullPushMsgSelect(void* param, Value* value) {
 	  LOG_WARN("Call CallPullPushMsgSelect count < 0");
   }
   info->Set(L"msg_list_", list);
+}
+
+void ChatMysql::CallOrderCreateInsert(void* param, Value* value)
+{
+	base_storage::DBStorageEngine* engine =
+		(base_storage::DBStorageEngine*) (param);
+	MYSQL_ROW rows;
+	int32 num = engine->RecordCount();
+	DicValue* dict = reinterpret_cast<DicValue*>(value);
+	if (num > 0) {
+		while (rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)) {
+			if (rows[0] != NULL)
+				dict->SetBigInteger(L"result_", atoll(rows[0]));
+			if (rows[1] != NULL)
+				dict->SetBigInteger(L"order_id_", atoll(rows[1]));
+		}
+	}
+	else {
+		LOG_WARN("Call CallOrderCreateInsert count < 0");
+	}
 }
 
 }
