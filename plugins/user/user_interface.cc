@@ -885,30 +885,10 @@ int32 UserInterface::UserGetWXNum(const int32 socket, PacketHead* packet)
 		err = user_mysql_->UserGetWXNum(recv.orderId(), recv.uidForm(), recv.uidTo(), &dic);
 		if (err < 0)
 			break;
-		SendMsg(socket, packet, &dic, USER_GET_WXNUM_RLY);
+		SendMsg(socket, packet, &dic, USER_UPDATE_WXNUM_RLY);
 	} while (0);
 	if (err < 0) {
-		SendError(socket, packet, err, USER_GET_WXNUM_RLY);
-	}
-	return err;
-}
-
-int32 UserInterface::UpdateDynamicWall(const int32 socket, PacketHead* packet)
-{
-	int32 err = 0;
-	do {
-		UpdateDynamicWallRecv recv(*packet);
-		err = recv.Deserialize();
-		if (err < 0)
-			break;
-		DicValue dic;
-		err = user_mysql_->UpdateDynamicWall(recv.uid(),recv.dynamicText(), recv.dynamicUrl(), &dic);
-		if (err < 0)
-			break;
-		SendMsg(socket, packet, &dic, DEFINE_UPDATE_DYNAMIC_WALL_RLY);
-	} while (0);
-	if (err < 0) {
-		SendError(socket, packet, err, DEFINE_UPDATE_DYNAMIC_WALL_RLY);
+		SendError(socket, packet, err, USER_UPDATE_WXNUM_RLY);
 	}
 	return err;
 }

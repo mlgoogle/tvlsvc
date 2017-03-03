@@ -893,21 +893,6 @@ private:
 	int64 uid_to_;
 };
 
-class UpdateDynamicWallRecv :public PacketHead {
-public:
-	UpdateDynamicWallRecv(PacketHead packet);
-	int32 Deserialize();
-
-	inline int64 uid() { return uid_; }
-	inline std::string dynamicText() { return dynamic_text_; }
-	inline std::string dynamicUrl() { return dynamic_url_; }
-
-private:
-	int64 uid_;
-	std::string dynamic_text_;
-	std::string dynamic_url_;
-};
-
 }  // namespace user
 
 #endif  // PLUGINS_USER_USER_PROTO_H_

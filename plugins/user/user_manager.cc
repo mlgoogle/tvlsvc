@@ -315,10 +315,6 @@ int32 UserManager::AssignPacket(const int32 socket, PacketHead* packet) {
 		interface->UserGetWXNum(socket, packet);
 		break;
 	}
-	case DEFINE_UPDATE_DYNAMIC_WALL_REQ: {
-		interface->UpdateDynamicWall(socket, packet);
-		break;
-	}
     case GUIDE_SERVICE_LIST_REQ: {
       interface->GuideServiceList(socket, packet);
       break;
