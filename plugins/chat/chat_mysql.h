@@ -37,7 +37,11 @@ class ChatMysql {
 
   int32 UpDateTripCommission(int64 rederId);
 
+  int32 UpDateGtPushComm(int64 from_uid, int64 to_uid, int64 msg_type, int64 msg_time, std::string servants_id, int64 appointment_id, std::string content);
+
   int32 PullPushMsgSelect(int64 uid, DicValue* dic);
+
+  int32 OrderCreateInsert(int64 from_uid, int64 to_uid, int64 service_prince, std::string wx_id, DicValue* dic);
 
   int32 EvaluateInfoSelect(int64 oid, DicValue* dic);
 
@@ -52,6 +56,8 @@ class ChatMysql {
 
   int32 CancelOrderPayUpdate(int64 oid, int64 otype, DicValue* dic);
 
+  int32 OrderMsgRecordInster(int64 oid, int64 otype, DicValue* dic);
+
   static void CallNewOrderInsertAndSelect(void* param, Value* value);
   static void CallChatRecordQuery(void* param, Value* value);
   static void CallDeviceTokenSelect(void* param, Value* value);
@@ -62,6 +68,7 @@ class ChatMysql {
   static void CallGuideOrderStatusUpdate(void* param, Value* value);
   static void CallGetUserInvitationInfo(void* param, Value* value);
   static void CallPullPushMsgSelect(void* param, Value* value);
+  static void CallOrderCreateInsert(void* param, Value* value);
 
  private:
   base_logic::DataEngine* mysql_engine_;

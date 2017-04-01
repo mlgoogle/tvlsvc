@@ -138,6 +138,20 @@ class UserMysql {
 
   int32 UserIdCardInfo(std::string IdCardNum, std::string IdCardName, std::string IdCardUrlName, int64 uid, DicValue* dic);
 
+  int32 UserServicrPrice(DicValue* dic);
+
+  int32 FollowType(int64 followFromId, int64 followToId, int64 followType, DicValue* dic);
+
+  int32 FollowList(int64 uid, int64 followType, int64 page, int64 pageCount, DicValue* dic);
+
+  int32 FollowNumber(int64 uid, int64 type, DicValue* dic);
+
+  int32 UserUpdateWXNum(int64 uid, std::string wx_num, std::string wx_url, int64 service_price, DicValue* dic);
+
+  int32 UserGetWXNum(int64 order_id, int64 uid_from, int64 uid_to, DicValue* dic);
+
+  int32 DynamicWallInsert(int64 uid, std::string dynamic_text, std::string dynamic_url, DicValue* dic);
+
   int32 CheckPasswdSelect(int64 uid, std::string pass, int64 type,
                           DicValue* dic);
 
@@ -202,6 +216,13 @@ class UserMysql {
   static void CallDefineGuideSkillsUpdateSelect(void* param, Value* value);
   static void CallUserInvitationCodeUpDate(void* param, Value* value);
   static void CallUserAppVersionInfo(void* param, Value* value);
+  static void CallUserServicrPrice(void* param, Value* value);
+  static void CallFollowTypeUpdate(void* param, Value* value);
+  static void CallFollowList(void* param, Value* value);
+  static void CallFollowNumber(void* param, Value* value);
+  static void CallUserUpdateWXNum(void* param, Value* value);
+  static void CallUserGetWXNum(void* param, Value* value);
+  static void CallUpdateDynamicWall(void* param, Value* value);
  private:
   base_logic::DataEngine* mysql_engine_;
 };

@@ -158,6 +158,23 @@ int32 ChatMysql::PullPushMsgSelect(int64 uid, DicValue* dic) {
   return err;
 }
 
+int32 ChatMysql::OrderCreateInsert(int64 from_uid, int64 to_uid, int64 service_prince, std::string wx_id, DicValue* dic)
+{
+	int32 err = 0;
+	bool r = false;
+	do {
+		std::stringstream ss;
+		ss << "call proc_OrderCreateInsertNew(" << from_uid << "," << to_uid << "," << service_prince << ",'" <<  wx_id << "')";
+		LOG_MSG2("sql: %s", ss.str().c_str());
+		r = mysql_engine_->ReadData(ss.str(), dic, CallOrderCreateInsert);
+		if (!r) {
+			err = SQL_EXEC_ERROR;
+			break;
+		}
+	} while (0);
+	return err;
+}
+
 int32 ChatMysql::EvaluateTripInsert(int64 oid, int64 s_score, int64 u_score,
                                     std::string remarks, int64 from, int64 to) {
   int32 err = 0;
@@ -233,6 +250,23 @@ int32 ChatMysql::UpDateTripCommission(int64 orderId) {
 			}
 		}
 
+	} while (0);
+	return err;
+}
+
+int32 ChatMysql::UpDateGtPushComm(int64 from_uid, int64 to_uid, int64 msg_type, int64 msg_time, std::string servants_id, int64 appointment_id, std::string content){
+	int32 err = 0;
+	bool r = false;
+	do 
+	{
+		std::stringstream ss;
+		ss << "call proc_OrderMsgInsert(" << from_uid << "," << to_uid << "," << msg_type << "," << msg_time << ",'" << servants_id << "'," << appointment_id << ",'" << content << "')";
+		LOG_MSG2("sql %s \n", ss.str().c_str());
+		r = mysql_engine_->WriteData(ss.str());
+		if (!r) {
+			err = SQL_EXEC_ERROR;
+			break;
+		}
 	} while (0);
 	return err;
 }
@@ -576,6 +610,26 @@ void ChatMysql::CallPullPushMsgSelect(void* param, Value* value) {
 	  LOG_WARN("Call CallPullPushMsgSelect count < 0");
   }
   info->Set(L"msg_list_", list);
+}
+
+void ChatMysql::CallOrderCreateInsert(void* param, Value* value)
+{
+	base_storage::DBStorageEngine* engine =
+		(base_storage::DBStorageEngine*) (param);
+	MYSQL_ROW rows;
+	int32 num = engine->RecordCount();
+	DicValue* dict = reinterpret_cast<DicValue*>(value);
+	if (num > 0) {
+		while (rows = (*(MYSQL_ROW*)(engine->FetchRows())->proc)) {
+			if (rows[0] != NULL)
+				dict->SetBigInteger(L"result_", atoll(rows[0]));
+			if (rows[1] != NULL)
+				dict->SetBigInteger(L"order_id_", atoll(rows[1]));
+		}
+	}
+	else {
+		LOG_WARN("Call CallOrderCreateInsert count < 0");
+	}
 }
 
 }

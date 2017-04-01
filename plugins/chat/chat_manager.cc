@@ -93,7 +93,11 @@ int32 ChatManager::AssignPacket(const int32 socket, PacketHead* packet) {
     case UNREAD_PUSH_MSG_RECORD_REQ: {
       interface->UnreadPushmsgRecord(socket, packet);
       break;
-    }
+	}
+	case ORDER_CREATE_REQ: {
+		interface->OrderCreate(socket, packet);
+		break;
+	}
   }
   return err;
 }

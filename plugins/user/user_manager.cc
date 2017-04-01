@@ -291,6 +291,34 @@ int32 UserManager::AssignPacket(const int32 socket, PacketHead* packet) {
         interface->UserIdCardInfo(socket, packet);
 		break;
 	}
+	case USER_SERVICR_PRICE_REQ: {
+		interface->UserServicrPrice(socket, packet);
+		break;
+	}
+	case USER_FOLLOW_TYPE_REQ: {
+		interface->FollowType(socket, packet);
+		break;
+	}
+	case USER_FOLLOW_LIST_REQ: {
+		interface->FollowList(socket, packet);
+		break;
+	}
+	case USER_FOLLOW_NUMBER_REQ: {
+		interface->FollowNumber(socket, packet);
+		break;
+	}
+	case USER_UPDATE_WXNUM_REQ: {
+		interface->UserUpdateWXNum(socket, packet);
+		break;
+	}
+	case USER_GET_WXNUM_REQ: {
+		interface->UserGetWXNum(socket, packet);
+		break;
+	}
+	case DEFINE_DYNAMIC_WALL_INSERT_REQ: {
+		interface->UpdateDynamicWall(socket, packet);
+		break;
+	}
     case GUIDE_SERVICE_LIST_REQ: {
       interface->GuideServiceList(socket, packet);
       break;

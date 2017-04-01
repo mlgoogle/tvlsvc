@@ -48,7 +48,8 @@ namespace chat {
 #define UNREAD_PUSH_MSG_RECORD_REQ CHAT_TYPE*1000 + 25
 #define UNREAD_PUSH_MSG_RECORD_RLY CHAT_TYPE*1000 + 26
 
-
+#define ORDER_CREATE_REQ CHAT_TYPE*1000 + 27
+#define ORDER_CREATE_RLY CHAT_TYPE*1000 + 28
 
 #define RECORD_CHAT_MSG 200  //定时器标识
 }  // namespace chat

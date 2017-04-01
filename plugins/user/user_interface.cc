@@ -778,6 +778,141 @@ int32 UserInterface::UserIdCardInfo(const int32 socket, PacketHead* packet)
 	return err;
 }
 
+int32 UserInterface::UserServicrPrice(const int32 socket, PacketHead* packet)
+{
+	int32 err = 0;
+	do {
+		DicValue dic;
+		err = user_mysql_->UserServicrPrice(&dic);
+		if (err < 0)
+			break;
+		SendMsg(socket, packet, &dic, USER_SERVICR_PRICE_RLY);
+	} while (0);
+	if (err < 0)
+		SendError(socket, packet, err, USER_SERVICR_PRICE_RLY);
+	return err;
+}
+
+int32 UserInterface::FollowType(const int32 socket, PacketHead* packet)
+{
+	int32 err = 0;
+	do {
+		FollowTypeRecv recv(*packet);
+		err = recv.Deserialize();
+		if (err < 0)
+			break;
+		DicValue dic;
+		err = user_mysql_->FollowType(recv.FollowFrom(),recv.FollowTo(), recv.FollowType(), &dic);
+		if (err < 0)
+			break;
+		SendMsg(socket, packet, &dic, USER_FOLLOW_TYPE_RLY);
+	} while (0);
+	if (err < 0) {
+		SendError(socket, packet, err, USER_FOLLOW_TYPE_RLY);
+	}
+	return err;
+}
+
+int32 UserInterface::FollowList(const int32 socket, PacketHead* packet)
+{
+	int32 err = 0;
+	do {
+		FollowListRecv recv(*packet);
+		err = recv.Deserialize();
+		if (err < 0)
+			break;
+		DicValue dic;
+		err = user_mysql_->FollowList(recv.uid(), recv.followType(),recv.page(), recv.page_count(), &dic);
+		if (err < 0)
+			break;
+		SendMsg(socket, packet, &dic, USER_FOLLOW_LIST_RLY);
+	} while (0);
+	if (err < 0) {
+		SendError(socket, packet, err, USER_FOLLOW_LIST_RLY);
+	}
+	return err;
+}
+
+int32 UserInterface::FollowNumber(const int32 socket, PacketHead* packet)
+{
+	int32 err = 0;
+	do {
+		FollowNumberRecv recv(*packet);
+		err = recv.Deserialize();
+		if (err < 0)
+			break;
+		DicValue dic;
+		err = user_mysql_->FollowNumber(recv.uid(), recv.type(),&dic);
+		if (err < 0)
+			break;
+		SendMsg(socket, packet, &dic, USER_FOLLOW_LIST_RLY);
+	} while (0);
+	if (err < 0) {
+		SendError(socket, packet, err, USER_FOLLOW_LIST_RLY);
+	}
+	return err;
+}
+
+int32 UserInterface::UserUpdateWXNum(const int32 socket, PacketHead* packet)
+{
+	int32 err = 0;
+	do {
+		UserUpdateWXNumRecv recv(*packet);
+		err = recv.Deserialize();
+		if (err < 0)
+			break;
+		DicValue dic;
+		err = user_mysql_->UserUpdateWXNum(recv.uid(), recv.wxNum(), recv.wxUrl(), recv.servicePrice(), &dic);
+		if (err < 0)
+			break;
+		SendMsg(socket, packet, &dic, USER_UPDATE_WXNUM_RLY);
+	} while (0);
+	if (err < 0) {
+		SendError(socket, packet, err, USER_UPDATE_WXNUM_RLY);
+	}
+	return err;
+}
+
+int32 UserInterface::UserGetWXNum(const int32 socket, PacketHead* packet)
+{
+	int32 err = 0;
+	do {
+		UserGetWXNumRecv recv(*packet);
+		err = recv.Deserialize();
+		if (err < 0)
+			break;
+		DicValue dic;
+		err = user_mysql_->UserGetWXNum(recv.orderId(), recv.uidForm(), recv.uidTo(), &dic);
+		if (err < 0)
+			break;
+		SendMsg(socket, packet, &dic, USER_GET_WXNUM_RLY);
+	} while (0);
+	if (err < 0) {
+		SendError(socket, packet, err, USER_GET_WXNUM_RLY);
+	}
+	return err;
+}
+
+int32 UserInterface::DynamicWallInsert(const int32 socket, PacketHead* packet)
+{
+	int32 err = 0;
+	do {
+		UpdateDynamicWallRecv recv(*packet);
+		err = recv.Deserialize();
+		if (err < 0)
+			break;
+		DicValue dic;
+		err = user_mysql_->DynamicWallInsert(recv.uid(), recv.dynamicText(), recv.dynamicUrl(), &dic);
+		if (err < 0)
+			break;
+		SendMsg(socket, packet, &dic, DEFINE_UPDATE_DYNAMIC_WALL_RLY);
+	} while (0);
+	if (err < 0) {
+		SendError(socket, packet, err, DEFINE_UPDATE_DYNAMIC_WALL_RLY);
+	}
+	return err;
+}
+
 int32 UserInterface::UserAppVersionInfo(const int32 socket, PacketHead* packet)
 {
 	int32 err = 0;
@@ -1618,8 +1753,8 @@ int32 UserInterface::ChangeGuideService(const int32 socket,
 //    ss_token << SMS_KEY << recv.timestamp() << recv.verify_code()
 //             << recv.phone_num();
 //    base::MD5Sum md5(ss_token.str());
-//    if (md5.GetHash() != recv.token()) {
-//      err = VERIFY_CODE_ERR;
+//    if (md5.GetHash() != recv.token()) {	
+//      err = VERIFY_CODE_ERR;  
 //      break;
 //    }
     std::list<ServiceData*> list = recv.service_list();

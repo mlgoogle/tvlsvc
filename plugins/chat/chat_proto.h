@@ -243,8 +243,14 @@ class GtPushCommRecv : public PacketHead {
   inline int64 msg_type() {
     return msg_type_;
   }
-  inline std::string msg_body() {
-    return msg_body_;
+  inline int64 msg_time() {
+	  return msg_time_;
+  }
+  inline std::string servant_id() {
+	return servant_id_;
+  }
+  inline int64 appointment_id() {
+	  return appointment_id_;
   }
   inline std::string content() {
     return content_;
@@ -253,7 +259,9 @@ class GtPushCommRecv : public PacketHead {
   int64 from_uid_;
   int64 to_uid_;
   int64 msg_type_;  //需要推送消息对应协议操作码
-  std::string msg_body_;
+  int64 msg_time_;
+  std::string servant_id_;
+  int64 appointment_id_;
   std::string content_;
 };
 
@@ -267,6 +275,22 @@ class PulledPushmsgRecv : public PacketHead {
   }
  private:
   int64 uid_;
+}; 
+
+class OrderCreateRecv : public PacketHead {
+public:
+	OrderCreateRecv(PacketHead packet);
+	int32 Deserialize();
+
+	inline int64 fromUid() { return from_uid_; }
+	inline int64 toUid() { return to_uid_; }
+	inline int64 servicePrince() { return service_prince_; }
+	inline std::string wxId() { return wx_id_; }
+private:
+	int64 from_uid_;
+	int64 to_uid_;
+	int64 service_prince_;
+	std::string wx_id_;
 };
 
 }  // namespace chat

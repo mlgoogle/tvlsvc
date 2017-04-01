@@ -815,6 +815,99 @@ private:
 	std::string IdCardName_;
 	std::string IdCardUrlName_;
 };
+
+class FollowTypeRecv :public PacketHead {
+public:
+	FollowTypeRecv(PacketHead packet);
+	int32 Deserialize();
+
+	inline int64 FollowFrom() { return follow_from_; }
+	inline int64 FollowTo() { return follow_to_; }
+	inline int64 FollowType() { return follow_type_; }
+
+private:
+	int64 follow_from_;
+	int64 follow_to_;
+	int64 follow_type_;
+};
+
+class FollowListRecv :public PacketHead {
+public:
+	FollowListRecv(PacketHead packet);
+	int32 Deserialize();
+
+	inline int64 uid() { return uid_; }
+	inline int64 followType() { return follow_type_; }
+	inline int64 page() { return page_num_; }
+	inline int64 page_count() { return page_count_; }
+
+private:
+	int64 uid_;
+	int64 follow_type_;
+	int64 page_num_;
+	int64 page_count_;
+}; 
+
+class FollowNumberRecv :public PacketHead {
+public:
+	FollowNumberRecv(PacketHead packet);
+	int32 Deserialize();
+
+	inline int64 uid() { return uid_; }
+	inline int64 type() { return type_; }
+
+private:
+	int64 uid_;
+	int64 type_;
+};
+
+class UserUpdateWXNumRecv :public PacketHead {
+public:
+	UserUpdateWXNumRecv(PacketHead packet);
+	int32 Deserialize();
+
+	inline int64 uid() { return uid_; }
+	inline int64 servicePrice() { return service_price_; }
+	inline std::string wxNum() { return wx_num_; }
+	inline std::string wxUrl() { return wx_url_; }
+
+private:
+	int64 uid_;
+	int64 service_price_;
+	std::string wx_num_;
+	std::string wx_url_;
+};
+
+class UserGetWXNumRecv :public PacketHead {
+public:
+	UserGetWXNumRecv(PacketHead packet);
+	int32 Deserialize();
+
+	inline int64 orderId() { return order_id_; }
+	inline int64 uidForm() { return uid_form_; }
+	inline int64 uidTo() { return uid_to_; }
+
+private:
+	int64 order_id_;
+	int64 uid_form_;
+	int64 uid_to_;
+};
+
+class UpdateDynamicWallRecv :public PacketHead {
+public:
+	UpdateDynamicWallRecv(PacketHead packet);
+	int32 Deserialize();
+
+	inline int64 uid() { return uid_; }
+	inline std::string dynamicText() { return dynamic_text_; }
+	inline std::string dynamicUrl() { return dynamic_url_; }
+
+private:
+	int64 uid_;
+	std::string dynamic_text_;
+	std::string dynamic_url_;
+};
+
 }  // namespace user
 
 #endif  // PLUGINS_USER_USER_PROTO_H_

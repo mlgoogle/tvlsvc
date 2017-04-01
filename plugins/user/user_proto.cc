@@ -2511,5 +2511,274 @@ int32 UserIdCardInfoRecv::Deserialize() {
 		serializer);
 	return err;
 }
+
+FollowTypeRecv::FollowTypeRecv(PacketHead packet) {
+	head_ = packet.head();
+	body_str_ = packet.body_str();
+	follow_from_ = 0;
+	follow_to_ = 0;
+	follow_type_ = 0;
+}
+
+int32 FollowTypeRecv::Deserialize() {
+	int32 err = 0;
+	bool r = false;
+	base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+		base_logic::IMPL_JSON, &body_str_, false);
+	std::string err_str;
+	DicValue* dic = (DicValue*)serializer->Deserialize(&err, &err_str);
+	do {
+		if (dic != NULL) {
+			r = dic->GetBigInteger(L"follow_from_", &follow_from_);
+			if (!r)
+			{
+				LOG_ERROR("FollowTypeRecv::follow_from_ parse error");
+			}
+			r = dic->GetBigInteger(L"follow_to_", &follow_to_);
+			if (!r)
+			{
+				LOG_ERROR("FollowTypeRecv::follow_to_ parse error");
+			}
+			r = dic->GetBigInteger(L"follow_type_", &follow_type_);
+			if (!r)
+			{
+				LOG_ERROR("FollowTypeRecv::follow_type_ parse error");
+			}
+		}
+		else {
+			LOG_ERROR("FollowTypeRecv Deserialize error");
+			err = REQUEST_JSON_ERR;
+			break;
+		}
+	} while (0);
+	base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+		serializer);
+	return err;
+}
+
+FollowListRecv::FollowListRecv(PacketHead packet) {
+	head_ = packet.head();
+	body_str_ = packet.body_str();
+	uid_ = 0;
+	follow_type_ = 0;
+	page_num_ = 0;
+	page_count_ = 0;
+}
+
+int32 FollowListRecv::Deserialize() {
+	int32 err = 0;
+	bool r = false;
+	base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+		base_logic::IMPL_JSON, &body_str_, false);
+	std::string err_str;
+	DicValue* dic = (DicValue*)serializer->Deserialize(&err, &err_str);
+	do {
+		if (dic != NULL) {
+			r = dic->GetBigInteger(L"uid_", &uid_);
+			if (!r)
+			{
+				LOG_ERROR("FollowListRecv::uid_ parse error");
+			}
+			r = dic->GetBigInteger(L"follow_type_", &follow_type_);
+			if (!r)
+			{
+				LOG_ERROR("FollowListRecv::follow_type_ parse error");
+			}
+			r = dic->GetBigInteger(L"page_num_", &page_num_);
+			if (!r)
+			{
+				LOG_ERROR("FollowListRecv::page_num parse error");
+			}
+			r = dic->GetBigInteger(L"page_count_", &page_count_);
+			if (!r)
+			{
+				LOG_ERROR("FollowListRecv::page_count_ parse error");
+			}
+		}
+		else {
+			LOG_ERROR("FollowListRecv Deserialize error");
+			err = REQUEST_JSON_ERR;
+			break;
+		}
+	} while (0);
+	base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+		serializer);
+	return err;
+}
+
+
+FollowNumberRecv::FollowNumberRecv(PacketHead packet) {
+	head_ = packet.head();
+	body_str_ = packet.body_str();
+	uid_ = 0;
+	type_ = 0;
+}
+
+int32 FollowNumberRecv::Deserialize() {
+	int32 err = 0;
+	bool r = false;
+	base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+		base_logic::IMPL_JSON, &body_str_, false);
+	std::string err_str;
+	DicValue* dic = (DicValue*)serializer->Deserialize(&err, &err_str);
+	do {
+		if (dic != NULL) {
+			r = dic->GetBigInteger(L"uid_", &uid_);
+			if (!r)
+			{
+				LOG_ERROR("FollowNumber::uid_ parse error");
+			}
+			r = dic->GetBigInteger(L"type_", &type_);
+			if (!r)
+			{
+				LOG_ERROR("FollowNumber::type_ parse error");
+			}
+		}
+		else {
+			LOG_ERROR("FollowNumber Deserialize error");
+			err = REQUEST_JSON_ERR;
+			break;
+		}
+	} while (0);
+	base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+		serializer);
+	return err;
+}
+
+UserUpdateWXNumRecv::UserUpdateWXNumRecv(PacketHead packet) {
+	head_ = packet.head();
+	body_str_ = packet.body_str();
+	uid_ = 0;
+	service_price_ = 0;
+}
+
+int32 UserUpdateWXNumRecv::Deserialize() {
+	int32 err = 0;
+	bool r = false;
+	base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+		base_logic::IMPL_JSON, &body_str_, false);
+	std::string err_str;
+	DicValue* dic = (DicValue*)serializer->Deserialize(&err, &err_str);
+	do {
+		if (dic != NULL) {
+			r = dic->GetBigInteger(L"uid_", &uid_);
+			if (!r)
+			{
+				LOG_ERROR("FollowNumber::uid_ parse error");
+			}
+			r = dic->GetString(L"wx_num_", &wx_num_);
+			if (!r)
+			{
+				LOG_ERROR("FollowNumber::wx_num_ parse error");
+			}
+			r = dic->GetString(L"wx_url_", &wx_url_);
+			if (!r)
+			{
+				LOG_ERROR("FollowNumber::wx_url_ parse error");
+			}
+			r = dic->GetBigInteger(L"service_price_", &service_price_);
+			if (!r)
+			{
+				LOG_ERROR("FollowNumber::service_price_ parse error");
+			}
+		}
+		else {
+			LOG_ERROR("FollowNumber Deserialize error");
+			err = REQUEST_JSON_ERR;
+			break;
+		}
+	} while (0);
+	base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+		serializer);
+	return err;
+}
+
+UserGetWXNumRecv::UserGetWXNumRecv(PacketHead packet) {
+	head_ = packet.head();
+	body_str_ = packet.body_str();
+	order_id_ = 0;
+	uid_form_ = 0;
+	uid_to_ = 0;
+}
+
+int32 UserGetWXNumRecv::Deserialize() {
+	int32 err = 0;
+	bool r = false;
+	base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+		base_logic::IMPL_JSON, &body_str_, false);
+	std::string err_str;
+	DicValue* dic = (DicValue*)serializer->Deserialize(&err, &err_str);
+	do {
+		if (dic != NULL) {
+			r = dic->GetBigInteger(L"order_id_", &order_id_);
+			if (!r)
+			{
+				LOG_ERROR("UserGetWXNumRecv::order_id_ parse error");
+			}
+			r = dic->GetBigInteger(L"uid_form_", &uid_form_);
+			if (!r)
+			{
+				LOG_ERROR("UserGetWXNumRecv::uid_form_ parse error");
+			}
+			r = dic->GetBigInteger(L"uid_to_", &uid_to_);
+			if (!r)
+			{
+				LOG_ERROR("UserGetWXNumRecv::uid_to_ parse error");
+			}
+		}
+		else {
+			LOG_ERROR("FollowNumber Deserialize error");
+			err = REQUEST_JSON_ERR;
+			break;
+		}
+	} while (0);
+	base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+		serializer);
+	return err;
+}
+
+
+UpdateDynamicWallRecv::UpdateDynamicWallRecv(PacketHead packet) {
+	head_ = packet.head();
+	body_str_ = packet.body_str();
+	uid_ = 0;
+}
+
+int32 UpdateDynamicWallRecv::Deserialize() {
+	int32 err = 0;
+	bool r = false;
+	base_logic::ValueSerializer* serializer = base_logic::ValueSerializer::Create(
+		base_logic::IMPL_JSON, &body_str_, false);
+	std::string err_str;
+	DicValue* dic = (DicValue*)serializer->Deserialize(&err, &err_str);
+	do {
+		if (dic != NULL) {
+			r = dic->GetBigInteger(L"uid_", &uid_);
+			if (!r)
+			{
+				LOG_ERROR("UpdateDynamicWallRecv::uid_ parse error");
+			}
+			r = dic->GetString(L"dynamic_text_", &dynamic_text_);
+			if (!r)
+			{
+				LOG_ERROR("UpdateDynamicWallRecv::dynamic_text_ parse error");
+			}
+			r = dic->GetString(L"dynamic_url_", &dynamic_url_);
+			if (!r)
+			{
+				LOG_ERROR("UpdateDynamicWallRecv::uid_to_ parse error");
+			}
+		}
+		else {
+			LOG_ERROR("UpdateDynamicWallRecv Deserialize error");
+			err = REQUEST_JSON_ERR;
+			break;
+		}
+	} while (0);
+	base_logic::ValueSerializer::DeleteSerializer(base_logic::IMPL_JSON,
+		serializer);
+	return err;
+}
+
 }  // namespace user
 
